@@ -1,0 +1,17 @@
+#+Title: The emacs-genome: a modification of emacs for (bio)statisticians
+
+* Features:
+
+file-list
+
+
+To use this, clone into your home:
+
+cd ~
+git clone git@github.com:tagteam/emacs-genome.git
+
+Then, append the following line to your .emacs file:
+
+(load-file "~/emacs-genome/biomacs.el")
+
+Enjoy!
