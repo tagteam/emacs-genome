@@ -1,18 +1,44 @@
+;;; ess-R-snps.el --- ess setup file for statistical software R
+
+;; Copyright (C) 2012  Thomas Alexander Gerds
+
+;; Author: Thomas Alexander Gerds <tag@biostat.ku.dk>
+;; Keywords: convenience, tools
+
+;; This program is free software; you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; This program is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
+
+;; You should have received a copy of the GNU General Public License
+;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+;;; Commentary:
+
+;; 
+
+;;; Code:
+
+(require 'ess-edit)
+
 ;;{{{ global custom
+(setq ess-display-buffer-reuse-frames nil)
+(setq-default ess-ask-for-ess-directory nil)
+(setq-default ess-directory (concat (getenv "HOME") "/R/"))
+(setq-default ess-history-directory (concat (getenv "HOME") "/R/"))
 (setq-default ess-language "R")
+(setq-default ess-dialect "R")
 (setq inferior-ess-font-lock-keywords nil)
 (unless (featurep 'xemacs)
   (setq ess-eval-deactivate-mark t))
 (setq ess-eval-visibly-p t)
-
 ;;}}}
 ;;{{{ inferior mode
-(defun ess-show-buffer (buf &optional visit)
-  (pop-to-buffer buf t (selected-frame)))
-(setq-default ess-ask-for-ess-directory nil)
-(setq-default ess-directory (concat (getenv "HOME") "/R/"))
-(setq-default ess-history-directory (concat (getenv "HOME") "/R/"))
-(setq ess-display-buffer-reuse-frames nil)
 (add-hook 'inferior-ess-mode-hook
 	  (lambda ()
 	    (local-set-key "\M-\t" 'ess-edit-indent-call-sophisticatedly)
@@ -28,7 +54,7 @@
 	    (setq comint-input-ring-size 5000)))
 ;;}}}
 ;;{{{ R mode
-(add-hook 'ess-mode-hook 'my-R-mode)
+(add-hook 'ess-mode-hook 'emacs-genome-R-mode)
 (defun tag-ess-eval-and-go ()
   (interactive)
   (if (region-active-p)
@@ -45,14 +71,14 @@
   (other-window 1)
   (R))
 
-(defun my-R-mode ()
+(defun emacs-genome-R-mode ()
   (interactive)
   (setq split-width-threshold nil)
   (define-key ess-mode-map "\M-F" 'ess-eval-function-and-go)
   (define-key ess-mode-map "\M-j" 'ess-eval-region-and-go)
   (define-key ess-mode-map "\M-r" 'copy-region-as-kill)
   (define-key ess-mode-map "\M-k" 'R-inferior-clear)
-  (define-key ess-mode-map "\M-q" 'my-indent-paragraph)
+  (define-key ess-mode-map "\M-q" 'emacs-genome-indent-paragraph)
   (make-variable-buffer-local 'hippie-expand-try-functions-list)
   (setq hippie-expand-try-functions-list
 	(append (list 'ess-complete-object-name)
@@ -80,7 +106,7 @@
 ;;{{{ Rd mode
 (add-hook 'Rd-mode-hook
 	  '(lambda ()
-	     (define-key Rd-mode-map "_" 'my-ess-smart-underscore)
+	     (define-key Rd-mode-map "_" 'emacs-genome-ess-smart-underscore)
 	     (define-key Rd-mode-map "\M-\t" 'ess-edit-indent-call-sophisticatedly)
 	     (define-key Rd-mode-map "\C-cF" 'ess-edit-insert-file-name)
 	     (define-key Rd-mode-map "\C-cf" 'ess-edit-insert-call)
@@ -122,6 +148,8 @@
       ;; (setq toggle t)
     ;; (setq toggle nil)))
 
+(defun ess-show-buffer (buf &optional visit)
+  (pop-to-buffer buf t (selected-frame)))
 
 (defadvice ess-eval-linewise (after add-history first activate)
   (if (and (not (eq major-mode 'inferior-ess-mode)) (< (length text-withtabs) 300))
@@ -234,12 +262,12 @@ non-nil then duplicates are ignored."
 	(not (or (and (null arg) R-minor-mode)
 		 (<= (prefix-numeric-value arg) 0)))))
 
-(define-key R-minor-mode-map "_" 'my-ess-smart-underscore)
+(define-key R-minor-mode-map "_" 'emacs-genome-ess-smart-underscore)
 (define-key R-minor-mode-map "\M-F" 'ess-eval-function-and-go)
 (define-key R-minor-mode-map "\M-j" 'tag-ess-eval-and-go)
 (define-key R-minor-mode-map "\M-r" 'copy-region-as-kill)
 (define-key R-minor-mode-map "\M-k" 'R-inferior-clear)
-(define-key R-minor-mode-map "\M-q" 'my-indent-paragraph)
+(define-key R-minor-mode-map "\M-q" 'emacs-genome-indent-paragraph)
 (define-key R-minor-mode-map "\M-m" 'ess-edit-motif)
 (define-key R-minor-mode-map "\M-u" 'ess-edit-dev-off)
 (define-key R-minor-mode-map "\C-z" 'fold-dwim-toggle)
@@ -260,16 +288,16 @@ non-nil then duplicates are ignored."
 
 ;;}}}
 ;;{{{ smart underscore
-(defun my-ess-smart-underscore ()
+(defun emacs-genome-ess-smart-underscore ()
   (interactive)
-  (if (not (eq last-command 'my-ess-smart-underscore))
+  (if (not (eq last-command 'emacs-genome-ess-smart-underscore))
       (insert " <- ")
     (undo)
     (insert "_")))
 ;;}}}
 ;;{{{ clearing the inferior window
-(defun R-inferior-clear()
-  (interactive)
+(defun R-inferior-clear(&optional arg)
+  (interactive "P")
   (save-excursion
     (let ((pbuf (or
 		 (condition-case nil
@@ -278,16 +306,17 @@ non-nil then duplicates are ignored."
 		 (concat "*" ess-current-process-name "*"))))
       ;; (pop-to-buffer pbuf)
       (set-buffer pbuf)
-      (erase-buffer)
-      (comint-send-input)  
+      (when arg (erase-buffer)
+	    (comint-send-input))
       (ess-switch-to-end-of-ESS))))
 ;;}}}
 ;;{{{ highlighted sweave
-(add-to-list 'auto-mode-alist '("\\.Rnw\\'" . Rnw-mode))
-(add-to-list 'auto-mode-alist '("\\.Snw\\'" . Rnw-mode))
+;; (add-to-list 'auto-mode-alist '("\\.Rnw\\'" . Rnw-mode))
+;; (add-to-list 'auto-mode-alist '("\\.Snw\\'" . Rnw-mode))
 ;;}}}
 ;;{{{ tracebug not loaded!
 ;; (when (and (not emacs-novice) (try-require 'ess-tracebug))
-    ;; (add-hook 'ess-post-run-hook 'ess-tracebug  t))
+;; (add-hook 'ess-post-run-hook 'ess-tracebug  t))
 ;;}}}
 (provide 'ess-R-snps)
+;;; ess-R-snps.el ends here
