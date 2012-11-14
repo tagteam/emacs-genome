@@ -41,6 +41,8 @@
 ;; expanding text
 (global-set-key "\M-e" 'hippie-expand)
 (global-set-key "\M-i" 'dabbrev-expand)
+;; searching for anything
+(global-set-key "\C-v" 'anything-recoll-search)
 
 (provide 'key-snps)
 ;;; key-snps.el ends here
