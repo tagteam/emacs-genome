@@ -116,11 +116,15 @@
 (require 'file-list-keymap)
 (require 'file-list-action)
 (require 'file-list-util)
-(require 'file-list-emacs)
 ;;}}}
 ;;{{{ functions that create and modify the file-list-alist 
 
 (defvar file-list-list-files-regexp "^.*[^\.]+$")
+
+(defun file-list-replace-in-string (str regexp newtext &optional literal)
+  (if (featurep 'xemacs)
+      (replace-in-string str regexp newtext)
+    (replace-regexp-in-string regexp newtext str nil literal)))
 
 (defun file-list-list-internal (dir &optional dont-exclude recursive exclude-handler)
   "Lists filenames below DIR and subdirectories of DIR.
@@ -480,8 +484,6 @@ and the cdr is the directory of filename."
 ;;}}}
 
 (provide 'file-list)
-
-
 
 ;; file-list.el ends here
 
