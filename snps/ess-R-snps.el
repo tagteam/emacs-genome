@@ -24,8 +24,6 @@
 
 ;;; Code:
 
-(require 'ess-edit)
-
 ;;{{{ global custom
 (setq ess-display-buffer-reuse-frames nil)
 (setq-default ess-ask-for-ess-directory nil)
@@ -189,12 +187,11 @@ non-nil then duplicates are ignored."
 
 ;;}}}
 ;;{{{ run script elsewhere, e.g on a ssh server called gauss
-(defadvice shell-command (after shell-in-new-buffer (command &optional output-buffer error-buffer))
-    (when (get-buffer "*Async Shell Command*")
-      (with-current-buffer "*Async Shell Command*"
-         (rename-uniquely))))
- (ad-activate 'shell-command)
-(try-require 'autorevert)
+;; (defadvice shell-command (after shell-in-new-buffer (command &optional output-buffer error-buffer))
+    ;; (when (get-buffer "*Async Shell Command*")
+      ;; (with-current-buffer "*Async Shell Command*"
+         ;; (rename-uniquely))))
+;; (ad-activate 'shell-command)
 
 (defun ess-run-script-elsewhere ()
   (interactive "P")
