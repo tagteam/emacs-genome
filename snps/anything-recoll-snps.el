@@ -63,6 +63,10 @@
 You do not need to include the -c option since this is already included, and the config directory
 can be passed as a argument to `anything-c-source-recoll'")
 
+(defun anything-recoll-search ()
+  (interactive)
+ (anything 'anything-c-source-recoll))
+
 (defun anything-c-source-recoll (name confdir)
   "Function to create anything source for recoll search results.
 The source variable will be named `anything-c-source-recoll-NAME' where NAME is the first arg to the function
