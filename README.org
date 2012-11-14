@@ -13,7 +13,7 @@ Enjoy!
 
 * Required
 
-git, auxtex, ess, latexmk, recoll
+git, auxtex, ess, latexmk, anything-el, recoll
 
 ** Install required software on Debian/Ubuntu
 
@@ -22,6 +22,7 @@ sudo apt-get install git
 sudo apt-get install auxtex
 sudo apt-get install ess
 sudo apt-get install recoll
+sudo apt-get install anything-el
 #+END_EXAMPLE
 
 ** Customize latexmk
@@ -40,6 +41,21 @@ $pdflatex = 'pdflatex -interaction=nonstopmode -halt-on-error';
 
 emacs-goodies   
 
+* Basic usage
+
+*** Evaluating R code
+
+highlight region (e.g. M-h or M-l) then M-j 
+
+*** Latexing a document
+
+M-j RETURN make-pdf RETURN
+
+*** Opening a maybe existing file  
+
+C-v: search through files. example: "ext:bib helen blanche" finds bibtex files which include all of the words "helen" and "blanche".
+
+  
 * Features
 ** File-list: a different file manager 
 ** ess-edit: convenient R programming   
@@ -69,10 +85,10 @@ emacs-goodies
 :PROPERTIES:
 :filename: [[~/emacs-genome/README.org]]
 :CaptureDate: <2012-11-14 Wed 12:30>
-:GitStatus: Modified but unstaged
+:GitStatus: Committed
 :GitInit: <2012-11-11 Sun 10:23> Moved README from markdown to org
 
-:LastCommit: <2012-11-14 Wed 13:30>  first add
+:LastCommit: <2012-11-14 Wed 14:27>  added some more
 :END:
 *** file-list manager  
 :PROPERTIES:
