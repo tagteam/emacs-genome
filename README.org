@@ -1,11 +1,78 @@
+#+Title: The emacs-genome: a modification of emacs for (bio)statisticians
+
+To use this, clone into your home:
+
+cd ~
+git clone git@github.com:tagteam/emacs-genome.git
+
+Then, append the following line to your .emacs file:
+
+(load-file "~/emacs-genome/biomacs.el")
+
+Enjoy!
+
+* Required
+
+git, auxtex, ess, latexmk, recoll
+
+** Install required software on Debian/Ubuntu
+
+#+BEGIN_EXAMPLE
+sudo apt-get install git
+sudo apt-get install auxtex
+sudo apt-get install ess
+sudo apt-get install recoll
+#+END_EXAMPLE
+
+** Customize latexmk
+
+Create a file "~/.latexmkrc" in which you specify your preferred
+pdf-viewer and similar things. My file currently looks like this:
+
+#+BEGIN_EXAMPLE
+$pdf_previewer = 'start evince';
+$print_type = 'pdf';
+$pdf_mode = 1;
+$pdflatex = 'pdflatex -interaction=nonstopmode -halt-on-error';
+#+END_EXAMPLE
+
+* Suggested
+
+emacs-goodies   
+
+* Features
+** File-list: a different file manager 
+** ess-edit: convenient R programming   
+** latex-mk: lazy latexing
 * Documents
   :PROPERTIES:
   :COLUMNS:  %20ITEM(Title) %GitStatus(Git Status) %50LastCommit(Last Commit) %8TODO(ToDo)
   :END:
+
+*** combine anything with recoll 
+:PROPERTIES:
+:filename: [[~/emacs-genome/snps/anything-recoll-snps.el]]
+:CaptureDate: <2012-11-14 Wed 13:12>
+:GitStatus: Committed
+:GitInit:  <2012-11-14 Wed 14:13>  first add
+:LastCommit: <2012-11-14 Wed 14:13>  first add
+:END:
+*** key bindings 
+:PROPERTIES:
+:filename: [[~/emacs-genome/snps/key-snps.el]]
+:CaptureDate: <2012-11-14 Wed 12:33>
+:GitStatus: Committed
+:GitInit:  <2012-11-14 Wed 14:25>  first add
+:LastCommit: <2012-11-14 Wed 14:25>  first add
+:END:
 *** Readme  
 :PROPERTIES:
 :filename: [[~/emacs-genome/README.org]]
 :CaptureDate: <2012-11-14 Wed 12:30>
+:GitStatus: Modified but unstaged
+:GitInit: <2012-11-11 Sun 10:23> Moved README from markdown to org
+
+:LastCommit: <2012-11-14 Wed 13:30>  first add
 :END:
 *** file-list manager  
 :PROPERTIES:
@@ -30,7 +97,7 @@
 :CaptureDate: <2012-11-13 Tue 20:48>
 :GitStatus: Committed
 :GitInit: <2012-11-11 Sun 10:56> first add of ess-R-snps
-:LastCommit: <2012-11-14 Wed 07:56>  clean-up
+:LastCommit: <2012-11-14 Wed 14:25>  clean-up more
 :END:
 *** TODO lazy latexing 
 :PROPERTIES:
@@ -66,52 +133,8 @@
 :LastCommit: <2012-11-14 Wed 07:54>  first add
 :END:
 
-#+Title: The emacs-genome: a modification of emacs for (bio)statisticians
-
-To use this, clone into your home:
-
-cd ~
-git clone git@github.com:tagteam/emacs-genome.git
-
-Then, append the following line to your .emacs file:
-
-(load-file "~/emacs-genome/biomacs.el")
-
-Enjoy!
 
 
-* Required
-
-git, auxtex, ess, latexmk
-
-** Install required software on Debian/Ubuntu
-
-#+BEGIN_EXAMPLE
-sudo apt-get install git
-sudo apt-get install auxtex
-sudo apt-get install ess
-#+END_EXAMPLE
-
-** Customize latexmk
-
-Create a file "~/.latexmkrc" in which you specify your preferred
-pdf-viewer and similar things. My file currently looks like this:
-
-#+BEGIN_EXAMPLE
-$pdf_previewer = 'start evince';
-$print_type = 'pdf';
-$pdf_mode = 1;
-$pdflatex = 'pdflatex -interaction=nonstopmode -halt-on-error';
-#+END_EXAMPLE
-
-* Suggested
-
-emacs-goodies   
-
-* Features
-** File-list: a different file manager 
-** ess-edit: convenient R programming   
-** latex-mk: lazy latexing
 
 
 
