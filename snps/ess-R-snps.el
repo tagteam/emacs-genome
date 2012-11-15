@@ -72,6 +72,7 @@
 (defun eg-R-mode ()
   (interactive)
   (setq split-width-threshold nil)
+  (setq dabbrev-abbrev-skip-leading-regexp "\\$") 
   (define-key ess-mode-map "\M-F" 'ess-eval-function-and-go)
   (define-key ess-mode-map "\M-j" 'ess-eval-region-and-go)
   (define-key ess-mode-map "\M-r" 'copy-region-as-kill)
@@ -187,13 +188,13 @@ non-nil then duplicates are ignored."
 
 ;;}}}
 ;;{{{ run script elsewhere, e.g on a ssh server called gauss
-;; (defadvice shell-command (after shell-in-new-buffer (command &optional output-buffer error-buffer))
-    ;; (when (get-buffer "*Async Shell Command*")
-      ;; (with-current-buffer "*Async Shell Command*"
-         ;; (rename-uniquely))))
-;; (ad-activate 'shell-command)
+(defadvice shell-command (after shell-in-new-buffer (command &optional output-buffer error-buffer))
+ (when (get-buffer "*Async Shell Command*")
+ (with-current-buffer "*Async Shell Command*"
+ (rename-uniquely))))
+ (ad-activate 'shell-command)
 
-(defun ess-run-script-elsewhere ()
+(defun ess-run-script-elsewhere (&optional ask)
   (interactive "P")
   (let* ((code (buffer-file-name (current-buffer)))
 	 (log (concat code "out"))
@@ -295,7 +296,7 @@ non-nil then duplicates are ignored."
 ;; (add-to-list 'auto-mode-alist '("\\.Snw\\'" . Rnw-mode))
 ;;}}}
 ;;{{{ tracebug not loaded!
-;; (when (and (not emacs-novice) (try-require 'ess-tracebug))
+;; (when (and (not emacs-novice) (require 'ess-tracebug))
 ;; (add-hook 'ess-post-run-hook 'ess-tracebug  t))
 ;;}}}
 (provide 'ess-R-snps)

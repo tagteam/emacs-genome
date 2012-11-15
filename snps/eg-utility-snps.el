@@ -24,6 +24,14 @@
 
 ;;; Code:
 
+(defun yank-or-pop (arg)
+  "Combine `yank' with `yank-pop'."
+  (interactive "*p") 
+  (if (eq last-command 'yank)
+      (yank-pop arg)
+    (yank arg))
+  nil)
+
 (defun count-words (start end)
   "Print number of words in the region."
   (interactive "r")
@@ -32,7 +40,6 @@
       (narrow-to-region start end)
       (goto-char (point-min))
       (count-matches "\\sw+"))))
-
 
 (defun looking-at-backward (regexp)
   (let* ((begin (point))
