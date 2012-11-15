@@ -26,9 +26,11 @@
 
 (global-set-key [f10] 'undo)
 (global-set-key "\M-o" 'other-window)
-;; buffer cycling
+;; buffer switching/cycling
 (global-set-key "\M-p" 'next-mode-buffer-backward)
 (global-set-key "\M-n" 'next-mode-buffer)
+(global-set-key "\C-x\C-b" 'anything-buffers+)
+(global-set-key "\C-xb" 'iswitchb)
 ;; commentary
 (global-set-key "\C-c;" 'comment-or-uncomment-line)
 (global-set-key "\M-;" 'comment-line)
@@ -43,6 +45,9 @@
 (global-set-key "\M-i" 'dabbrev-expand)
 ;; searching for anything
 (global-set-key "\C-v" 'anything-recoll-search)
+;; copy-and-paste 
+(global-set-key "\M-y" 'yank-or-pop)
+(global-set-key "\M-r" 'copy-region-as-kill)
 
 (provide 'key-snps)
 ;;; key-snps.el ends here
