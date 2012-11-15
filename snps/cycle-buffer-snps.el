@@ -24,10 +24,6 @@
 
 ;;; Code:
 
-
-
-
-
 ;; cycle through buffers by major mode
 
 (defun next-mode-buffer (&optional backwards)

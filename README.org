@@ -13,16 +13,19 @@ Enjoy!
 
 * Required
 
-git, auxtex, ess, latexmk, anything-el, recoll
+git, auxtex, ess, latexmk, anything-el, recoll, aspell
 
 ** Install required software on Debian/Ubuntu
 
 #+BEGIN_EXAMPLE
 sudo apt-get install git
 sudo apt-get install auxtex
-sudo apt-get install ess
+## sudo apt-get install ess
+git clone https://github.com/emacs-ess/ESS ~/emacs-genome/genes/ESS
 sudo apt-get install recoll
-sudo apt-get install anything-el
+git clone git://repo.or.cz/anything-config.git ~/emacs-genome/genes/anything-config
+## sudo apt-get install anything-el
+sudo apt-get aspell
 #+END_EXAMPLE
 
 ** Customize latexmk
@@ -37,11 +40,25 @@ $pdf_mode = 1;
 $pdflatex = 'pdflatex -interaction=nonstopmode -halt-on-error';
 #+END_EXAMPLE
 
-* Suggested
-
-emacs-goodies   
+** Initialize recoll
 
 * Basic usage
+*** copy-and-paste
+
+Whenever you copy (M-w) or kill (C-w) text in a region, it will be
+copied to the "kill-ring". The emacs default key bindings are C-y for
+yank (paste) and M-y for yank-pop (paste earlier copies/kills). The
+function yank-pop works when the previous command was yank. It takes
+the text that was yanked and replaces it with the text from an earlier
+kill. Repeatedly pressing M-y then cycles through the ring of earlier
+copies/kills.
+
+The emacs-genome has the following modifications:
+
+M-y is bound to yank-or-pop which combines yank and yank-pop such that
+the same key (M-y) is used for both commands.
+
+My fingers have difficulties to reach M-w, so I use M-r instead.
 
 *** Evaluating R code
 
@@ -53,9 +70,19 @@ M-j RETURN make-pdf RETURN
 
 *** Opening a maybe existing file  
 
-C-v: search through files. example: "ext:bib helen blanche" finds bibtex files which include all of the words "helen" and "blanche".
+Recoll (xapian) text indexing engine plugin, derived from
+anything-c-source-locate
 
-  
+The command anything-recoll-search (short-cut: C-v) is an emacs
+interface to the recoll search.
+
+Example:
+
+C-v  then type "ext:bib helen blanche"
+
+shows list of bibtex files which include all of the words "helen" and
+"blanche".
+
 * Features
 ** File-list: a different file manager 
 ** ess-edit: convenient R programming   
@@ -63,32 +90,41 @@ C-v: search through files. example: "ext:bib helen blanche" finds bibtex files w
 * Documents
   :PROPERTIES:
   :COLUMNS:  %20ITEM(Title) %GitStatus(Git Status) %50LastCommit(Last Commit) %8TODO(ToDo)
+
   :END:
 
+*** copy and paste snps 
+:PROPERTIES:
+:filename: [[~/emacs-genome/snps/copy-paste-snps.el]]
+:CaptureDate: <2012-11-15 Thu 06:48>
+:GitStatus: Modified but unstaged
+:GitInit:  <2012-11-15 Thu 07:50>  first add
+:LastCommit: <2012-11-15 Thu 07:50>  first add
+:END:
 *** combine anything with recoll 
 :PROPERTIES:
 :filename: [[~/emacs-genome/snps/anything-recoll-snps.el]]
 :CaptureDate: <2012-11-14 Wed 13:12>
-:GitStatus: Committed
+:GitStatus: Modified but unstaged
 :GitInit:  <2012-11-14 Wed 14:13>  first add
-:LastCommit: <2012-11-14 Wed 14:13>  first add
+:LastCommit: <2012-11-14 Wed 14:51>  new interactive function
 :END:
 *** key bindings 
 :PROPERTIES:
 :filename: [[~/emacs-genome/snps/key-snps.el]]
 :CaptureDate: <2012-11-14 Wed 12:33>
-:GitStatus: Committed
+:GitStatus: Modified but unstaged
 :GitInit:  <2012-11-14 Wed 14:25>  first add
-:LastCommit: <2012-11-14 Wed 14:25>  first add
+:LastCommit: <2012-11-14 Wed 14:52>  added anything key C-v
 :END:
 *** Readme  
 :PROPERTIES:
 :filename: [[~/emacs-genome/README.org]]
 :CaptureDate: <2012-11-14 Wed 12:30>
-:GitStatus: Committed
+:GitStatus: Modified but unstaged
 :GitInit: <2012-11-11 Sun 10:23> Moved README from markdown to org
 
-:LastCommit: <2012-11-14 Wed 14:27>  added some more
+:LastCommit: <2012-11-14 Wed 14:52>  added basic usage section
 :END:
 *** file-list manager  
 :PROPERTIES:
@@ -103,7 +139,7 @@ C-v: search through files. example: "ext:bib helen blanche" finds bibtex files w
 :PROPERTIES:
 :filename: [[~/emacs-genome/snps/eg-utility-snps.el]]
 :CaptureDate: <2012-11-14 Wed 06:24>
-:GitStatus: Committed
+:GitStatus: Modified but unstaged
 :GitInit:  <2012-11-14 Wed 07:46>  first commit
 :LastCommit: <2012-11-14 Wed 07:46>  first commit
 :END:
@@ -111,7 +147,7 @@ C-v: search through files. example: "ext:bib helen blanche" finds bibtex files w
 :PROPERTIES:
 :filename: [[~/emacs-genome/snps/ess-R-snps.el]]
 :CaptureDate: <2012-11-13 Tue 20:48>
-:GitStatus: Committed
+:GitStatus: Modified but unstaged
 :GitInit: <2012-11-11 Sun 10:56> first add of ess-R-snps
 :LastCommit: <2012-11-14 Wed 14:25>  clean-up more
 :END:
@@ -121,7 +157,7 @@ C-v: search through files. example: "ext:bib helen blanche" finds bibtex files w
 :CaptureDate: <2012-11-13 Tue 20:34>
 :GitStatus: Committed
 :GitInit:  <2012-11-13 Tue 21:47>  first add
-:LastCommit: <2012-11-13 Tue 21:47>  first add
+:LastCommit: <2012-11-14 Wed 14:52>  changed try-require to require
 :END:
 *** convenient R programming 
 :PROPERTIES:
@@ -136,7 +172,7 @@ C-v: search through files. example: "ext:bib helen blanche" finds bibtex files w
 :PROPERTIES:
 :filename: [[~/emacs-genome/snps/cycle-buffer-snps.el]]
 :CaptureDate: <2012-11-13 Tue 20:32>
-:GitStatus: Committed
+:GitStatus: Modified but unstaged
 :GitInit:  <2012-11-13 Tue 21:48>  first add
 :LastCommit: <2012-11-13 Tue 21:48>  first add
 :END:
@@ -144,9 +180,9 @@ C-v: search through files. example: "ext:bib helen blanche" finds bibtex files w
 :PROPERTIES:
 :FileName: [[~/emacs-genome/biomacs.el]]
 :CaptureDate: <2012-11-12 Mon 08:32>
-:GitStatus: Committed
+:GitStatus: Modified but unstaged
 :GitInit:  <2012-11-14 Wed 07:54>  first add
-:LastCommit: <2012-11-14 Wed 07:54>  first add
+:LastCommit: <2012-11-14 Wed 14:52>  added anything
 :END:
 
 

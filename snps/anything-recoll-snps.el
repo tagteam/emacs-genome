@@ -23,15 +23,6 @@
 
 ;;; Code:
 
-
-
-
-
-
-(add-to-list 'load-path (concat (getenv "HOME") "/emacs-genome/genes/anything-config"))
-(try-require 'anything)
-(try-require 'anything-config)
-
 ;;; Recoll (xapian) text indexing engine plugin, derived from anything-c-source-locate
 
 ;; (defvar anything-c-recoll-options
