@@ -61,6 +61,7 @@
 	     (visibly (< (length (buffer-substring-no-properties start end)) 300)))
 	(ess-eval-region-and-go start end visibly))
     (ess-eval-line-and-step)))
+
 (defun r (arg)
   (interactive "P")
   (cond ((not (one-window-p)) nil)
