@@ -6,6 +6,7 @@
 ;; look and feel
 (require 'appearance-snps nil t)
 ;; anything
+(require 'recentf nil t)
 (require 'anything nil t)
 (require 'anything-recoll-snps nil t)
 ;; completion
@@ -27,5 +28,9 @@
 (require 'key-snps nil t)
 ;; folding
 (require 'folding-snps nil t)
-
-
+;; start-up behaviour
+(add-hook 'after-init-hook '(lambda ()
+			      (recentf-mode)
+			      (recentf-open-files)
+			      (split-window-vertically)
+			      (totd)));; tip of the day

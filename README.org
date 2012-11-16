@@ -117,16 +117,26 @@ http://www.masteringemacs.org/articles/2011/02/08/mastering-key-bindings-emacs/
   :COLUMNS:  %20ITEM(Title) %GitStatus(Git Status) %50LastCommit(Last Commit) %8TODO(ToDo)
 
   :END:
-
+*** Look and feel 
+:PROPERTIES:
+:filename: [[~/emacs-genome/snps/appearance-snps.el]]
+:CaptureDate: <2012-11-16 Fri 15:00>
+:END:
 *** emacs genome featured init file 
 :PROPERTIES:
 :filename: [[~/emacs-genome/emacs-genome.el]]
 :CaptureDate: <2012-11-16 Fri 14:52>
+:GitStatus: Committed
+:GitInit:  <2012-11-16 Fri 15:56>  first add
+:LastCommit: <2012-11-16 Fri 15:56>  first add
 :END:
 *** folding  
 :PROPERTIES:
 :filename: [[~/emacs-genome/snps/folding-snps.el]]
 :CaptureDate: <2012-11-16 Fri 11:10>
+:GitStatus: Committed
+:GitInit:  <2012-11-16 Fri 15:56>  first add
+:LastCommit: <2012-11-16 Fri 15:56>  first add
 :END:
 *** combine anything with recoll 
 :PROPERTIES:
@@ -151,7 +161,7 @@ http://www.masteringemacs.org/articles/2011/02/08/mastering-key-bindings-emacs/
 :GitStatus: Committed
 :GitInit: <2012-11-11 Sun 10:23> Moved README from markdown to org
 
-:LastCommit: <2012-11-16 Fri 15:55>  added info for completion
+:LastCommit: <2012-11-16 Fri 15:57>  added emacs-genome.el
 :END:
 *** file-list: a different file manager 
 :PROPERTIES:
