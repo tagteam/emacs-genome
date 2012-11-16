@@ -28,8 +28,8 @@
 ;; buffer switching/cycling
 (global-set-key "\M-p" 'next-mode-buffer-backward)
 (global-set-key "\M-n" 'next-mode-buffer)
-(global-set-key "\C-x\C-b" 'anything-buffers-list)
-(global-set-key "\C-xb" 'iswitchb)
+(global-set-key "\C-x\C-b" 'anything-buffers+)
+(global-set-key "\C-xb" 'iswitchb-buffer)
 ;; commentary
 (global-set-key "\C-c;" 'comment-or-uncomment-line)
 (global-set-key "\M-;" 'comment-line)
