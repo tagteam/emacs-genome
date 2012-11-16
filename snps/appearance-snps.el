@@ -118,18 +118,18 @@
       ;; auto-save-interval 2000)
 ;;}}}
 ;;{{{ paren mode
-(if (require 'mic-paren)
+(if (require 'mic-paren nil t)
     (paren-activate)
   (show-paren-mode))
 ;; (require 'scroll-in-place)
 ;; (setq scroll-in-place t)
-(require 'uniquify)       
+(require 'uniquify nil t)       
 
 (setq uniquify-buffer-name-style 'post-forward)
 ;; (require 'default-dir)
 ;;}}}
 ;;{{{ time
-(require 'time)
+(require 'time nil t)
 ;;}}}
 ;;{{{ frame title
 (setq frame-title-format (concat " %b" " %f " (user-login-name) "@" (shell-command-to-string "echo $HOSTNAME")))
