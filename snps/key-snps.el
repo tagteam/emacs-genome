@@ -25,7 +25,6 @@
 ;;; Code:
 
 (global-set-key [f10] 'undo)
-(global-set-key "\M-o" 'other-window)
 ;; buffer switching/cycling
 (global-set-key "\M-p" 'next-mode-buffer-backward)
 (global-set-key "\M-n" 'next-mode-buffer)

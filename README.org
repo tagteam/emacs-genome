@@ -1,32 +1,39 @@
 #+Title: The emacs-genome: a modification of emacs for (bio)statisticians
 
-To use this, clone into your home:
+* Install
 
+Apply the following command in a terminal to clone the emacs-genome
+into your home:
+
+#+BEGIN_SRC sh
 cd ~
 git clone git@github.com:tagteam/emacs-genome.git
+#+END_SRC
 
-Then, append the following line to your .emacs file:
+Then, prepend the following line to your .emacs file:
 
+#+BEGIN_SRC  emacs-lisp :export code
 (load-file "~/emacs-genome/biomacs.el")
+#+END_SRC
 
 Enjoy!
 
-* Required
+* Required software 
 
 git, auxtex, ess, latexmk, anything-el, recoll, aspell
 
 ** Install required software on Debian/Ubuntu
 
-#+BEGIN_EXAMPLE
+#+BEGIN_src sh
 sudo apt-get install git
 sudo apt-get install auxtex
-## sudo apt-get install ess
+sudo apt-get install ess
 git clone https://github.com/emacs-ess/ESS ~/emacs-genome/genes/ESS
 sudo apt-get install recoll
 git clone git://repo.or.cz/anything-config.git ~/emacs-genome/genes/anything-config
-## sudo apt-get install anything-el
+sudo apt-get install anything-el
 sudo apt-get aspell
-#+END_EXAMPLE
+#+END_src
 
 ** Customize latexmk
 
@@ -43,7 +50,7 @@ $pdflatex = 'pdflatex -interaction=nonstopmode -halt-on-error';
 ** Initialize recoll
 
 * Basic usage
-*** copy-and-paste
+** Copy-and-paste
 
 Whenever you copy (M-w) or kill (C-w) text in a region, it will be
 copied to the "kill-ring". The emacs default key bindings are C-y for
@@ -60,15 +67,15 @@ the same key (M-y) is used for both commands.
 
 My fingers have difficulties to reach M-w, so I use M-r instead.
 
-*** Evaluating R code
+** Evaluating R code
 
 highlight region (e.g. M-h or M-l) then M-j 
 
-*** Latexing a document
+** Latexing a document
 
 M-j RETURN make-pdf RETURN
 
-*** Opening a maybe existing file  
+** Opening a maybe existing file  
 
 Recoll (xapian) text indexing engine plugin, derived from
 anything-c-source-locate
@@ -83,8 +90,9 @@ C-v  then type "ext:bib helen blanche"
 shows list of bibtex files which include all of the words "helen" and
 "blanche".
 
-* Advanced 
-*** Changing keybindings
+* Modifying the settings
+
+** Changing keybindings
 
 http://www.masteringemacs.org/articles/2011/02/08/mastering-key-bindings-emacs/
 
@@ -97,6 +105,7 @@ http://www.masteringemacs.org/articles/2011/02/08/mastering-key-bindings-emacs/
   :COLUMNS:  %20ITEM(Title) %GitStatus(Git Status) %50LastCommit(Last Commit) %8TODO(ToDo)
 
   :END:
+
 *** folding  
 :PROPERTIES:
 :filename: [[~/emacs-genome/snps/folding-snps.el]]
@@ -106,7 +115,7 @@ http://www.masteringemacs.org/articles/2011/02/08/mastering-key-bindings-emacs/
 :PROPERTIES:
 :filename: [[~/emacs-genome/snps/copy-paste-snps.el]]
 :CaptureDate: <2012-11-15 Thu 06:48>
-:GitStatus: Unknown
+:GitStatus: File does not exist
 :GitInit:  <2012-11-15 Thu 07:50>  first add
 :LastCommit: <2012-11-15 Thu 07:50>  first add
 :END:
@@ -114,9 +123,9 @@ http://www.masteringemacs.org/articles/2011/02/08/mastering-key-bindings-emacs/
 :PROPERTIES:
 :filename: [[~/emacs-genome/snps/anything-recoll-snps.el]]
 :CaptureDate: <2012-11-14 Wed 13:12>
-:GitStatus: Modified but unstaged
+:GitStatus: Committed
 :GitInit:  <2012-11-14 Wed 14:13>  first add
-:LastCommit: <2012-11-14 Wed 14:51>  new interactive function
+:LastCommit: <2012-11-15 Thu 09:52> added some more
 :END:
 *** key bindings 
 :PROPERTIES:
@@ -124,7 +133,7 @@ http://www.masteringemacs.org/articles/2011/02/08/mastering-key-bindings-emacs/
 :CaptureDate: <2012-11-14 Wed 12:33>
 :GitStatus: Committed
 :GitInit:  <2012-11-14 Wed 14:25>  first add
-:LastCommit: <2012-11-15 Thu 09:52>  added anything-buffers+
+:LastCommit: <2012-11-16 Fri 15:25>  added folding key f12
 :END:
 *** Readme  
 :PROPERTIES:
@@ -133,7 +142,7 @@ http://www.masteringemacs.org/articles/2011/02/08/mastering-key-bindings-emacs/
 :GitStatus: Modified but unstaged
 :GitInit: <2012-11-11 Sun 10:23> Moved README from markdown to org
 
-:LastCommit: <2012-11-14 Wed 14:52>  added basic usage section
+:LastCommit: <2012-11-16 Fri 13:09> added folding and window cycling keybindings
 :END:
 *** file-list manager  
 :PROPERTIES:
@@ -148,17 +157,17 @@ http://www.masteringemacs.org/articles/2011/02/08/mastering-key-bindings-emacs/
 :PROPERTIES:
 :filename: [[~/emacs-genome/snps/eg-utility-snps.el]]
 :CaptureDate: <2012-11-14 Wed 06:24>
-:GitStatus: Modified but unstaged
+:GitStatus: Committed
 :GitInit:  <2012-11-14 Wed 07:46>  first commit
-:LastCommit: <2012-11-14 Wed 07:46>  first commit
+:LastCommit: <2012-11-15 Thu 09:52> added some more
 :END:
 *** ess R snps 
 :PROPERTIES:
 :filename: [[~/emacs-genome/snps/ess-R-snps.el]]
 :CaptureDate: <2012-11-13 Tue 20:48>
-:GitStatus: Modified but unstaged
+:GitStatus: Committed
 :GitInit: <2012-11-11 Sun 10:56> first add of ess-R-snps
-:LastCommit: <2012-11-14 Wed 14:25>  clean-up more
+:LastCommit: <2012-11-16 Fri 13:09> added folding and window cycling keybindings
 :END:
 *** TODO lazy latexing 
 :PROPERTIES:
@@ -181,17 +190,17 @@ http://www.masteringemacs.org/articles/2011/02/08/mastering-key-bindings-emacs/
 :PROPERTIES:
 :filename: [[~/emacs-genome/snps/cycle-buffer-snps.el]]
 :CaptureDate: <2012-11-13 Tue 20:32>
-:GitStatus: Modified but unstaged
+:GitStatus: Committed
 :GitInit:  <2012-11-13 Tue 21:48>  first add
-:LastCommit: <2012-11-13 Tue 21:48>  first add
+:LastCommit: <2012-11-15 Thu 09:52> added some more
 :END:
 *** Sample init file for emacs-genome 
 :PROPERTIES:
 :FileName: [[~/emacs-genome/biomacs.el]]
 :CaptureDate: <2012-11-12 Mon 08:32>
-:GitStatus: Modified but unstaged
+:GitStatus: Committed
 :GitInit:  <2012-11-14 Wed 07:54>  first add
-:LastCommit: <2012-11-14 Wed 14:52>  added anything
+:LastCommit: <2012-11-16 Fri 13:09> added folding and window cycling keybindings
 :END:
 
 
