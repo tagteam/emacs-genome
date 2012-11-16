@@ -1,28 +1,28 @@
-(setq emacs-novice t)
+(setq emacs-novicet)
 (add-to-list 'load-path (concat (getenv "HOME") "/emacs-genome/snps/"))
 (add-to-list 'load-path (concat (getenv "HOME") "/emacs-genome/genes/"))
 ;; general purpose utility functions
-(require 'eg-utility-snps t)
+(require 'eg-utility-snps nil t)
 ;; completion
-(require 'hippie-exp t)
+(require 'hippie-exp nil t)
 ;; buffer cycling
-(require 'iswitchb t)
-(iswitchb-mode t)
+(require 'iswitchb nil t)
+(iswitchb-mode nil t)
 (setq iswitchb-default-method 'samewindow)
-(setq iswitchb-case t)
-(require 'cycle-buffer-snps t)
+(setq iswitchb-case nil t)
+(require 'cycle-buffer-snps nil t)
 ;; Emacs speaks statistics
 (setq ess-etc-directory-list nil)
-(require 'ess-site t)
-(require 'ess-R-snps t)
-(require 'ess-edit t)
+(require 'ess-site nil t)
+(require 'ess-R-snps nil t)
+(require 'ess-edit nil t)
 ;; LaTeX
-(require 'latex-snps t)
+(require 'latex-snps nil t)
 ;; keybindings
-(require 'key-snps t)
+(require 'key-snps nil t)
 ;; anything-recoll
-(require 'anything t)
-(require 'anything-recoll-snps t)
+(require 'anything nil t)
+(require 'anything-recoll-snps nil t)
 ;; folding
-(require 'folding-snps t)
+(require 'folding-snps nil t)
 
