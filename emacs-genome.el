@@ -17,6 +17,9 @@
 (setq iswitchb-default-method 'samewindow)
 (setq iswitchb-case t)
 (require 'cycle-buffer-snps nil t)
+;; window cycling
+(require 'winner nil t)
+(winner-mode)
 ;; Emacs speaks statistics
 (setq ess-etc-directory-list nil)
 (require 'ess-site nil t)

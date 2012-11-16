@@ -47,6 +47,10 @@
 ;; copy-and-paste 
 (global-set-key "\M-y" 'yank-or-pop)
 (global-set-key "\M-r" 'copy-region-as-kill)
+;;; window cycling
+(global-set-key [(f8)] 'winner-undo)
+(global-set-key [(control f8)] 'winner-redo)
+(global-set-key [(meta f8)] 'winner-redo)
 (global-set-key "\M-o" 'other-window)          ; move to next window clockwise
 (global-set-key "\M-O" '(lambda ()(interactive) (other-window -1))) ; move to next window anti-clockwise
 ;; (global-set-key [M-left] 'windmove-left)          ; move to left windnow
@@ -55,5 +59,6 @@
 ;; (global-set-key [M-down] 'windmove-down)          ; move to downer window
 ;; folding
 (global-set-key [(f12)] 'folding-mode)
+(global-set-key [(meta f12)] 'fold-dwim-toggle)
 (provide 'key-snps)
 ;;; key-snps.el ends here
