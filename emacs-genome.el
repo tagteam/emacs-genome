@@ -34,6 +34,6 @@
 ;; start-up behaviour
 (add-hook 'after-init-hook '(lambda ()
 			      (recentf-mode)
-			      (recentf-open-files)
-			      (split-window-vertically)
-			      (totd)));; tip of the day
+			      (recentf-open-files)))
+			      ;; (split-window-vertically)
+			      ;; (totd)));; tip of the day
