@@ -81,6 +81,13 @@ move to with the same argument."
    nil t))
 
 
+(unless (featurep 'xemacs)
+  (defun kill-entire-line ()
+    (interactive)
+    (progn
+      (beginning-of-line)
+      (kill-line))))
+
 (defun eg-indent-paragraph ()
   (interactive)
   (cond 
