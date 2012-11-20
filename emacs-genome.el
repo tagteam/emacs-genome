@@ -26,7 +26,7 @@
 (require 'ess-R-snps nil t)
 (require 'ess-edit nil t)
 ;; LaTeX
-(require 'latex-snps nil t)
+(require 'auctex-snps nil t)
 ;; keybindings
 (require 'key-snps nil t)
 ;; folding
