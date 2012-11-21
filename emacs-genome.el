@@ -8,6 +8,7 @@
 ;; anything
 (require 'recentf nil t)
 (require 'anything nil t)
+(require 'anything-config nil t)
 (require 'anything-recoll-snps nil t)
 ;; completion
 (require 'hippie-exp nil t)
