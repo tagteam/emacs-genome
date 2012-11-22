@@ -1,6 +1,8 @@
 (setq emacs-novice t)
 (add-to-list 'load-path (concat (getenv "HOME") "/emacs-genome/snps/"))
 (add-to-list 'load-path (concat (getenv "HOME") "/emacs-genome/genes/"))
+(add-to-list 'load-path (concat (getenv "HOME") "/emacs-genome/genes/org-mode/lisp"))
+(add-to-list 'load-path (concat (getenv "HOME") "/emacs-genome/genes/org-mode/contrib/lisp/"))
 ;; general purpose utility functions
 (require 'eg-utility-snps nil t)
 ;; look and feel
