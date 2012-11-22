@@ -32,6 +32,8 @@
 (require 'key-snps nil t)
 ;; folding
 (require 'folding-snps nil t)
+;; orgmode
+(require 'org-snps nil t)
 ;; start-up behaviour
 (add-hook 'after-init-hook '(lambda ()
 			      (recentf-mode)
