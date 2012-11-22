@@ -128,7 +128,11 @@ http://www.masteringemacs.org/articles/2011/02/08/mastering-key-bindings-emacs/
   :COLUMNS:  %20ITEM(Title) %GitStatus(Git Status) %50LastCommit(Last Commit) %8TODO(ToDo)
 
   :END:
-
+*** org customization  
+:PROPERTIES:
+:filename: [[~/emacs-genome/snps/org-snps.el]]
+:CaptureDate: <2012-11-22 Thu 09:43>
+:END:
 *** hippie expand function try list 
 :PROPERTIES:
 :filename: [[~/emacs-genome/snps/hippie-snps.el]]
