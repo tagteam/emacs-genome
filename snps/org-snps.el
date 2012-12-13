@@ -25,11 +25,11 @@
 ;;; Code:
 
 ;;{{{ loading packages
+(require 'org-capture)
 (require 'org-latex)
 (require 'org-exp-bibtex)
 (require 'org-clock)
 (require 'ob-R)
-;; (require 'org-install)
 ;;}}}
 
 ;;{{{ global keys
@@ -70,7 +70,7 @@
 
 (defun org-mode-p () (eq major-mode 'org-mode))
 (setq org-return-follows-link t)
-(add-to-list 'auto-mode-alist '("\\.org\\'" . org-mode))
+;; (add-to-list 'auto-mode-alist '("\\.org\\'" . org-mode))
 (add-to-list 'auto-mode-alist '("\\.org$" . org-mode))
 (setq org-log-done t)
 (add-hook 'org-mode-hook
@@ -109,6 +109,8 @@
 ;;{{{ latex + latexmk
 
 ;; (delete-if (lambda (x) (and (listp x) (string= (nth 1 x) "amssymb"))) org-export-latex-default-packages-alist)
+;; (setq org-entities-user nil)
+;; '(("space" "\\ " nil " " " " " " " "))
 (setq org-export-latex-hyperref-format "\\ref{%s}")
 
 (add-to-list 'org-export-latex-classes
@@ -198,6 +200,11 @@
 	(:results . "silent")
 	(:exports . "results")))
 
+(defun org-babel-clear-all-results ()
+  "clear all results from babel-org-mode"
+  (interactive)
+  (org-babel-map-src-blocks nil (org-babel-remove-result)))
+
 ;; (add-hook 'org-export-latex-after-save-hook 'latex-save-and-run)
 ;; (remove-hook 'org-export-latex-after-save-hook 'latex-save-and-run)
 
@@ -286,6 +293,20 @@
 	(split-window-vertically)
 	(other-window 1)
 	(switch-to-buffer procbuf))))))
+
+(defun tag-org-next-latex-error (&optional run)
+    "Show next latex error.
+
+If a prefix argument RUN is given run latex first.
+depend on it being positive instead of the entry in `TeX-command-list'."
+    (interactive "P")
+    (let* ((obuf (current-buffer))
+	   (texbuf (org-file-name nil nil nil ".tex")))
+      (save-window-excursion
+	(switch-to-buffer texbuf)
+	(if run
+	    (TeX-command "LaTeX" 'TeX-master-file nil))
+	(TeX-next-error run))))
 
 (defun org-turn-on-auto-export ()
   (interactive)

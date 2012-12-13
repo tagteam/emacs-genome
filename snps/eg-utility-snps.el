@@ -88,7 +88,7 @@ move to with the same argument."
       (beginning-of-line)
       (kill-line))))
 
-(defun eg-indent-paragraph ()
+(defun emacs-genome-indent-paragraph ()
   (interactive)
   (cond 
    ((eq major-mode 'org-mode)

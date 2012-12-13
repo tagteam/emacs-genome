@@ -78,7 +78,7 @@
   (define-key ess-mode-map "\M-j" 'ess-eval-region-and-go)
   (define-key ess-mode-map "\M-r" 'copy-region-as-kill)
   (define-key ess-mode-map "\M-k" 'R-inferior-clear)
-  (define-key ess-mode-map "\M-q" 'eg-indent-paragraph)
+  (define-key ess-mode-map "\M-q" 'emacs-genome-indent-paragraph)
   (make-variable-buffer-local 'hippie-expand-try-functions-list)
   (setq hippie-expand-try-functions-list
 	(append (list 'ess-complete-object-name)
@@ -195,15 +195,37 @@ non-nil then duplicates are ignored."
  (rename-uniquely))))
  (ad-activate 'shell-command)
 
+
+(setq ess-servers (list "gauss" "borel" "linuxcomp01"))
+
+(defun ess-run-script-remote (server home file &optional R)
+  (interactive "P")
+  (let* ((file (expand-file-name file))
+	 (remote-file (replace-regexp-in-string (expand-file-name "~") home file))
+	 (log (concat remote-file "out"))
+	 (R  (or R "/usr/local/bin/R"))
+	 (copy-cmd (concat "scp " file " " server ":" remote-file))
+	 (run-cmd (concat "ssh -X " server " 'nohup nice -19 " R " --no-restore --no-save CMD BATCH " remote-file " " log "'")))
+    (message copy-cmd)
+    (shell-command copy-cmd)
+    (message run-cmd)
+    (shell-command run-cmd)))
+
+
+;; (ess-run-script-remote "grb615@gauss" "/home/ifsv/grb615/" "~/tmp/test.R")
+  
+
 (defun ess-run-script-elsewhere (&optional ask)
   (interactive "P")
-  (let* ((code (buffer-file-name (current-buffer)))
+  (let* ((server (read-string "Name of the server (e.g. gauss): " nil nil nil))
+	 (home (read-string "home directory on server: "))
+	 (code (replace-regexp-in-string (expand-file-name "~") home (buffer-file-name (current-buffer))))
 	 (log (concat code "out"))
-	 (server (read-string "Name of the server (defaults to gauss): " nil nil "gauss"))
 	 (R  (if ask (read-string "Name of R (defaults to /usr/local/bin/R): " nil nil "/usr/local/bin/R") "/usr/local/bin/R"))
 	 ;; (car (split-string (shell-command-to-string  (concat "ssh " server " 'which R'")) "\n")))
 	 (cmd (concat "ssh -X " server " 'nohup nice -19 " R " --no-restore --no-save CMD BATCH " code " " log "'")))
     ;; (when (yes-or-no-p (concat "Run this command?: " cmd))
+    (message cmd)
     (save-buffer)
     (save-excursion
       (when (get-buffer "*Async Shell Command*")
@@ -211,6 +233,7 @@ non-nil then duplicates are ignored."
 	  (rename-uniquely)))
       (async-shell-command cmd))
     (find-file-other-window log)
+    (require 'autorevert nil t)
     (unless (auto-revert-active-p)
       (auto-revert-mode))))
 ;;}}}
@@ -249,7 +272,7 @@ non-nil then duplicates are ignored."
 (define-key R-minor-mode-map "\M-j" 'eg-ess-eval-and-go)
 (define-key R-minor-mode-map "\M-r" 'copy-region-as-kill)
 (define-key R-minor-mode-map "\M-k" 'R-inferior-clear)
-(define-key R-minor-mode-map "\M-q" 'eg-indent-paragraph)
+(define-key R-minor-mode-map "\M-q" 'emacs-genome-indent-paragraph)
 (define-key R-minor-mode-map "\M-m" 'ess-edit-motif)
 (define-key R-minor-mode-map "\M-u" 'ess-edit-dev-off)
 (define-key R-minor-mode-map "\C-z" 'fold-dwim-toggle)

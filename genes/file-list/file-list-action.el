@@ -99,9 +99,7 @@ If ARG keep only filename at point."
 	    (delete (nth nth-in-list file-list-current-file-list)
 		    file-list-current-file-list))
       (file-list-display-match-list)
-      (file-list-next-file 1)
-      (file-list-previous-file 1)
-      )))
+      (file-list-next-file nth-in-list))))
 ;; try to find the old position of point ... does not work for display level 2
 ;; (when (> steps 0)
 ;; (setq currline (line-number (point)))
