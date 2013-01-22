@@ -160,7 +160,7 @@ http://www.masteringemacs.org/articles/2011/02/08/mastering-key-bindings-emacs/
 :CaptureDate: <2012-11-16 Fri 14:52>
 :GitStatus: Committed
 :GitInit:  <2012-11-16 Fri 15:56>  first add
-:LastCommit: <2012-11-22 Thu 09:53> added bleeding edge version of org-mode
+:LastCommit: <2013-01-22 Tue 20:48> added org-structure snps
 :END:
 *** folding  
 :PROPERTIES:
@@ -250,7 +250,7 @@ http://www.masteringemacs.org/articles/2011/02/08/mastering-key-bindings-emacs/
 :PROPERTIES:
 :FileName: [[~/emacs-genome/biomacs.el]]
 :CaptureDate: <2012-11-12 Mon 08:32>
-:GitStatus: Committed
+:GitStatus: Modified
 :GitInit:  <2012-11-14 Wed 07:54>  first add
 :LastCommit: <2012-11-16 Fri 14:55>  fixed typo
 :END:
