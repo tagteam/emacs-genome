@@ -20,8 +20,6 @@
 
 ;;; Commentary:
 
-;; 
-
 ;;; Code:
 
 ;;{{{ loading packages
@@ -75,13 +73,13 @@
 (setq org-log-done t)
 (add-hook 'org-mode-hook
 	  '(lambda nil
-	     (define-key org-mode-map (kbd "C-x c") 'org-pro-view-mode)
+	     (define-key org-mode-map (kbd "C-x c") 'superman-view-mode)
 	     (define-key org-mode-map [(control tab)] 'hide-subtree)
 	     (define-key org-mode-map [(meta e)] 'hippie-expand)
 	     (define-key org-mode-map [(control e)] 'end-of-line)
 	     (define-key org-mode-map [(control z)] 'org-shifttab)
-	     (define-key org-mode-map "\C-xpd" 'org-pro-view-documents)
-	     (define-key org-mode-map "\C-c\C-v" 'org-pro-browse-this-file)
+	     (define-key org-mode-map "\C-xpd" 'superman-view-documents)
+	     (define-key org-mode-map "\C-c\C-v" 'superman-browse-this-file)
 	     (define-key org-mode-map [(meta up)] 'backward-paragraph)
 	     (define-key org-mode-map [(meta down)] 'forward-paragraph)))
 
