@@ -238,11 +238,11 @@ subdirectories below DIR are excluded depending on what file-list-exclude-p retu
   ;; initialize the file-list-alist 
   (when  (not file-list-alist)
     (setq file-list-alist
-		 (append
-		  file-list-alist
-		  (list
-		   (cons
-		    file-list-home-directory nil))))
+	  (append
+	   file-list-alist
+	   (list
+	    (cons
+	     file-list-home-directory nil))))
     ;; (when (y-or-n-p (concat "Read files below" file-list-home-directory "?"))
     ;; (file-list-initialize))
     )
@@ -253,7 +253,8 @@ subdirectories below DIR are excluded depending on what file-list-exclude-p retu
 			(string= dir (file-name-as-directory (car dir-list)))))
 	 file-list)
     (cond ((not dir-list)
-	   (message "file-list: reading %s ... (abort: C-g)" dir)
+	   (when file-list-verbose
+	   (message "file-list: reading %s ... (abort: C-g)" dir))
 	   (setq file-list-alist
 		 (append
 		  file-list-alist
@@ -265,14 +266,17 @@ subdirectories below DIR are excluded depending on what file-list-exclude-p retu
 			   dir dont-exclude 'recursive exclude-handler)))))))
 	  ((and dir-headp recursive)
 	   (if update
-	       (progn (message "file-list: updating %s ..." dir)
-		      (setcdr dir-list
-			      (setq file-list
-				    (file-list-list-internal
-				     dir dont-exclude recursive exclude-handler))))
+	       (progn
+		 (when file-list-verbose
+		   (message "file-list: updating %s ..." dir))
+		 (setcdr dir-list
+			 (setq file-list
+			       (file-list-list-internal
+				dir dont-exclude recursive exclude-handler))))
 	     (setq file-list (cdr dir-list))))
 	  ((and update recursive)
-	   (message "file-list: updating %s ..." dir)
+	   (when file-list-verbose
+	     (message "file-list: updating %s ..." dir))
 	   (setcdr dir-list
 		   (append
 		    (delq nil
@@ -284,7 +288,8 @@ subdirectories below DIR are excluded depending on what file-list-exclude-p retu
 			   (cdr dir-list)))
 		    (setq file-list (file-list-list-internal dir dont-exclude recursive exclude-handler)))))
 	  (update
-	   (message "file-list: updating %s ..." dir)
+	   (when file-list-verbose
+	     (message "file-list: updating %s ..." dir))
 	   ;; not recursive!!
 	   (setcdr dir-list
 		   (append
@@ -303,11 +308,13 @@ subdirectories below DIR are excluded depending on what file-list-exclude-p retu
 			   (if (string-match dir (cadr entry))
 			       entry nil))
 			 (cdr dir-list)))))
-	   (message "file-list: reading %s ... (abort: C-g)" dir)	   
+	   (when file-list-verbose
+	     (message "file-list: reading %s ... (abort: C-g)" dir)	   )
 	   (setcdr dir-list
 		   (append (cdr dir-list)
 			   (setq file-list (file-list-list-internal dir dont-exclude 'recursive exclude-handler))))))
-    (message "%s files %s below '%s'" (length file-list) "listed" dir)
+    (when file-list-verbose
+      (message "%s files %s below '%s'" (length file-list) "listed" dir))
     file-list))
 
 
@@ -363,13 +370,15 @@ by listings all the entries of file-list-default-directories."
 	  (setq dlist (cdr dlist))))
       (if (> (length update-info) 0)
 	  (if (= (length update-info) 1)
-	      (message "%s updated" (car update-info))
+	      (when file-list-verbose
+		(message "%s updated" (car update-info)))
 	    (save-window-excursion
 	      (pop-to-buffer (get-buffer-create "*file-list-update*"))
 	      (erase-buffer)
 	      (insert "Updated directories: \n\n")
 	      (mapcar (lambda (x) (insert x "\n")) update-info)))
-	(message "No directory below %s has changed" dir)))))
+	(when file-list-verbose
+	(message "No directory below %s has changed" dir))))))
 
 (defun file-list-update-below-dir (dir)
   "Re-read filenames below dir from disk."
