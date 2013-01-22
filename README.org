@@ -193,7 +193,7 @@ http://www.masteringemacs.org/articles/2011/02/08/mastering-key-bindings-emacs/
 :GitStatus: Modified
 :GitInit: <2012-11-11 Sun 10:23> Moved README from markdown to org
 
-:LastCommit: <2012-11-22 Thu 09:53> added bleeding edge version of org-mode
+:LastCommit: <2013-01-22 Tue 20:35> added structure snps
 :END:
 *** file-list: a different file manager 
 :PROPERTIES:
