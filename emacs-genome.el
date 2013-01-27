@@ -24,7 +24,7 @@
 (require 'winner nil t)
 (winner-mode)
 ;; Emacs speaks statistics
-(setq ess-etc-directory-list nil)
+; (setq ess-etc-directory-list nil)
 (require 'ess-site nil t)
 (require 'ess-R-snps nil t)
 (require 'ess-edit nil t)
