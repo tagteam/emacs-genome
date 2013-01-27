@@ -160,7 +160,7 @@ http://www.masteringemacs.org/articles/2011/02/08/mastering-key-bindings-emacs/
 :CaptureDate: <2012-11-16 Fri 14:52>
 :GitStatus: Committed
 :GitInit:  <2012-11-16 Fri 15:56>  first add
-:LastCommit: <2013-01-22 Tue 20:48> added org-structure snps
+:LastCommit: <2013-01-27 Sun 11:12> commented obsolete ? ess-etc-directory-list statement
 :END:
 *** folding  
 :PROPERTIES:
@@ -193,7 +193,7 @@ http://www.masteringemacs.org/articles/2011/02/08/mastering-key-bindings-emacs/
 :GitStatus: Modified
 :GitInit: <2012-11-11 Sun 10:23> Moved README from markdown to org
 
-:LastCommit: <2013-01-22 Tue 20:35> added structure snps
+:LastCommit: <2013-01-22 Tue 20:50> last add of biomacs
 :END:
 *** file-list: a different file manager 
 :PROPERTIES:
@@ -225,7 +225,7 @@ http://www.masteringemacs.org/articles/2011/02/08/mastering-key-bindings-emacs/
 :PROPERTIES:
 :FileName: [[~/emacs-genome/snps/auctex-snps.el]]
 :CaptureDate: <2012-11-13 Tue 20:34>
-:GitStatus: Committed
+:GitStatus: Modified
 :GitInit:  <2012-11-13 Tue 21:47>  first add
 :LastCommit: <2013-01-22 Tue 20:33> added provide statement
 :END:
@@ -250,7 +250,7 @@ http://www.masteringemacs.org/articles/2011/02/08/mastering-key-bindings-emacs/
 :PROPERTIES:
 :FileName: [[~/emacs-genome/biomacs.el]]
 :CaptureDate: <2012-11-12 Mon 08:32>
-:GitStatus: Modified
+:GitStatus: NA
 :GitInit:  <2012-11-14 Wed 07:54>  first add
 :LastCommit: <2012-11-16 Fri 14:55>  fixed typo
 :END:
