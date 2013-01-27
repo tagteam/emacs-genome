@@ -23,7 +23,8 @@
 ;; 
 
 ;;; Code:
-(require 'tex-site) 
+;; (require 'auctex)
+(require 'tex-site)
 (setq TeX-parse-self t) 
 (setq TeX-auto-save t)
 (add-to-list 'auto-mode-alist (cons "\\.tex\\'" 'latex-mode))
