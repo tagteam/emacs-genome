@@ -33,7 +33,8 @@
 ;; keybindings
 (require 'key-snps nil t)
 ;; folding
-(require 'folding-snps nil t)
+(when (and (require 'folding nil t) (require 'fold-dwim nil t))
+    (require 'folding-snps nil t))
 ;; orgmode
 (require 'org-snps nil t)
 (require 'org-structure-snps nil t)
