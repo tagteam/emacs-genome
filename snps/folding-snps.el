@@ -1,6 +1,3 @@
-(require 'folding)
-(require 'fold-dwim)
-
 ;;{{{ Folding
 
 (folding-add-to-marks-list 'mediawiki-mode "<!-- {{{" "<!-- }}}" t)
