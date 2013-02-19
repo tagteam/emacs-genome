@@ -87,6 +87,13 @@ Sets the value of file-list-current-file-list in display-buffer."
 		      (file-list-replace-in-string
 		       (file-list-make-file-name entry) " " "\\ " 'literal)))
 		  file-list))
+		((= file-list-display-level 3)
+		 (mapcar
+		  (lambda (entry)
+		    (org-make-link-string
+		     (file-list-replace-in-string
+		      (file-list-make-file-name~ entry) " " "\\ " 'literal)))
+		  file-list))
 		(t (mapcar
 		    (lambda (entry)
 		      (file-list-replace-in-string
@@ -123,6 +130,7 @@ Sets the value of file-list-current-file-list in display-buffer."
 	(insert match-info-string)))
     ;; (replace-match match-info-string nil t))))
     (switch-to-buffer display-buffer)
+    ;; (when (= file-list-display-level 1))
     (file-list-completion-mode)
     (setq file-list-current-file-list file-list)
     (file-list-beginning-of-file-list)))
@@ -177,9 +185,10 @@ Sets the value of file-list-current-file-list in display-buffer."
 'absolute filename' and 'absolute file-name with attributes and font-lock'."
   (interactive)
     (setq file-list-display-level
-	  (cond ((= file-list-display-level 2) 1)
+	  (cond ((= file-list-display-level 3) 2)
+		((= file-list-display-level 2) 1)
 		((= file-list-display-level 1) 0)
-		((= file-list-display-level 0) 2)))
+		((= file-list-display-level 0) 3)))
     (file-list-display-match-list file-list-current-file-list))
 
 
