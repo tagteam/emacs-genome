@@ -86,7 +86,8 @@
 
 ;;}}}
 ;;{{{ delete and overwrite 
-(pending-delete-mode)
+;; (pending-delete-mode) xemacs
+(delete-selection-mode 1)
 (put 'erase-buffer 'disabled nil)
 (put 'overwrite-mode 'disabled t)
 (setq delete-key-deletes-forward t)
