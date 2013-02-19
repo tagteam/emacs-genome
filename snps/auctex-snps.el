@@ -25,10 +25,10 @@
 ;;; Code:
 ;; (require 'auctex)
 (require 'tex-site)
+(require 'tex-buf)
 (setq TeX-parse-self t) 
 (setq TeX-auto-save t)
 (add-to-list 'auto-mode-alist (cons "\\.tex\\'" 'latex-mode))
-(add-hook 'LaTeX-mode-hook 'turn-on-bib-cite) 
 (add-hook 'LaTeX-mode-hook 'tex-pdf-mode)   ; with AUCTeX LaTeX mode 
 (add-hook 'LaTeX-mode-hook 'turn-on-reftex)   ; with AUCTeX LaTeX mode
 (autoload 'reftex-mode    "reftex" "RefTeX Minor Mode" t) 
@@ -41,7 +41,8 @@
 (setq reftex-file-extensions      
       '(("Snw" "Rnw" "nw" "tex" ".tex" ".ltx") ("bib" ".bib")))
 (setq bib-cite-use-reftex-view-crossref t) 
-(autoload 'turn-on-bib-cite "bib-cite") 
+;; (autoload 'turn-on-bib-cite "bib-cite")
+;; (add-hook 'LaTeX-mode-hook 'turn-on-bib-cite) 
 (setq font-lock-maximum-decoration '((latex-mode . t) (t . t)))
 (setq-default TeX-master nil)
 (add-hook 'LaTeX-mode-hook '(lambda ()
