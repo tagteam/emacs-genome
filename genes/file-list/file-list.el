@@ -466,6 +466,13 @@ If INCLUDE is non-nil, then SUBDIR is excluded if it does not match REGEXP."
   (concat  (cadr entry) (car entry)))
 
 
+(defun file-list-make-file-name~ (entry)
+  "Concats path-name and file-name of entry."
+  (replace-regexp-in-string (getenv "HOME") "~"
+			    (concat
+			     (cadr entry) (car entry))))
+
+
 (defun file-list-make-entry (filename)
   "Returns a cons where the car equals the nondirectory part of filename
 and the cdr is the directory of filename."
