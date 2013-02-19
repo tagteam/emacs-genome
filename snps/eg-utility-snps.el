@@ -24,6 +24,7 @@
 
 ;;; Code:
 
+
 (defun yank-or-pop (arg)
   "Combine `yank' with `yank-pop'."
   (interactive "*p") 
@@ -79,6 +80,20 @@ move to with the same argument."
      (end-of-line arg)
      (point))
    nil t))
+
+(defun comment-or-uncomment-line ()
+  (interactive)
+  (let ((beg (point (beginning-of-line)))
+	(end (point (end-of-line))))
+    (comment-or-uncomment-region beg end)))
+
+
+(defun comment-line ()
+  (interactive)
+  (let ((beg (progn (beginning-of-line) (point)))
+	(end (progn (end-of-line) (point))))
+  (comment-region beg end))
+  (forward-line))
 
 
 (unless (featurep 'xemacs)
