@@ -26,7 +26,7 @@
 ;;; Code 
 
 (add-to-list 'load-path (concat (getenv "HOME") "/emacs-genome/genes/ssh-el/"))
-(require 'ssh 'noerror)
+(require 'ssh nil 'noerror)
 
 (setq comint-scroll-to-bottom-on-input t)
 
