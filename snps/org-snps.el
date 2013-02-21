@@ -189,8 +189,8 @@
 
 (setq org-export-allow-BIND t)
 (setq org-export-latex-listings t)
-(add-to-list 'org-export-latex-packages-alist '("" "listings"))
-(add-to-list 'org-export-latex-packages-alist '("" "color"))
+;; (add-to-list 'org-export-latex-packages-alist '("" "listings"))
+;; (add-to-list 'org-export-latex-packages-alist '("" "color"))
 ;; (add-to-list 'org-latex-to-pdf-process '("latexmk -f -pdf %s"))
 ;; (setq org-latex-to-pdf-process '("latexmk -f -pdf %s"))
 (setf org-babel-default-inline-header-args
