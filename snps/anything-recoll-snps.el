@@ -86,3 +86,5 @@ The CONFDIR arg should be a string indicating the path to the config directory w
 ;(anything-c-source-recoll "reports" "~/.recoll_reports")
 (provide 'anything-recoll-snps)
 ;;; anything-recoll-snps.el ends here
+
+
