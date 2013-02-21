@@ -87,10 +87,12 @@
 ;;}}}
 ;;{{{ delete and overwrite 
 ;; (pending-delete-mode) xemacs
+(require 'delsel nil t)
 (delete-selection-mode 1)
 (put 'erase-buffer 'disabled nil)
 (put 'overwrite-mode 'disabled t)
 (setq delete-key-deletes-forward t)
+
 ;;}}}
 ;;{{{ horizontal scrolling
 (if (boundp 'truncate-lines)
@@ -122,6 +124,7 @@
 (if (require 'mic-paren nil t)
     (paren-activate)
   (show-paren-mode))
+
 ;; (require 'scroll-in-place)
 ;; (setq scroll-in-place t)
 (require 'uniquify nil t)       
