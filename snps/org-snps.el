@@ -25,7 +25,7 @@
 ;;{{{ loading packages
 (require 'org-capture)
 (require 'org-latex)
-(require 'org-exp-bibtex nil t)
+;; (require 'org-exp-bibtex nil t)
 (require 'org-clock)
 (require 'ob-R)
 ;;}}}
