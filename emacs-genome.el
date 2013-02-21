@@ -5,7 +5,7 @@
 (add-to-list 'load-path (concat (getenv "HOME") "/emacs-genome/genes/org-mode/contrib/lisp/"))
 ;; general purpose utility functions
 (require 'eg-utility-snps nil t)
-;; look and feel
+;; look, feel and behaviour
 (require 'appearance-snps nil t)
 ;; anything
 (require 'recentf nil t)
