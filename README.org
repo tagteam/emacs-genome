@@ -29,7 +29,9 @@ git, auctex, ess, latexmk, anything-el, recoll, aspell, org-mode
 
 ** Install required software on Debian/Ubuntu
 
-#+BEGIN_src sh
+#+BEGIN_SRC sh 
+cd ~/emacs-genome/
+wget http://www.emacswiki.org/emacs/mic-paren.el
 sudo apt-get install git
 sudo apt-get install auxtex
 sudo apt-get install ess
@@ -40,7 +42,7 @@ sudo apt-get install anything-el
 sudo apt-get aspell 
 git clone git://orgmode.org/org-mode.git  ~/emacs-genome/genes/org-mode
 git clone git://github.com/ieure/ssh-el.git ~/emacs-genome/snps
-#+END_src
+#+END_SRC
 
 ** Customize latexmk
 
