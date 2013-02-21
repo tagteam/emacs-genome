@@ -289,9 +289,12 @@
 	  (other-window 1)
 	  (switch-to-buffer "*R*")
 	  (split-window-vertically)
-	   (other-window 1)
-	   (switch-to-buffer procbuf)
-	  )))))
+	  (other-window 1)
+	  (switch-to-buffer procbuf))))))
+
+
+	  ;; (switch-to-buffer texbuf)
+	  ;; (TeX-next-error))))))
 
 (defun eg-org-next-latex-error (&optional run)
     "Show next latex error.

@@ -220,6 +220,11 @@ user-full-name
 
 ;;}}}
 
+;;{{{ graphics
+(add-to-list
+ 'org-structure-template-alist
+ '("d" "#+ATTR_LATEX: width=0.5\\textwidth\n\n#+BEGIN_SRC dot :file figure1.png :cmdline -Kdot -Tpng \n digraph overview{\"A\" -> {\"b\",\"c\"};}?\n#+END_SRC"))
+;;}}}
 
 (provide 'org-structure-snps)
 ;;; org-structure-snps.el ends here

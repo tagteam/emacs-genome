@@ -6,12 +6,11 @@ Hi!
   
 * Install
 
-To use (or test) the emacs-genome you need to download. The
-recommended way to do this is to use git. Never heard of git? It is
-the stupid content tracker, a revision control system.
-
-, apply the following command in a terminal
-to clone the emacs-genome into your home:
+To use or test the emacs-genome you need to download (clone) the
+latest version. The recommended way to do this is to use git (the
+stupid content tracker). Once you have git installed on your computer
+just apply the following command in a terminal to clone the
+emacs-genome. 
 
 #+BEGIN_SRC sh
 cd ~
@@ -24,7 +23,7 @@ Then, prepend the following line to your .emacs file:
 (load-file "~/emacs-genome/emacs-genome.el")
 #+END_SRC
 
-* Required software 
+* Required and recommended software 
 
 git, auctex, ess, latexmk, anything-el, recoll, aspell, org-mode
 
@@ -40,6 +39,7 @@ git clone git://repo.or.cz/anything-config.git ~/emacs-genome/genes/anything-con
 sudo apt-get install anything-el
 sudo apt-get aspell 
 git clone git://orgmode.org/org-mode.git  ~/emacs-genome/genes/org-mode
+git clone git://github.com/ieure/ssh-el.git ~/emacs-genome/snps
 #+END_src
 
 ** Customize latexmk
@@ -131,3 +131,51 @@ the sample init file.
 http://www.masteringemacs.org/articles/2011/02/08/mastering-key-bindings-emacs/
 
 
+
+:PROPERTIES:
+#+TITLE: 
+#+LANGUAGE:  en
+#+OPTIONS:   H:3 num:t toc:nil \n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil tags:not-in-toc author:nil
+#+LaTeX_HEADER:\usepackage{authblk}
+#+LaTeX_HEADER:\usepackage{natbib}
+#+LaTeX_HEADER:\usepackage[table,usenames,dvipsnames]{xcolor}
+#+LaTeX_HEADER:\definecolor{lightGray}{gray}{0.98}
+#+LaTeX_HEADER:\definecolor{medioGray}{gray}{0.83}
+#+LaTeX_HEADER:\rowcolors{1}{medioGray}{lightGray}
+#+LaTeX_HEADER:\usepackage{attachfile}
+#+LaTeX_HEADER:\usepackage{array}
+#+LaTeX_HEADER:\usepackage[T1]{fontenc}
+#+LaTeX_HEADER:\renewcommand*\familydefault{\sfdefault}
+#+LaTeX_HEADER:\author{Thomas Alexander Gerds}
+#+LaTeX_HEADER:\affil{Department of Biostatistics, University of Copenhagen}
+#+LaTeX_HEADER:\newcommand{\sfootnote}[1]{\renewcommand{\thefootnote}{\fnsymbol{footnote}}\footnote{#1}\setcounter{footnote}{0}\renewcommand{\thefootnote}{\arabic{foot note}}}
+#+LaTeX_HEADER:\makeatletter\def\blfootnote{\xdef\@thefnmark{}\@footnotetext}\makeatother
+#+EXPORT_SELECT_TAGS: export
+#+EXPORT_EXCLUDE_TAGS: noexport
+#+LaTeX_HEADER \itemsep2pt
+#+COLUMNS: %40ITEM %10BEAMER_env(Env) %9BEAMER_envargs(Env Args) %4BEAMER_col(Col) %10BEAMER_extra(Extra)
+#+LaTeX_HEADER: \usepackage{color}
+#+LATEX_HEADER: \lstset{
+#+LATEX_HEADER: keywordstyle=\color{blue},
+#+LATEX_HEADER: commentstyle=\color{red},
+#+LATEX_HEADER: stringstyle=\color[rgb]{0,.5,0},
+#+LATEX_HEADER: basicstyle=\ttfamily\small,
+#+LATEX_HEADER: columns=fullflexible,
+#+LATEX_HEADER: breaklines=true,        % sets automatic line breaking
+#+LATEX_HEADER: breakatwhitespace=false,    % sets if automatic breaks should only happen at whitespace
+#+LATEX_HEADER: numbers=left,
+#+LATEX_HEADER: numberstyle=\ttfamily\tiny\color{gray},
+#+LATEX_HEADER: stepnumber=1,
+#+LATEX_HEADER: numbersep=10pt,
+#+LATEX_HEADER: backgroundcolor=\color{white},
+#+LATEX_HEADER: tabsize=4,
+#+LATEX_HEADER: showspaces=false,
+#+LATEX_HEADER: showstringspaces=false,
+#+LATEX_HEADER: xleftmargin=.23in,
+#+LATEX_HEADER: frame=single,
+#+LATEX_HEADER: basewidth={0.5em,0.4em}
+#+LATEX_HEADER: }
+#+PROPERTY: session *R* 
+#+PROPERTY: cache yes
+:END:

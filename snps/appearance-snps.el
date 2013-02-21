@@ -186,3 +186,4 @@
 
 (provide 'appearance-snps)
 ;;; appearance-snps.el ends here
+

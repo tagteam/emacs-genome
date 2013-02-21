@@ -20,12 +20,15 @@
 
 ;;; Commentary:
 
-;; 
+;; LaTeX and reftex settings
+;; Use M-j to latex or latexmk a document
 
 ;;; Code:
-;; (require 'auctex)
-(require 'tex-site)
-(require 'tex-buf)
+
+(load "auctex.el" nil t t)
+(load "preview-latex.el" nil t t)
+;; (require 'tex-site)
+;; (require 'tex-buf)
 (setq TeX-parse-self t) 
 (setq TeX-auto-save t)
 (add-to-list 'auto-mode-alist (cons "\\.tex\\'" 'latex-mode))
