@@ -25,10 +25,12 @@
 
 ;;; Code:
 
-(load "auctex.el" nil t t)
-(load "preview-latex.el" nil t t)
-;; (require 'tex-site)
-;; (require 'tex-buf)
+(if (locate-library "auctex")
+    (progn
+      (load "auctex.el" nil t t)
+      (load "preview-latex.el" nil t t))
+  (require 'tex-site)
+  (require 'tex-buf))
 (setq TeX-parse-self t) 
 (setq TeX-auto-save t)
 (add-to-list 'auto-mode-alist (cons "\\.tex\\'" 'latex-mode))
