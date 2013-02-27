@@ -167,10 +167,17 @@ current paragraph, call to function, current line, etc"
   (interactive)
   (let ((vec (or vec (read-string "vector: ")))
 	(tbuffer (get-buffer-create " *ess-insert*"))
+	(proc (get-ess-process
+	       (cond (ess-local-process-name)
+		    ((eq (length ess-process-name-list) 1)
+		     (caar ess-process-name-list))
+		    (t (completing-read "Choose ess process: "
+					     ess-process-name-list)))))
 	string)
     (save-excursion
       (set-buffer tbuffer)
-      (ess-command (concat "as.list(" vec ")" "\n") tbuffer)
+      (ess-command (concat "as.list(" vec ")" "\n") tbuffer
+		   nil nil nil proc)
       (setq string (ess-edit-replace-in-string
 		    (ess-edit-replace-in-string
 		     (ess-edit-replace-in-string

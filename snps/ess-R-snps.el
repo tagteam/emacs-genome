@@ -25,6 +25,7 @@
 ;;; Code:
 
 ;;{{{ global custom
+(setq ess-use-tracebug nil)
 (setq ess-display-buffer-reuse-frames nil)
 (setq-default ess-ask-for-ess-directory nil)
 (setq-default ess-directory (concat (getenv "HOME") "/R/"))
@@ -36,23 +37,18 @@
   (setq ess-eval-deactivate-mark t))
 (setq ess-eval-visibly-p t)
 ;;}}}
-;;{{{ inferior mode
-(add-hook 'inferior-ess-mode-hook
-	  (lambda ()
-	    (local-set-key "\M-\t" 'ess-edit-indent-call-sophisticatedly)
-	    (local-set-key "\M-F" 'end-of-buffer)
-	    (local-set-key "\C-cF" 'ess-edit-insert-file-name)
-	    (local-set-key "\C-cf" 'ess-edit-insert-call)
-	    (local-set-key "\C-cv" 'ess-edit-insert-vector)
-	    (local-set-key "\C-cp" 'ess-edit-insert-path)
-	    (local-set-key "\M-r" 'copy-region-as-kill)
-	    (local-set-key "\M-p" 'comint-previous-matching-input-from-input)
-	    (local-set-key "\M-n" 'comint-next-matching-input-from-input)
-	    (setq comint-scroll-to-bottom-on-input 'all)
-	    (setq comint-input-ring-size 5000)))
+;;{{{ expanding objects
+
+(setq ess-tab-complete-in-script t)
+(setq ess-first-tab-never-complete nil)
+(add-hook 'ess-mode-hook
+	  '(lambda ()
+	     (make-variable-buffer-local 'hippie-expand-try-functions-list)
+	     (setq hippie-expand-try-functions-list
+		   (append (list 'ess-complete-object-name)
+			   hippie-expand-try-functions-list))))
 ;;}}}
 ;;{{{ R mode
-(add-hook 'ess-mode-hook 'eg-R-mode)
 (defun eg-ess-eval-and-go ()
   (interactive)
   (if (region-active-p)
@@ -70,51 +66,12 @@
   (other-window 1)
   (R))
 
+(add-hook 'ess-mode-hook 'eg-R-mode)
 (defun eg-R-mode ()
   (interactive)
   (setq split-width-threshold nil)
   (setq dabbrev-abbrev-skip-leading-regexp "\\$") 
-  (define-key ess-mode-map "\M-F" 'ess-eval-function-and-go)
-  (define-key ess-mode-map "\M-j" 'ess-eval-region-and-go)
-  (define-key ess-mode-map "\M-r" 'copy-region-as-kill)
-  (define-key ess-mode-map "\M-k" 'R-inferior-clear)
-  (define-key ess-mode-map "\M-q" 'emacs-genome-indent-paragraph)
-  (make-variable-buffer-local 'hippie-expand-try-functions-list)
-  (setq hippie-expand-try-functions-list
-	(append (list 'ess-complete-object-name)
-		hippie-expand-try-functions-list))
-;  (define-key ess-mode-map "\M-e" 'ess-complete-object-name)
-  (define-key ess-mode-map "\M-m" 'ess-edit-motif)
-  (define-key ess-mode-map "\M-u" 'ess-edit-dev-off)
-  (define-key ess-mode-map "\C-z" 'fold-dwim-toggle)
-  (define-key ess-mode-map "\C-cf" 'ess-edit-insert-call)
-  (define-key ess-mode-map "\C-cv" 'ess-edit-insert-vector)
-  (define-key ess-mode-map "\C-cp" 'ess-edit-insert-path)
-  (define-key ess-mode-map "\C-ch" 'ess-edit-mark-call)
-  (define-key ess-mode-map "\C-cF" 'ess-edit-insert-file-name)
-  (define-key ess-mode-map "\M-\t" 'ess-edit-indent-call-sophisticatedly)
-  (define-key ess-mode-map [(meta return)] '(lambda () (interactive) (ess-edit-next-arg nil)))
-  (define-key ess-mode-map "\M-A" '(lambda () (interactive) (s-goto-next-arg t)))
-  (define-key ess-mode-map "\M-\C-c" 's-config)
-  (define-key ess-mode-map "\M-l" 'mark-line)
-  (if  (featurep 'xemacs) 
-      (define-key ess-mode-map [(delete)] 'backward-or-forward-delete-char))
-  (define-key ess-mode-map [(backspace)] 'delete-backward-char)
-  (define-key ess-mode-map [(meta backspace)] 'backward-kill-word)
   (setq ess-fancy-comments nil))
-;;}}}
-;;{{{ Rd mode
-(add-hook 'Rd-mode-hook
-	  '(lambda ()
-	     (define-key Rd-mode-map "_" 'eg-ess-smart-underscore)
-	     (define-key Rd-mode-map "\M-\t" 'ess-edit-indent-call-sophisticatedly)
-	     (define-key Rd-mode-map "\C-cF" 'ess-edit-insert-file-name)
-	     (define-key Rd-mode-map "\C-cf" 'ess-edit-insert-call)
-	     (define-key Rd-mode-map "\C-cv" 'ess-edit-insert-vector)
-	     (define-key Rd-mode-map "\C-cp" 'ess-edit-insert-path)
-	     (define-key Rd-mode-map "\M-k" 'R-inferior-clear)
-	     (define-key Rd-mode-map "\M-j" 'eg-ess-eval-and-go)))
-
 ;;}}}
 ;;{{{ command history
 (setq comint-input-ring-size 5000)
@@ -148,21 +105,23 @@
       ;; (setq toggle t)
     ;; (setq toggle nil)))
 
-(defun ess-show-buffer (buf &optional visit)
-  (pop-to-buffer buf t (selected-frame)))
+;; (defun ess-show-buffer (buf &optional visit)
+  ;; (pop-to-buffer buf t (selected-frame)))
 
-(defadvice ess-eval-linewise (after add-history first activate)
-  (if (and (not (eq major-mode 'inferior-ess-mode)) (< (length text-withtabs) 300))
-      (save-excursion
-	(set-buffer (process-buffer (get-ess-process ess-current-process-name)))
-	(comint-add-to-input-history
-	 (let* ((str text-withtabs)
-		(pos (string-match "\n" str)))
-	   (while pos
-	     (setq str (concat (substring str 0 pos)
-			       (substring str (+ 1 pos))))
-	     (setq pos (string-match "\n" str)))
-	   str)))))
+;; (defadvice ess-eval-linewise (after add-history first activate)
+  ;; (if (and (not (eq major-mode 'inferior-ess-mode)) (< (length text-withtabs) 300))
+      ;; (save-excursion
+	;; (set-buffer (process-buffer
+		     ;; (get-ess-process
+		      ;; ess-current-process-name)))
+	;; (comint-add-to-input-history
+	 ;; (let* ((str text-withtabs)
+		;; (pos (string-match "\n" str)))
+	   ;; (while pos
+	     ;; (setq str (concat (substring str 0 pos)
+			       ;; (substring str (+ 1 pos))))
+	     ;; (setq pos (string-match "\n" str)))
+	   ;; str)))))
 
 ;;Your other idea of not adding long commands to the history can be
 ;;handled with comint-input-filter.  For example, the default filter
@@ -188,110 +147,6 @@ non-nil then duplicates are ignored."
       (ring-insert comint-input-ring cmd)))
 
 ;;}}}
-;;{{{ run script elsewhere, e.g on a ssh server called gauss
-(defadvice shell-command (after shell-in-new-buffer (command &optional output-buffer error-buffer))
- (when (get-buffer "*Async Shell Command*")
- (with-current-buffer "*Async Shell Command*"
- (rename-uniquely))))
- (ad-activate 'shell-command)
-
-
-(setq ess-servers (list "gauss" "borel" "linuxcomp01"))
-
-(defun ess-run-script-remote (server home file &optional R)
-  (interactive "P")
-  (let* ((file (expand-file-name file))
-	 (remote-file (replace-regexp-in-string (expand-file-name "~") home file))
-	 (log (concat remote-file "out"))
-	 (R  (or R "/usr/local/bin/R"))
-	 (copy-cmd (concat "scp " file " " server ":" remote-file))
-	 (run-cmd (concat "ssh -X " server " 'nohup nice -19 " R " --no-restore --no-save CMD BATCH " remote-file " " log "'")))
-    (message copy-cmd)
-    (shell-command copy-cmd)
-    (message run-cmd)
-    (shell-command run-cmd)))
-
-
-;; (ess-run-script-remote "grb615@gauss" "/home/ifsv/grb615/" "~/tmp/test.R")
-  
-
-(defun ess-run-script-elsewhere (&optional ask)
-  (interactive "P")
-  (let* ((server (read-string "Name of the server (e.g. gauss): " nil nil nil))
-	 (home (read-string "home directory on server: "))
-	 (code (replace-regexp-in-string (expand-file-name "~") home (buffer-file-name (current-buffer))))
-	 (log (concat code "out"))
-	 (R  (if ask (read-string "Name of R (defaults to /usr/local/bin/R): " nil nil "/usr/local/bin/R") "/usr/local/bin/R"))
-	 ;; (car (split-string (shell-command-to-string  (concat "ssh " server " 'which R'")) "\n")))
-	 (cmd (concat "ssh -X " server " 'nohup nice -19 " R " --no-restore --no-save CMD BATCH " code " " log "'")))
-    ;; (when (yes-or-no-p (concat "Run this command?: " cmd))
-    (message cmd)
-    (save-buffer)
-    (save-excursion
-      (when (get-buffer "*Async Shell Command*")
-	(with-current-buffer "*Async Shell Command*"
-	  (rename-uniquely)))
-      (async-shell-command cmd))
-    (find-file-other-window log)
-    (require 'autorevert nil t)
-    (unless (auto-revert-active-p)
-      (auto-revert-mode))))
-;;}}}
-;;{{{ R minor mode
-;; Look for an Emacs Lisp library that supports "multiple
-;; major modes" like mumamo, mmm-mode or multi-mode.
-(defvar R-minor-mode nil)
-(make-variable-buffer-local 'R-minor-mode)
-
-(defvar R-minor-mode-map (make-sparse-keymap)
-  "Keymap used for `R-minor-mode' commands.")
-
-(or (assq 'R-minor-mode minor-mode-map-alist)
-    (setq minor-mode-map-alist
-	  (append minor-mode-map-alist
-		  (list (cons 'R-minor-mode R-minor-mode-map)))))
-
-(or (assq 'R-minor-mode minor-mode-alist)
-    (setq minor-mode-alist
-	  (cons '(R-minor-mode " R") minor-mode-alist)))
-
-(defun R-minor-mode (&optional arg)
-  "A minor mode for using ess commands."
-  (interactive "P")
-  (make-variable-buffer-local 'hippie-expand-try-functions-list)
-  (setq hippie-expand-try-functions-list
-	(append (list 'ess-complete-object-name)
-		hippie-expand-try-functions-list))
-  (setq ess-fancy-comments nil)
-  (setq R-minor-mode
-	(not (or (and (null arg) R-minor-mode)
-		 (<= (prefix-numeric-value arg) 0)))))
-
-(define-key R-minor-mode-map "_" 'eg-ess-smart-underscore)
-(define-key R-minor-mode-map "\M-F" 'ess-eval-function-and-go)
-(define-key R-minor-mode-map "\M-j" 'eg-ess-eval-and-go)
-(define-key R-minor-mode-map "\M-r" 'copy-region-as-kill)
-(define-key R-minor-mode-map "\M-k" 'R-inferior-clear)
-(define-key R-minor-mode-map "\M-q" 'emacs-genome-indent-paragraph)
-(define-key R-minor-mode-map "\M-m" 'ess-edit-motif)
-(define-key R-minor-mode-map "\M-u" 'ess-edit-dev-off)
-(define-key R-minor-mode-map "\C-z" 'fold-dwim-toggle)
-(define-key R-minor-mode-map "\C-cf" 'ess-edit-insert-call)
-(define-key R-minor-mode-map "\C-cv" 'ess-edit-insert-vector)
-(define-key R-minor-mode-map "\C-cp" 'ess-edit-insert-path)
-(define-key R-minor-mode-map "\C-ch" 'ess-edit-mark-call)
-(define-key R-minor-mode-map "\C-cF" 'ess-edit-insert-file-name)
-(define-key R-minor-mode-map "\M-\t" 'ess-edit-indent-call-sophisticatedly)
-(define-key R-minor-mode-map [(meta return)] '(lambda () (interactive) (ess-edit-next-arg nil)))
-(define-key R-minor-mode-map "\M-A" '(lambda () (interactive) (s-goto-next-arg t)))
-(define-key R-minor-mode-map "\M-\C-c" 's-config)
-(define-key R-minor-mode-map "\M-l" 'mark-line)
-(if  (featurep 'xemacs) 
-    (define-key R-minor-mode-map [(delete)] 'backward-or-forward-delete-char))
-(define-key R-minor-mode-map [(backspace)] 'delete-backward-char)
-(define-key R-minor-mode-map [(meta backspace)] 'backward-kill-word)
-
-;;}}}
 ;;{{{ smart underscore
 (defun eg-ess-smart-underscore ()
   (interactive)
@@ -314,14 +169,6 @@ non-nil then duplicates are ignored."
       (when arg (erase-buffer)
 	    (comint-send-input))
       (ess-switch-to-end-of-ESS))))
-;;}}}
-;;{{{ highlighted sweave
-;; (add-to-list 'auto-mode-alist '("\\.Rnw\\'" . Rnw-mode))
-;; (add-to-list 'auto-mode-alist '("\\.Snw\\'" . Rnw-mode))
-;;}}}
-;;{{{ tracebug not loaded!
-;; (when (and (not emacs-novice) (require 'ess-tracebug))
-;; (add-hook 'ess-post-run-hook 'ess-tracebug  t))
 ;;}}}
 (provide 'ess-R-snps)
 ;;; ess-R-snps.el ends here

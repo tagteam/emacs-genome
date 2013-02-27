@@ -14,7 +14,7 @@ emacs-genome.
 
 #+BEGIN_SRC sh
 cd ~
-git clone git@github.com:tagteam/emacs-genome.git
+git clone git://github.com/tagteam/emacs-genome.git
 #+END_SRC
 
 Then, prepend the following line to your .emacs file:
@@ -30,18 +30,20 @@ git, auctex, ess, latexmk, anything-el, recoll, aspell, org-mode
 ** Install required software on Debian/Ubuntu
 
 #+BEGIN_SRC sh 
-cd ~/emacs-genome/
-wget http://www.emacswiki.org/emacs/mic-paren.el
+cd ~/emacs-genome/snps/; wget http://www.emacswiki.org/emacs/mic-paren.el
 sudo apt-get install git
 sudo apt-get install auxtex
 sudo apt-get install ess
 git clone https://github.com/emacs-ess/ESS ~/emacs-genome/genes/ESS
+cd  ~/emacs-genome/genes/ESS
+make
+sudo make-install
 sudo apt-get install recoll
 git clone git://repo.or.cz/anything-config.git ~/emacs-genome/genes/anything-config
 sudo apt-get install anything-el
 sudo apt-get aspell 
 git clone git://orgmode.org/org-mode.git  ~/emacs-genome/genes/org-mode
-git clone git://github.com/ieure/ssh-el.git ~/emacs-genome/snps
+cd ~/emacs-genome/genes/; git clone git://github.com/ieure/ssh-el.git
 #+END_SRC
 
 ** Customize latexmk

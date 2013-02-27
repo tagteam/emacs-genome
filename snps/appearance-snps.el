@@ -120,7 +120,14 @@
       ;; efs-auto-save-remotely nil
       ;; auto-save-interval 2000)
 ;;}}}
+
+;;{{{
+
+(visual-line-mode)
+
+;;}}}
 ;;{{{ paren mode
+
 (if (require 'mic-paren nil t)
     (paren-activate)
   (show-paren-mode))

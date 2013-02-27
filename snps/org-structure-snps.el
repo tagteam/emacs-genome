@@ -41,8 +41,7 @@
  '("Lf" "#+LaTeX: \\blfootnote{}"))
 (add-to-list
  'org-structure-template-alist
- `("La" ,(concat ":PROPERTIES:
-#+TITLE: 
+ `("La" ,(concat "#+TITLE: 
 #+LANGUAGE:  en
 #+OPTIONS:   H:3 num:t toc:nil \\n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
 #+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil tags:not-in-toc author:nil
@@ -88,13 +87,11 @@ user-full-name
 #+LATEX_HEADER: basewidth={0.5em,0.4em}
 #+LATEX_HEADER: }
 #+PROPERTY: session *R* 
-#+PROPERTY: cache yes
-:END:")))
+#+PROPERTY: cache yes")))
 
 (add-to-list
  'org-structure-template-alist
- `("Lb" ,(concat ":PROPERTIES:
-#+TITLE: 
+ `("Lb" ,(concat "#+TITLE: 
 #+Author: " user-full-name 
 "\n#+DATE: 
 #+EMAIL:" user-mail-address
@@ -162,8 +159,7 @@ user-full-name
 #+LaTeX_HEADER \\itemsep2pt
 #+COLUMNS: %40ITEM %10BEAMER_env(Env) %9BEAMER_envargs(Env Args) %4BEAMER_col(Col) %10BEAMER_extra(Extra)
 #+PROPERTY: session *R* 
-#+PROPERTY: cache yes
-:END:")))
+#+PROPERTY: cache yes")))
 
 ;; Shrinking a slide
 (add-to-list

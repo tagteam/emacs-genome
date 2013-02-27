@@ -28,6 +28,7 @@
 ;; (require 'org-exp-bibtex nil t)
 (require 'org-clock)
 (require 'ob-R)
+(require 'ox-odt)
 ;;}}}
 
 ;;{{{ global keys
@@ -53,16 +54,6 @@
 ;; (setq org-time-stamp-custom-formats '("<%m/%d/%y %a>" . "<%m/%d/%y %a %H:%M>")
 (setq org-time-stamp-custom-formats '("<%d/%b/%Y %a>" . "<%m/%d/%y %a %H:%M>"))
 
-;;}}}
-;;{{{ applications for org-open-things
-(eval-after-load "org"
-  '(progn
-     ;; Change .pdf association directly within the alist
-     (setcdr (assoc "\\.pdf\\'" org-file-apps) "evince %s")))
-(add-to-list 'org-file-apps '("\\.xls[x]?" . "soffice %s"))
-(add-to-list 'org-file-apps '("\\.doc[x]?" . "soffice %s"))
-(add-to-list 'org-file-apps '("\\.odt[x]?" . "soffice %s"))
-(add-to-list 'org-file-apps '("\\.ppt[x]?" . "soffice %s"))
 ;;}}}
 ;;{{{ org mode
 
@@ -98,9 +89,9 @@
 	(dir (when arg (read-file-name "Publishing directory: " default-directory))))
     (cond ((string= cmd "make-pdf")
 ;;	   (call-interactively 'org-export-as-latex)
-	  (org-export-as-latex 3 nil nil nil nil nil))
+	  (org-latex-export-as-latex 3 nil nil nil nil nil))
 	  ((string= cmd "make-html")
-	   (org-export-as-html-and-open 3)))))
+	   (org-html-export-as-html-and-open 3)))))
 	   ;; (org-export-as-html-and-open 3 nil nil nil nil dir)))))
 
 ;;}}}
@@ -109,9 +100,9 @@
 ;; (delete-if (lambda (x) (and (listp x) (string= (nth 1 x) "amssymb"))) org-export-latex-default-packages-alist)
 ;; (setq org-entities-user nil)
 ;; '(("space" "\\ " nil " " " " " " " "))
-(setq org-export-latex-hyperref-format "\\ref{%s}")
+;; (setq org-export-latex-hyperref-format "\\ref{%s}")
 
-(add-to-list 'org-export-latex-classes
+(add-to-list 'org-latex-classes
       '("org-article"
          "\\documentclass{article}
          [NO-DEFAULT-PACKAGES]
@@ -122,8 +113,19 @@
          ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
          ("\\paragraph{%s}" . "\\paragraph*{%s}")
          ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
+(add-to-list 'org-latex-classes
+      '("beamer"
+         "\\documentclass{beamer}
+         [NO-DEFAULT-PACKAGES]
+         [PACKAGES]
+         [EXTRA]"
+         ("\\section{%s}" . "\\section*{%s}")
+         ("\\subsection{%s}" . "\\subsection*{%s}")
+         ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+         ("\\paragraph{%s}" . "\\paragraph*{%s}")
+         ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
 
-(add-to-list 'org-export-latex-classes
+(add-to-list 'org-latex-classes
              `("book"
                "\\documentclass{book}"
                ("\\chapter{%s}" . "\\chapter*{%s}")
@@ -132,7 +134,7 @@
                ("\\subsubsection{%s}" . "\\subsubsection*{%s}"))
              )
 
-(add-to-list 'org-export-latex-classes
+(add-to-list 'org-latex-classes
              `("book"
                "\\documentclass{book}"
                ("\\chapter{%s}" . "\\chapter*{%s}")
@@ -141,7 +143,7 @@
                ("\\subsubsection{%s}" . "\\subsubsection*{%s}")))
 
 
-(add-to-list 'org-export-latex-classes
+(add-to-list 'org-latex-classes
 	     '("biom"
                "\\documentclass[useAMS,usenatbib]{biom}"
                ("\\section{%s}" . "\\section*{%s}")
@@ -150,7 +152,7 @@
                ("\\paragraph{%s}" . "\\paragraph*{%s}")
                ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
 
-(add-to-list 'org-export-latex-classes
+(add-to-list 'org-latex-classes
 	     '("biomref"
                "\\documentclass[useAMS,usenatbib,referee]{biom}"
                ("\\section{%s}" . "\\section*{%s}")
@@ -159,7 +161,7 @@
                ("\\paragraph{%s}" . "\\paragraph*{%s}")
                ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
 
-(add-to-list 'org-export-latex-classes
+(add-to-list 'org-latex-classes
 	     '("simauth"
                "\\documentclass{simauth}"
                ("\\section{%s}" . "\\section*{%s}")
@@ -168,7 +170,7 @@
                ("\\paragraph{%s}" . "\\paragraph*{%s}")
                ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
 
-(add-to-list 'org-export-latex-classes
+(add-to-list 'org-latex-classes
 	     '("amsart"
                "\\documentclass{amsart}"
                ("\\section{%s}" . "\\section*{%s}")
@@ -178,7 +180,7 @@
                ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
 
 
-(add-to-list 'org-export-latex-classes
+(add-to-list 'org-latex-classes
 	     '("scrartcl"
                "\\documentclass{scrartcl}"
                ("\\section{%s}" . "\\section*{%s}")
@@ -187,10 +189,14 @@
                ("\\paragraph{%s}" . "\\paragraph*{%s}")
                ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
 
+
+(require 'ox-latex)
+
 (setq org-export-allow-BIND t)
-(setq org-export-latex-listings t)
-;; (add-to-list 'org-export-latex-packages-alist '("" "listings"))
-;; (add-to-list 'org-export-latex-packages-alist '("" "color"))
+;; (setq org-latex-listings t)
+(setq org-latex-listings t)
+(add-to-list 'org-latex-packages-alist '("" "listings"))
+(add-to-list 'org-latex-packages-alist '("" "color"))
 ;; (add-to-list 'org-latex-to-pdf-process '("latexmk -f -pdf %s"))
 ;; (setq org-latex-to-pdf-process '("latexmk -f -pdf %s"))
 (setf org-babel-default-inline-header-args
@@ -203,8 +209,8 @@
   (interactive)
   (org-babel-map-src-blocks nil (org-babel-remove-result)))
 
-;; (add-hook 'org-export-latex-after-save-hook 'latex-save-and-run)
-;; (remove-hook 'org-export-latex-after-save-hook 'latex-save-and-run)
+;; (add-hook 'org-latex-after-save-hook 'latex-save-and-run)
+;; (remove-hook 'org-latex-after-save-hook 'latex-save-and-run)
 
 (defun eg-org-indent ()
   "visit tex-buf or R-buf"
@@ -253,38 +259,29 @@
   (if (string= (car (org-babel-get-src-block-info)) "R")
       (eg-ess-eval-and-go)
     (save-buffer)
-    (org-export-as-latex 3)
     (let* ((obuf (current-buffer))
+	   ;; (org-export-show-temporary-export-buffer nil)
 	   (texbuf (org-file-name nil nil nil ".tex"))
 	   (name (org-file-name nil nil nil ""))
 	   (curdir (file-name-directory (org-file-name nil nil t "")))
-	   ;; (pubdir (file-name-as-directory
-	   ;; (concat curdir "../public")))
-	   ;; (texfile (if (file-exists-p pubdir)
-	   ;; (concat pubdir texbuf)
-	   ;; (org-file-name nil nil t ".tex")))
 	   (texfile (org-file-name nil nil t ".tex"))
 	   (procbuf (TeX-process-buffer-name name))
-	   ;; (progn (find-file texfile)
-	   ;; (texbuf (progn
-	   ;; (switch-to-buffer obuf)
-	   ;; (call-interactively 'org-export-as-latex)))
-	   ;;(org-export-as-latex nil nil nil nil nil nil)))
 	   (process (TeX-process name))
 	   (delete start-new-process)
 	   (start start-new-process))
+      ;; (org-latex-export-as-latex)
+       (org-latex-export-to-latex)
       (save-excursion
-	;; (set-buffer texbuf)
 	(when (and delete process) (delete-process process))
-	(when (or start
-		  (not (and process (eq (process-status process) 'run))))
+	(when (or start (not (and process (eq (process-status process) 'run))))
 	  (TeX-run-command "make-pdf" (concat "latexmk -pvc -pdf -f " name) name)))
       (when start-new-process
 	(save-excursion
 	  (delete-other-windows)
 	  (split-window-horizontally)
 	  (other-window 1)
-	  (switch-to-buffer texbuf)
+	  ;; (switch-to-buffer texbuf)
+	  (find-file texfile)
 	  (split-window-vertically)
 	  (other-window 1)
 	  (switch-to-buffer "*R*")
