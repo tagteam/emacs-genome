@@ -345,7 +345,7 @@ If EXT is given then turn name.xxx into name.ext. EXT must be a string like '.te
 ;; #+LINK: bib file:~/mydocs/mybib.bib::%s
 
 ;; To customize this citation I have defined in my .emacs
-(defun emacs-genome-org-mode-setup ()
+(defun eg/org-mode-setup ()
   (interactive)
   (load-library "reftex")
   (reftex-parse-all) ; to make reftex aware of the biblio

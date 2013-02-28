@@ -1,6 +1,4 @@
-(setq emacs-novice t)
 (add-to-list 'load-path (concat (getenv "HOME") "/emacs-genome/snps/"))
-(add-to-list 'load-path (concat (getenv "HOME") "/emacs-genome/genes/"))
 (add-to-list 'load-path (concat (getenv "HOME") "/emacs-genome/genes/org-mode/lisp"))
 (add-to-list 'load-path (concat (getenv "HOME") "/emacs-genome/genes/org-mode/contrib/lisp/"))
 ;; general purpose utility functions
@@ -9,9 +7,9 @@
 (require 'appearance-snps nil t)
 ;; anything
 (require 'recentf nil t)
-(require 'anything nil t)
-(require 'anything-config nil t)
-(require 'anything-recoll-snps nil t)
+;; (require 'helm nil t)
+;; (require 'helm-config nil t)
+;; (require 'helm-recoll-snps nil t)
 ;; shell within emacs
 (require 'shell-snps nil t)
 ;; completion
@@ -29,9 +27,10 @@
 ; (setq ess-etc-directory-list nil)
 (require 'ess-site nil t)
 (require 'ess-R-snps nil t)
+(require 'tag-R-keys nil t)
 (require 'ess-edit nil t)
 ;; LaTeX
-(require 'auctex-snps nil t)
+(require 'latex-snps nil t)
 ;; keybindings
 (require 'key-snps nil t)
 ;; folding

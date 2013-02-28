@@ -28,17 +28,11 @@
 (setq warning-suppress-types nil)
 (setq debug-on-error t)	
 ;;}}}
-;;{{{ remove toolbar
-(when (and (boundp emacs-novice) (not emacs-novice))
-  (if (featurep 'xemacs)
-      (setq toolbar-visible-p nil)
-    (tool-bar-mode -1)))
-;;}}}
 ;;{{{ prefer horizontal splits also on a wide screen
 (setq split-width-threshold nil)
 ;;}}}
 ;;{{{ avoid pop-ups
-(unless emacs-novice (setq use-file-dialog nil))
+(setq use-file-dialog nil)
 (setq font-lock-verbose nil) ;; get rid of the stupid pop-up box
 ;;}}}
 ;;{{{ no blinking cursor!

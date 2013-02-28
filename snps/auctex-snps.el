@@ -55,7 +55,7 @@
 			      (TeX-source-specials-mode)
 			      (setq TeX-master t)
 			      (setq LaTeX-enable-toolbar nil)
-			      (define-key LaTeX-mode-map "\M-q" 'emacs-genome-indent-paragraph)
+			      (define-key LaTeX-mode-map "\M-q" 'eg/indent-paragraph)
 			      (define-key LaTeX-mode-map "\M-j" 'latex-save-and-run)))
 
 

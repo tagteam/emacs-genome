@@ -35,7 +35,7 @@
 (global-set-key "\C-c;" 'comment-or-uncomment-line)
 (global-set-key "\M-;" 'comment-line)
 ;; major-mode specific indentation
-(global-set-key "\M-q" 'emacs-genome-indent-paragraph) 
+(global-set-key "\M-q" 'eg/indent-paragraph) 
 (global-set-key "\M-Q" '(lambda () (interactive) (mark-paragraph) (fill-region-as-paragraph (region-beginning) (region-end))))
 ;; marking text
 (global-set-key "\M-l" 'mark-line)

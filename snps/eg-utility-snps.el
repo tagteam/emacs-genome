@@ -103,7 +103,7 @@ move to with the same argument."
       (beginning-of-line)
       (kill-line))))
 
-(defun emacs-genome-indent-paragraph ()
+(defun eg/indent-paragraph ()
   (interactive)
   (cond 
    ((eq major-mode 'org-mode)
