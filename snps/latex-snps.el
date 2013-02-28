@@ -26,11 +26,13 @@
 ;;; Code:
 
 ;;{{{ load auctex
-(add-to-list  'load-path (concat (getenv "HOME") "/emacs-genome/genes/auctex"))
+(add-to-list  'load-path (concat (getenv "HOME") "/emacs-genome/genes/auctex/"))
 (add-to-list  'load-path (concat (getenv "HOME") "/emacs-genome/genes/auctex/style"))
 (add-to-list  'load-path (concat (getenv "HOME") "/emacs-genome/genes/auctex/preview"))
+
 (load "auctex.el" nil t t)
 (load "preview-latex.el" nil t t)
+(require 'tex-buf)
 ;;}}}
 ;;{{{ LaTeX mode hook
 (add-hook 'LaTeX-mode-hook
