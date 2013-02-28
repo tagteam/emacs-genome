@@ -23,6 +23,10 @@
 ;;; Code:
 
 ;;{{{ loading packages
+
+(add-to-list 'load-path (concat (getenv "HOME") "/emacs-genome/genes/org-mode/lisp"))
+(add-to-list 'load-path (concat (getenv "HOME") "/emacs-genome/genes/org-mode/contrib/lisp/"))
+
 (require 'org-capture)
 (require 'org-latex)
 ;; (require 'org-exp-bibtex nil t)
