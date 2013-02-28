@@ -1,6 +1,4 @@
 (add-to-list 'load-path (concat (getenv "HOME") "/emacs-genome/snps/"))
-(add-to-list 'load-path (concat (getenv "HOME") "/emacs-genome/genes/org-mode/lisp"))
-(add-to-list 'load-path (concat (getenv "HOME") "/emacs-genome/genes/org-mode/contrib/lisp/"))
 ;; general purpose utility functions
 (require 'eg-utility-snps nil t)
 ;; look, feel and behaviour
@@ -25,6 +23,7 @@
 (winner-mode)
 ;; Emacs speaks statistics
 ; (setq ess-etc-directory-list nil)
+(add-to-list 'load-path (concat (getenv "HOME") "/emacs-genome/genes/ess/"))
 (require 'ess-site nil t)
 (require 'ess-R-snps nil t)
 (require 'tag-R-keys nil t)
