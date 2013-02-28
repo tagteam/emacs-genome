@@ -63,7 +63,7 @@ user-full-name
 #+LaTeX_HEADER:\\makeatletter\\def\\blfootnote{\\xdef\\@thefnmark{}\\@footnotetext}\\makeatother
 #+EXPORT_SELECT_TAGS: export
 #+EXPORT_EXCLUDE_TAGS: noexport
-#+LaTeX_HEADER \\itemsep2pt
+#+LaTeX_HEADER: \\itemsep2pt
 #+COLUMNS: %40ITEM %10BEAMER_env(Env) %9BEAMER_envargs(Env Args) %4BEAMER_col(Col) %10BEAMER_extra(Extra)
 #+LaTeX_HEADER: \\usepackage{color}
 #+LATEX_HEADER: \\lstset{
@@ -156,7 +156,7 @@ user-full-name
 #+LATEX_HEADER: \\DefineVerbatimEnvironment{verbatim}{Verbatim}{fontsize=\\small,formatcom = {\\color[rgb]{0.5,0,0}}}
 #+EXPORT_SELECT_TAGS: export
 #+EXPORT_EXCLUDE_TAGS: noexport
-#+LaTeX_HEADER \\itemsep2pt
+#+LaTeX_HEADER: \\itemsep2pt
 #+COLUMNS: %40ITEM %10BEAMER_env(Env) %9BEAMER_envargs(Env Args) %4BEAMER_col(Col) %10BEAMER_extra(Extra)
 #+PROPERTY: session *R* 
 #+PROPERTY: cache yes")))
