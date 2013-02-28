@@ -23,7 +23,7 @@
 (winner-mode)
 ;; Emacs speaks statistics
 ; (setq ess-etc-directory-list nil)
-(add-to-list 'load-path (concat (getenv "HOME") "/emacs-genome/genes/ess/"))
+(add-to-list 'load-path (concat (getenv "HOME") "/emacs-genome/genes/ess/lisp"))
 (require 'ess-site nil t)
 (require 'ess-R-snps nil t)
 (require 'tag-R-keys nil t)
