@@ -44,11 +44,10 @@
 (setq find-file-existing-other-name t)
 ;;}}}
 ;;{{{ minibuffer
-(unless emacs-novice
-  (setq
-   minibuffer-confirm-incomplete t
-   minibuffer-max-depth nil
-   enable-recursive-minibuffers t))
+(setq
+ minibuffer-confirm-incomplete t
+ minibuffer-max-depth nil
+ enable-recursive-minibuffers t)
    
 ;; 10.15 Why doesn't SPC complete file names anymore?
 ;; ==================================================
