@@ -10,7 +10,7 @@ TARGETS := $(foreach file,$(ROOTFILES),$(patsubst %,$(DEFAULTPATH)/%,$(file)))
 
 default: root git compile
 
-all: root git misc
+all: root git 
 
 ls: 
 	@ls -ldaG $(TARGETS)
@@ -64,6 +64,6 @@ compile:
 	cd $(GENES)/auctex; make
 	cd $(GENES)/mu; make
 
-.PHONY: all default link root git misc
+.PHONY: all default link root git 
 
 

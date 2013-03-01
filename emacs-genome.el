@@ -38,6 +38,9 @@
 ;; orgmode
 (require 'org-snps nil t)
 (require 'org-structure-snps nil t)
+;; superman
+(add-to-list 'load-path (concat (getenv "HOME") "/emacs-genome/genes/SuperMan/lisp"))
+(require 'superman-manager nil t)
 ;; start-up behaviour
 (add-hook 'after-init-hook '(lambda ()
 			      (recentf-mode)
