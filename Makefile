@@ -43,12 +43,12 @@ git:
 	$(MAKE) gitone url=git://github.com/jwiegley/auctex.git dir=auctex
 	$(MAKE) gitone url=git://github.com/emacs-ess/ESS.git dir=ess
 	$(MAKE) gitone url=git://orgmode.org/org-mode.git dir=org-mode
-        $(MAKE) gitone url=git://github.com/ieure/ssh-el.git dir=ssh-el
+# $(MAKE) gitone url=git://github.com/ieure/ssh-el.git dir=ssh-el
 	$(MAKE) gitone url=git://github.com/kkholst/SuperMan.git dir=SuperMan
 	$(MAKE) gitone url=git://jblevins.org/git/deft.git dir=deft
-        $(MAKE) gitone url=git://github.com/auto-complete/auto-complete.git dir=auto-complete
+# $(MAKE) gitone url=git://github.com/auto-complete/auto-complete.git dir=auto-complete
 	$(MAKE) gitone url=git://github.com/joodland/bm.git dir=bm
-	$(MAKE) gitone url=git://github.com/sellout/emacs-color-theme-solarized.git dir=emacs-color-theme-solarized
+# $(MAKE) gitone url=git://github.com/sellout/emacs-color-theme-solarized.git dir=emacs-color-theme-solarized
 	$(MAKE) gitone url=git://github.com/roman/golden-ratio.el.git dir=golden-ratio
 	$(MAKE) gitone url=git://github.com/emacs-helm/helm.git dir=helm
 	$(MAKE) gitone url=git://github.com/dandavison/minimal.git dir=minimal
