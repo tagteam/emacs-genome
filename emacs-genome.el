@@ -1,3 +1,4 @@
+;; (set-face-attribute 'default nil :font "DejaVu Sans Mono" :height 120)
 (add-to-list 'load-path (concat (getenv "HOME") "/emacs-genome/snps/"))
 ;; general purpose utility functions
 (require 'eg-utility-snps nil t)
