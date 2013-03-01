@@ -1,4 +1,4 @@
-TMP := $(HOME)/tmp/backup
+TMP := /tmp/backup
 _DUMMY_ := $(shell mkdir -p $(TMP))
 ROOTFILES = .latexmkrc 
 
