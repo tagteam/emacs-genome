@@ -28,11 +28,14 @@
 (add-to-list 'load-path (concat (getenv "HOME") "/emacs-genome/genes/org-mode/contrib/lisp/"))
 
 (require 'org-capture)
-(require 'org-latex)
 ;; (require 'org-exp-bibtex nil t)
 (require 'org-clock)
 (require 'ob-R)
-(require 'ox-odt)
+(require 'ox-latex)
+(require 'ox-beamer)
+(condition-case nil 
+    (require 'ox-odt)
+  (error nil))
 ;;}}}
 
 ;;{{{ global keys

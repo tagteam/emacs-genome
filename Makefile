@@ -59,10 +59,10 @@ git:
 	$(MAKE) gitone url=git://github.com/magit/magit.git dir=magit
 
 compile:
-	cd $(GENES)/org-mode; make
-	cd $(GENES)/ess; make
-	cd $(GENES)/auctex; make
-	cd $(GENES)/mu; make
+	cd $(GENES)/org-mode;make
+	cd $(GENES)/ess; ./configure; make
+	cd $(GENES)/auctex; ./configure; make
+	cd $(GENES)/mu; autoconf -i; make
 
 .PHONY: all default link root git 
 
