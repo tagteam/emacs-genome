@@ -99,7 +99,6 @@
 	  (org-latex-export-as-latex 3 nil nil nil nil nil))
 	  ((string= cmd "make-html")
 	   (org-html-export-as-html-and-open 3)))))
-	   ;; (org-export-as-html-and-open 3 nil nil nil nil dir)))))
 
 ;;}}}
 ;;{{{ latex + latexmk
@@ -202,6 +201,9 @@
 (setq org-export-allow-BIND t)
 ;; (setq org-latex-listings t)
 (setq org-latex-listings t)
+(setq org-latex-listings-options
+    '(("basicstyle" "\\small")
+      ("numbers" "left")))
 (add-to-list 'org-latex-packages-alist '("" "listings"))
 (add-to-list 'org-latex-packages-alist '("" "color"))
 ;; (add-to-list 'org-latex-to-pdf-process '("latexmk -f -pdf %s"))
