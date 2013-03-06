@@ -116,14 +116,14 @@
 
 ;;{{{
 
-(visual-line-mode)
+(visual-line-mode 1)
 
 ;;}}}
 ;;{{{ paren mode
 
 (if (require 'mic-paren nil t)
     (paren-activate)
-  (show-paren-mode))
+  (show-paren-mode 1))
 
 ;; (require 'scroll-in-place)
 ;; (setq scroll-in-place t)
