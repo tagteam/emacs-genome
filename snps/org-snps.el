@@ -45,7 +45,7 @@
 ;;}}}
 ;;{{{ babel emacs-lisp
 
-(defun eg-indent-elisp-org-buffer ()
+(defun eg/indent-elisp-org-buffer ()
   (interactive)
   (emacs-lisp-mode)
   (save-excursion (goto-char (point-min))
@@ -87,7 +87,7 @@
 ;; C-c C-e t     (org-insert-export-options-template)
 
 
-(defun eg-org-save-and-run (&optional arg)
+(defun eg/org-save-and-run (&optional arg)
   (interactive)
   (save-buffer)
   (let ((cmd (completing-read "Command (default make-pdf): " 
@@ -95,8 +95,10 @@
 			      nil 'must-match nil nil "make-pdf" nil))
 	(dir (when arg (read-file-name "Publishing directory: " default-directory))))
     (cond ((string= cmd "make-pdf")
-;;	   (call-interactively 'org-export-as-latex)
-	  (org-latex-export-as-latex 3 nil nil nil nil nil))
+	   ;;	   (call-interactively 'org-export-as-latex)
+	   (if org-beamer-mode
+	       (org-beamer-export-as-latex 3 nil nil nil nil nil)
+	     (org-latex-export-as-latex 3 nil nil nil nil nil)))
 	  ((string= cmd "make-html")
 	   (org-html-export-as-html-and-open 3)))))
 
@@ -221,14 +223,14 @@
 ;; (add-hook 'org-latex-after-save-hook 'latex-save-and-run)
 ;; (remove-hook 'org-latex-after-save-hook 'latex-save-and-run)
 
-(defun eg-org-indent ()
+(defun eg/org-indent ()
   "visit tex-buf or R-buf"
   (interactive)
   (if (string= (car (org-babel-get-src-block-info)) "R")
       (ess-edit-indent-call-sophisticatedly)
     (pcomplete)))
 
-(defun eg-org-mark-block-or-element ()
+(defun eg/org-mark-block-or-element ()
   "Mark block or element."
   (interactive)
   (if (not (org-babel-get-src-block-info))
@@ -239,7 +241,7 @@
 	(goto-char (match-beginning 5))))
     
 
-(defun eg-org-switch-to-assoc-buffer ()
+(defun eg/org-switch-to-assoc-buffer ()
   "visit tex-buf or R-buf"
   (interactive)
   (if (string= (car (org-babel-get-src-block-info)) "R")
@@ -247,13 +249,13 @@
     (pop-to-buffer (org-file-name nil nil nil ".tex"))))
 
 
-(defun eg-org-ess-eval-function ()
+(defun eg/org-ess-eval-function ()
   "If in R_SRC block, evaluate function at point."
   (interactive)
   (if (string= (car (org-babel-get-src-block-info)) "R")
         (ess-eval-function-and-go)))
 
-(defun eg-org-smart-underscore ()
+(defun eg/org-smart-underscore ()
     "Smart \"_\" key: insert <- if in SRC R block unless in string/comment."
     (interactive)
     (if (and
@@ -262,11 +264,11 @@
       (ess-insert-S-assign)
       (insert "_")))
 
-(defun eg-org-export-as-latex (&optional start-new-process)
+(defun eg/org-export-as-latex (&optional start-new-process)
   "See library tex-buf for help on TeX-process"
   (interactive "P")
   (if (string= (car (org-babel-get-src-block-info)) "R")
-      (eg-ess-eval-and-go)
+      (eg/ess-eval-and-go)
     (save-buffer)
     (let* ((obuf (current-buffer))
 	   ;; (org-export-show-temporary-export-buffer nil)
@@ -279,7 +281,9 @@
 	   (delete start-new-process)
 	   (start start-new-process))
       ;; (org-latex-export-as-latex)
-       (org-latex-export-to-latex)
+      (if org-beamer-mode
+	  (org-beamer-export-to-latex)
+	(org-latex-export-to-latex))
       (save-excursion
 	(when (and delete process) (delete-process process))
 	(when (or start (not (and process (eq (process-status process) 'run))))
@@ -302,7 +306,7 @@
 	  ;; (switch-to-buffer texbuf)
 	  ;; (TeX-next-error))))))
 
-(defun eg-org-next-latex-error (&optional run)
+(defun eg/org-next-latex-error (&optional run)
     "Show next latex error.
 
 If a prefix argument RUN is given run latex first.
@@ -318,11 +322,11 @@ depend on it being positive instead of the entry in `TeX-command-list'."
 
 (defun org-turn-on-auto-export ()
   (interactive)
-  (add-hook 'after-save-hook 'eg-org-export-as-latex))
+  (add-hook 'after-save-hook 'eg/org-export-as-latex))
 
 (defun org-turn-off-auto-export ()
   (interactive)
-  (remove-hook 'after-save-hook 'eg-org-export-as-latex))
+  (remove-hook 'after-save-hook 'eg/org-export-as-latex))
 
 ;; (setq org-export-html-after-blockquotes-hook nil)
 ;; (add-hook 'org-export-html-after-blockquotes-hook '(lambda ()
@@ -391,7 +395,7 @@ If EXT is given then turn name.xxx into name.ext. EXT must be a string like '.te
 ;;}}}
 ;;{{{ babel emacs-lisp
 
-(defun eg-org-lazy-load (&optional only-this-block)
+(defun eg/org-lazy-load (&optional only-this-block)
   "Tangle, load and show emacs-lisp code. "
   (interactive "P")
   (when (string= (car (org-babel-get-src-block-info)) "emacs-lisp")
@@ -406,13 +410,13 @@ If EXT is given then turn name.xxx into name.ext. EXT must be a string like '.te
 ;;{{{ org mode hook
 (add-hook 'org-mode-hook
 	  '(lambda nil
-	     (define-key org-mode-map [(meta k)] 'eg-org-switch-to-assoc-buffer)
-	     (define-key org-mode-map [(meta j)] 'eg-org-export-as-latex)
-	     (define-key org-mode-map [(control shift e)] 'eg-org-lazy-load)
-	     (define-key org-mode-map [(control xx)] 'eg-org-lazy-load)
+	     (define-key org-mode-map [(meta k)] 'eg/org-switch-to-assoc-buffer)
+	     (define-key org-mode-map [(meta j)] 'eg/org-export-as-latex)
+	     (define-key org-mode-map [(control shift e)] 'eg/org-lazy-load)
+	     (define-key org-mode-map [(control xx)] 'eg/org-lazy-load)
 	     (define-key org-mode-map "\M-F" 'ess-eval-function-and-go)
-	     (define-key org-mode-map [(meta control i)] 'eg-org-indent)
-	     (define-key org-mode-map "_" 'eg-org-smart-underscore)))
+	     (define-key org-mode-map [(meta control i)] 'eg/org-indent)
+	     (define-key org-mode-map "_" 'eg/org-smart-underscore)))
 
 ;;}}}
 ;;{{{ list documents
@@ -468,7 +472,7 @@ If EXT is given then turn name.xxx into name.ext. EXT must be a string like '.te
 
 ;;}}}
 
-(defun eg-org-run-script (&optional server R)
+(defun eg/org-run-script (&optional server R)
   (interactive)
   (let* ((buf (buffer-file-name (current-buffer)))
 	 (code (concat (file-name-sans-extension buf) ".R"))
