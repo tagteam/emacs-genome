@@ -42,10 +42,12 @@
 ;; superman
 (add-to-list 'load-path (concat (getenv "HOME") "/emacs-genome/genes/SuperMan/lisp"))
 (require 'superman-manager nil t)
+(superman-parse-projects)
 ;; file-list 
 (add-to-list 'load-path (concat (getenv "HOME") "/emacs-genome/genes/file-list/"))
 (require 'file-list nil t)
 ;; start-up behaviour
+(setq inhibit-startup-screen 'yes-please)
 (add-hook 'after-init-hook '(lambda ()
 			      (recentf-mode)
 			      (recentf-open-files)))
