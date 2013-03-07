@@ -1,6 +1,6 @@
 (require 'hippie-exp)
 
-(defun eg-hippie-expand (arg)
+(defun eg/hippie-expand (arg)
   (interactive "P")
   ;; hippie-expand does not have a customization-feature (like
   ;; dabbrev-expand) to search case-sensitive for completions.
