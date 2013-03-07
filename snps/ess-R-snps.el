@@ -49,7 +49,7 @@
 			   hippie-expand-try-functions-list))))
 ;;}}}
 ;;{{{ R mode
-(defun eg-ess-eval-and-go ()
+(defun eg/ess-eval-and-go ()
   (interactive)
   (if (region-active-p)
       (let* ((start (region-beginning))
@@ -66,8 +66,8 @@
   (other-window 1)
   (R))
 
-(add-hook 'ess-mode-hook 'eg-R-mode)
-(defun eg-R-mode ()
+(add-hook 'ess-mode-hook 'eg/R-mode)
+(defun eg/R-mode ()
   (interactive)
   (setq split-width-threshold nil)
   (setq dabbrev-abbrev-skip-leading-regexp "\\$") 
@@ -148,9 +148,9 @@ non-nil then duplicates are ignored."
 
 ;;}}}
 ;;{{{ smart underscore
-(defun eg-ess-smart-underscore ()
+(defun eg/ess-smart-underscore ()
   (interactive)
-  (if (not (eq last-command 'eg-ess-smart-underscore))
+  (if (not (eq last-command 'eg/ess-smart-underscore))
       (insert " <- ")
     (undo)
     (insert "_")))
