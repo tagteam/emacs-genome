@@ -37,6 +37,18 @@
   (setq ess-eval-deactivate-mark t))
 (setq ess-eval-visibly-p t)
 ;;}}}
+;;{{{ key bindings
+
+(add-hook 'ess-mode-hook 'eg/R-keybindings)
+(defun eg/R-keybindings ()
+  (interactive)
+  (define-key ess-mode-map "\M-j" 'ess-eval-region-and-go)
+  (define-key ess-mode-map "\M-r" 'copy-region-as-kill)
+  (define-key ess-mode-map "\M-q" 'eg/indent-paragraph)
+  (define-key ess-mode-map "\M-l" 'mark-line)
+  (define-key ess-mode-map [(backspace)] 'delete-backward-char)
+  (define-key ess-mode-map [(meta backspace)] 'backward-kill-word))
+;;}}}
 ;;{{{ expanding objects
 
 (setq ess-tab-complete-in-script t)
