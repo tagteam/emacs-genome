@@ -56,19 +56,21 @@
 	   (async-shell-command
 	    (concat "PATH=~/bin:\"${PATH}\";" fun " "
 		    (file-list-quote-filename file-name))))
-    ; (start-process-shell-command
-	   ;; "file-list-find-magic"
-	   ;; nil
-	   ;; (concat fun " "
-	   ;; (file-list-quote-filename file-name))))
-	   (t
-	    (cond ((not arg) nil)
-		  ((= arg 4) (switch-to-buffer-other-window (current-buffer)))
-		  ((= arg 5) (switch-to-buffer-other-frame (current-buffer)))
-		  (t nil))
-	    (find-file file-name)
-	    (when grep-line
-	      (goto-line (string-to-int grep-line)))))))
+					; (start-process-shell-command
+	  ;; "file-list-find-magic"
+	  ;; nil
+	  ;; (concat fun " "
+	  ;; (file-list-quote-filename file-name))))
+	  (t
+	   (cond ((not arg) nil)
+		 ((= arg 4) (switch-to-buffer-other-window (current-buffer)))
+		 ((= arg 5) (switch-to-buffer-other-frame (current-buffer)))
+		 (t nil))
+	   (if (functionp 'org-open-at-point)
+	       (org-open-file file-name)
+	     (find-file file-name))
+	   (when grep-line
+	     (goto-line (string-to-int grep-line)))))))
 
 (defun file-list-choose-file-other-window (&optional event extent buffer magic)
   (interactive)
