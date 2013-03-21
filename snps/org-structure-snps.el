@@ -188,28 +188,28 @@ user-full-name
 ;;{{{ R code objects
 (add-to-list
  'org-structure-template-alist
- '("Rs" "#+BEGIN_SRC R :results silent  :exports none :session *R* \n?\n#+END_SRC"))
+ '("Rs" "#+BEGIN_SRC R :results silent  :exports none :session *R* :cache yes \n?\n#+END_SRC"))
 (add-to-list
  'org-structure-template-alist
- '("Rb" "#+BEGIN_SRC R :exports both :results output raw  :session *R* \n?\n#+END_SRC"))
+ '("Rb" "#+BEGIN_SRC R :exports both :results output raw  :session *R* :cache yes \n?\n#+END_SRC"))
 (add-to-list
  'org-structure-template-alist
- '("Rc" "#+BEGIN_SRC R :exports code :results silent  :session *R* \n?\n#+END_SRC"))
+ '("Rc" "#+BEGIN_SRC R :exports code :results silent  :session *R* :cache yes \n?\n#+END_SRC"))
 (add-to-list
  'org-structure-template-alist
  '("Rl" "#+BEGIN_SRC R  :results output latex   :exports results  :session *R*\n?\n#+END_SRC"))
 (add-to-list
  'org-structure-template-alist
- '("Ro" "#+BEGIN_SRC R  :results output raw  :exports results  :session *R* \n?\n#+END_SRC"))
+ '("Ro" "#+BEGIN_SRC R  :results output raw  :exports results  :session *R* :cache yes \n?\n#+END_SRC"))
 (add-to-list
  'org-structure-template-alist
- '("Rv" "#+BEGIN_SRC R  :results value  :exports results  :session *R* \n?\n#+END_SRC"))
+ '("Rv" "#+BEGIN_SRC R  :results value  :exports results  :session *R* :cache yes \n?\n#+END_SRC"))
 (add-to-list
  'org-structure-template-alist
- '("Rr" "#+BEGIN_SRC R  :results output raw  :exports results  :session *R* \n?\n#+END_SRC"))
+ '("Rr" "#+BEGIN_SRC R  :results output raw  :exports results  :session *R* :cache yes \n?\n#+END_SRC"))
 (add-to-list
  'org-structure-template-alist
- '("Rg" "#+BEGIN_SRC R :results graphics  :file %file :exports results :session *R* \n?\n#+END_SRC"))
+ '("Rg" "#+BEGIN_SRC R :results graphics  :file %file :exports results :session *R* :cache yes \n?\n#+END_SRC"))
 (add-to-list
  'org-structure-template-alist
  '("Rt" "SRC_R{}"))
