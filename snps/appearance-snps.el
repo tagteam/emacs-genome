@@ -113,8 +113,10 @@
       ;; efs-auto-save-remotely nil
       ;; auto-save-interval 2000)
 ;;}}}
-
-;;{{{
+;;{{{ save minibuffer history
+(savehist-mode 1)
+;;}}}
+;;{{{ visual line mode
 
 (visual-line-mode 1)
 
