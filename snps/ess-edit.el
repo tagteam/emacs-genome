@@ -337,7 +337,13 @@ current paragraph, call to function, current line, etc"
       (setq end (match-end 0))
       (delete-region beg end))))
 
-
+(defun ess-edit-insert-formula ()
+  (interactive)
+  (let ((vars (read-string "Variables for the right hand side of formula: ")))
+  (ess-edit-insert-vector vars)
+  (backward-word)
+  (ess-edit-vector2formula)))
+  
 (defun ess-edit-vector2formula ()
   (interactive)
     (let* ((fname (ess-edit-read-call 1 'move))
