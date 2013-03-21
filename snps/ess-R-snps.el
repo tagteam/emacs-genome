@@ -85,6 +85,10 @@
   (setq dabbrev-abbrev-skip-leading-regexp "\\$") 
   (setq ess-fancy-comments nil))
 ;;}}}
+;;{{{ scrolling iess window on output
+(setq comint-scroll-to-bottom-on-output 'this)
+(setq comint-scroll-to-bottom-on-input 'this)
+;;}}}
 ;;{{{ command history
 (setq comint-input-ring-size 5000)
 ;;(add-hook 'ess-send-input-hook
