@@ -34,6 +34,7 @@
 
 ;; 
 ;;; Code:
+;; (setq org-structure-template-alist nil)
 
 ;;{{{ Latex & Beamer
 (add-to-list
@@ -45,6 +46,8 @@
 #+LANGUAGE:  en
 #+OPTIONS:   H:3 num:t toc:nil \\n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
 #+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil tags:not-in-toc author:nil
+#+LaTeX_CLASS: org-article
+#+LaTeX_HEADER:\\usepackage{amsmath}
 #+LaTeX_HEADER:\\usepackage{authblk}
 #+LaTeX_HEADER:\\usepackage{natbib}
 #+LaTeX_HEADER:\\usepackage[table,usenames,dvipsnames]{xcolor}
@@ -86,7 +89,7 @@ user-full-name
 #+LATEX_HEADER: frame=single,
 #+LATEX_HEADER: basewidth={0.5em,0.4em}
 #+LATEX_HEADER: }
-#+PROPERTY: session *R* 
+#+PROPERTY: session *R*
 #+PROPERTY: cache yes")))
 
 (add-to-list
@@ -96,8 +99,8 @@ user-full-name
 "\n#+DATE: 
 #+EMAIL:" user-mail-address
 "\n#+LANGUAGE:  en
-#+OPTIONS:   H:3 num:t toc:nil \\n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
-#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil tags:not-in-toc
+#+OPTIONS: H:3 num:t toc:nil \\n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
+#+OPTIONS: TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil tags:not-in-toc
 #+INFOJS_OPT: view:nil toc:nil ltoc:t mouse:underline buttons:0 path:http://orgmode.org/org-info.js
 #+EXPORT_SELECT_TAGS: export
 #+EXPORT_EXCLUDE_TAGS: noexport
@@ -110,7 +113,6 @@ user-full-name
 #+LaTeX_HEADER: \\usepackage{attachfile}
 #+LaTeX_HEADER: \\usepackage{array}
 #+LATEX_CMD: pdflatex
-#+BEAMER_FRAME_LEVEL: 2
 #+LaTeX_HEADER: \\usetheme[numbers]{Dresden}
 #+LaTeX_HEADER: \\setbeamercolor{structure}{fg=white}
 #+LaTeX_HEADER: \\setbeamercolor*{palette primary}{fg=black,bg=white}
@@ -133,32 +135,31 @@ user-full-name
 #+LaTeX_HEADER: \\newcommand{\\sfootnote}[1]{\\renewcommand{\\thefootnote}{\\fnsymbol{footnote}}\\footnote{#1}\\setcounter{footnote}{0}\\renewcommand{\\thefootnote}{\\arabic{foot note}}}
 #+LaTeX_HEADER:\\makeatletter\\def\\blfootnote{\\xdef\\@thefnmark{}\\@footnotetext}\\makeatother
 #+LATEX_HEADER: \\lstset{
-#+LATEX_HEADER:         keywordstyle=\\color{blue},
-#+LATEX_HEADER:         commentstyle=\\color{red},
-#+LATEX_HEADER:         stringstyle=\\color[rgb]{0,.5,0},
-#+LATEX_HEADER:         basicstyle=\\ttfamily\\small,
-#+LATEX_HEADER:         columns=fullflexible,
+#+LATEX_HEADER: keywordstyle=\\color{blue},
+#+LATEX_HEADER: commentstyle=\\color{red},
+#+LATEX_HEADER: stringstyle=\\color[rgb]{0,.5,0},
+#+LATEX_HEADER: basicstyle=\\ttfamily\\small,
+#+LATEX_HEADER: columns=fullflexible,
 #+LATEX_HEADER: breaklines=true,        % sets automatic line breaking
 #+LATEX_HEADER: breakatwhitespace=false,    % sets if automatic breaks should only happen at whitespace
-#+LATEX_HEADER:         numbers=left,
-#+LATEX_HEADER:             numberstyle=\\ttfamily\\tiny\\color{gray},
-#+LATEX_HEADER:    stepnumber=1,
-#+LATEX_HEADER:    numbersep=10pt,
-#+LATEX_HEADER:    backgroundcolor=\\color{white},
-#+LATEX_HEADER:    tabsize=4,
-#+LATEX_HEADER:    showspaces=false,
-#+LATEX_HEADER:    showstringspaces=false,
-#+LATEX_HEADER:    xleftmargin=.23in,
-#+LATEX_HEADER:         frame=single,
-#+LATEX_HEADER:         basewidth={0.5em,0.4em}
-#+LATEX_HEADER:         }
+#+LATEX_HEADER: numbers=left,
+#+LATEX_HEADER: numberstyle=\\ttfamily\\tiny\\color{gray},
+#+LATEX_HEADER: stepnumber=1,
+#+LATEX_HEADER: numbersep=10pt,
+#+LATEX_HEADER: backgroundcolor=\\color{white},
+#+LATEX_HEADER: tabsize=4,
+#+LATEX_HEADER: showspaces=false,
+#+LATEX_HEADER: showstringspaces=false,
+#+LATEX_HEADER: xleftmargin=.23in,
+#+LATEX_HEADER: frame=single,
+#+LATEX_HEADER: basewidth={0.5em,0.4em}
+#+LATEX_HEADER: }
 #+LATEX_HEADER: \\RequirePackage{fancyvrb}
 #+LATEX_HEADER: \\DefineVerbatimEnvironment{verbatim}{Verbatim}{fontsize=\\small,formatcom = {\\color[rgb]{0.5,0,0}}}
 #+EXPORT_SELECT_TAGS: export
 #+EXPORT_EXCLUDE_TAGS: noexport
-#+LaTeX_HEADER: \\itemsep2pt
 #+COLUMNS: %40ITEM %10BEAMER_env(Env) %9BEAMER_envargs(Env Args) %4BEAMER_col(Col) %10BEAMER_extra(Extra)
-#+PROPERTY: session *R* 
+#+PROPERTY: session *R*
 #+PROPERTY: cache yes")))
 
 ;; Shrinking a slide

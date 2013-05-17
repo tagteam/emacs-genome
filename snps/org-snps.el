@@ -110,6 +110,15 @@
 ;; '(("space" "\\ " nil " " " " " " " "))
 ;; (setq org-export-latex-hyperref-format "\\ref{%s}")
 
+(setq org-latex-default-packages-alist
+      '(("AUTO" "inputenc" t)
+	("" "graphicx" t)
+	("" "longtable" nil)
+	("" "float" nil)
+	("" "wrapfig" nil)
+	("" "amsmath" t)
+	("" "hyperref" nil)))
+
 (add-to-list 'org-latex-classes
       '("org-article"
          "\\documentclass{article}
@@ -133,14 +142,18 @@
          ("\\paragraph{%s}" . "\\paragraph*{%s}")
          ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
 
+
 (add-to-list 'org-latex-classes
-             `("book"
-               "\\documentclass{book}"
-               ("\\chapter{%s}" . "\\chapter*{%s}")
+             '("jss"
+               "\\documentclass[useAMS,article,shortnames]{jss}
+	       [NO-DEFAULT-PACKAGES]
+               [PACKAGES]
+               [EXTRA]"
                ("\\section{%s}" . "\\section*{%s}")
                ("\\subsection{%s}" . "\\subsection*{%s}")
-               ("\\subsubsection{%s}" . "\\subsubsection*{%s}"))
-             )
+               ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+               ("\\paragraph{%s}" . "\\paragraph*{%s}")
+               ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
 
 (add-to-list 'org-latex-classes
              `("book"
@@ -280,6 +293,10 @@
 	   (process (TeX-process name))
 	   (delete start-new-process)
 	   (start start-new-process))
+      (save-window-excursion
+	(when (get-file-buffer texbuf)
+	  (kill-buffer (get-file-buffer texbuf))
+	  (find-file texfile)))
       ;; (org-latex-export-as-latex)
       (if org-beamer-mode
 	  (org-beamer-export-to-latex)
@@ -294,7 +311,11 @@
 	  (split-window-horizontally)
 	  (other-window 1)
 	  ;; (switch-to-buffer texbuf)
-	  (find-file texfile)
+	  (if (get-file-buffer texbuf)
+	      (progn
+	      (switch-to-buffer (get-file-buffer texbuf))
+	      (revert-buffer t t t))
+	  (find-file texfile))
 	  (split-window-vertically)
 	  (other-window 1)
 	  (switch-to-buffer "*R*")

@@ -20,8 +20,9 @@
 (setq iswitchb-case t)
 (require 'cycle-buffer-snps nil t)
 ;; window cycling
-(require 'winner nil t)
-(winner-mode)
+(if (require 'winner nil t)
+    
+(winner-mode))
 ;; Emacs speaks statistics
 ; (setq ess-etc-directory-list nil)
 (add-to-list 'load-path (concat (getenv "HOME") "/emacs-genome/genes/ess/lisp"))

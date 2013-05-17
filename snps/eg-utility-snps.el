@@ -70,7 +70,7 @@
 
 
 (defun mark-line (arg)
-  "Set mark in line.
+  "Push the mark in line.
 The place mark goes is the same place \\[forward-line] would
 move to with the same argument."
   (interactive "p")
@@ -80,6 +80,7 @@ move to with the same argument."
      (end-of-line arg)
      (point))
    nil t))
+
 
 (defun comment-or-uncomment-line ()
   (interactive)
@@ -102,6 +103,15 @@ move to with the same argument."
     (progn
       (beginning-of-line)
       (kill-line))))
+
+(defun eg/mark-paragraph ()
+  (interactive)
+  (cond 
+   ((eq major-mode 'org-mode)
+    (if (org-babel-where-is-src-block-head)
+      (org-babel-mark-block)
+       (org-mark-subtree)))
+    (t (mark-paragraph))))
 
 (defun eg/indent-paragraph ()
   (interactive)
