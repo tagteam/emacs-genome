@@ -56,7 +56,6 @@ compile:
 	cd $(GENES)/org-mode;$(MAKE) -si
 	cd $(GENES)/ess; ./configure; $(MAKE) -si
 	cd $(GENES)/auctex; ./configure; $(MAKE) -si 
-	cd $(GENES)/mu; autoconf -i; $(MAKE) -si 
 
 .PHONY: all default link root git 
 
