@@ -24,9 +24,16 @@
 
 ;;; Code:
 
+;; (customize-set-variable
+ ;; 'display-buffer-alist '((".*" . (display-buffer-same-window . nil))))
 ;;{{{ global custom
 (setq ess-use-tracebug nil)
 (setq ess-display-buffer-reuse-frames nil)
+
+;; I don't like if another frame pops up showing the inferior-ess buffer,
+;; rather I want unconditionally that the buffer is shown in the current frame.
+(defun ess-buffer-visible-other-frame (buf) nil)
+
 (setq-default ess-ask-for-ess-directory nil)
 (setq-default ess-directory (concat (getenv "HOME") "/R/"))
 (setq-default ess-history-directory (concat (getenv "HOME") "/R/"))

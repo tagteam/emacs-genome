@@ -40,29 +40,23 @@ gitone:
 git:
 	@echo "************** Emacs-Genome..."
 	@git pull
-	$(MAKE) gitone url=git://github.com/jwiegley/auctex.git dir=auctex
-	$(MAKE) gitone url=git://github.com/emacs-ess/ESS.git dir=ess
-	$(MAKE) gitone url=git://orgmode.org/org-mode.git dir=org-mode
-# $(MAKE) gitone url=git://github.com/ieure/ssh-el.git dir=ssh-el
-	$(MAKE) gitone url=git://github.com/kkholst/SuperMan.git dir=SuperMan
-	$(MAKE) gitone url=git://jblevins.org/git/deft.git dir=deft
+	$(MAKE) -si gitone url=git://github.com/jwiegley/auctex.git dir=auctex
+	$(MAKE) -si gitone url=git://github.com/emacs-ess/ESS.git dir=ess
+	$(MAKE) -si gitone url=git://orgmode.org/org-mode.git dir=org-mode
+# $(MAKE) gitone -si url=git://github.com/ieure/ssh-el.git dir=ssh-el
+	$(MAKE) -si gitone url=git://github.com/kkholst/SuperMan.git dir=SuperMan
+# $(MAKE) gitone url=git://jblevins.org/git/deft.git dir=deft
 # $(MAKE) gitone url=git://github.com/auto-complete/auto-complete.git dir=auto-complete
-	$(MAKE) gitone url=git://github.com/joodland/bm.git dir=bm
-# $(MAKE) gitone url=git://github.com/sellout/emacs-color-theme-solarized.git dir=emacs-color-theme-solarized
-	$(MAKE) gitone url=git://github.com/roman/golden-ratio.el.git dir=golden-ratio
-	$(MAKE) gitone url=git://github.com/emacs-helm/helm.git dir=helm
-	$(MAKE) gitone url=git://github.com/dandavison/minimal.git dir=minimal
-	$(MAKE) gitone url=git://randomsample.de/minimap.git dir=minimap
-	$(MAKE) gitone url=git://github.com/djcb/mu.git dir=mu
-	$(MAKE) gitone url=git://github.com/auto-complete/popup-el dir=popup
-	$(MAKE) gitone url=git://github.com/escherdragon/sunrise-commander.git dir=sunrise-commander
-	$(MAKE) gitone url=git://github.com/magit/magit.git dir=magit
+	$(MAKE) -si gitone url=git://github.com/joodland/bm.git dir=bm
+        $(MAKE) -si gitone url=git://github.com/roman/golden-ratio.el.git dir=golden-ratio
+	$(MAKE) -si gitone url=git://github.com/emacs-helm/helm.git dir=helm
+	$(MAKE) -si gitone url=git://github.com/magit/magit.git dir=magit
 
 compile:
-	cd $(GENES)/org-mode;make
-	cd $(GENES)/ess; ./configure; make
-	cd $(GENES)/auctex; ./configure; make
-	cd $(GENES)/mu; autoconf -i; make
+	cd $(GENES)/org-mode;$(MAKE) -si
+	cd $(GENES)/ess; ./configure; $(MAKE) -si
+	cd $(GENES)/auctex; ./configure; $(MAKE) -si 
+	cd $(GENES)/mu; autoconf -i; $(MAKE) -si 
 
 .PHONY: all default link root git 
 

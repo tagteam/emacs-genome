@@ -119,10 +119,11 @@
 	("" "amsmath" t)
 	("" "hyperref" nil)))
 
+ ;; [NO-DEFAULT-PACKAGES]
+
 (add-to-list 'org-latex-classes
       '("org-article"
          "\\documentclass{article}
-         [NO-DEFAULT-PACKAGES]
          [PACKAGES]
          [EXTRA]"
          ("\\section{%s}" . "\\section*{%s}")

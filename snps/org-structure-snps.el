@@ -108,6 +108,7 @@ user-full-name
 #+LINK_HOME: 
 #+startup: beamer
 #+LaTeX_CLASS: beamer
+#+Latex_header:\\institute{Department of Biostatistics, University of Copenhagen}
 #  #+ LaTeX_class_options: [handout]
 #+LaTeX_HEADER:\\usepackage{natbib}
 #+LaTeX_HEADER: \\usepackage{attachfile}
