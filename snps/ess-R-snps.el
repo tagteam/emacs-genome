@@ -53,6 +53,7 @@
   (define-key ess-mode-map "\M-r" 'copy-region-as-kill)
   (define-key ess-mode-map "\M-q" 'eg/indent-paragraph)
   (define-key ess-mode-map "\M-l" 'mark-line)
+  (define-key ess-mode-map "\M-k" 'eg-switch-to-R)
   (define-key ess-mode-map [(backspace)] 'delete-backward-char)
   (define-key ess-mode-map [(meta backspace)] 'backward-kill-word))
 ;;}}}
@@ -179,19 +180,13 @@ non-nil then duplicates are ignored."
     (insert "_")))
 ;;}}}
 ;;{{{ clearing the inferior window
-(defun R-inferior-clear(&optional arg)
+(defun eg-switch-to-R (&optional arg)
+  "Goto the end of the R console with argument ARG erase its contents.
+See `ess-switch-to-ESS' and `ess-show-buffer' for buffer behaviour.
+"
   (interactive "P")
-  (save-excursion
-    (let ((pbuf (or
-		 (condition-case nil
-		     (process-buffer (get-ess-process ess-local-process-name))
-		   (error nil))
-		 (concat "*" ess-current-process-name "*"))))
-      ;; (pop-to-buffer pbuf)
-      (set-buffer pbuf)
-      (when arg (erase-buffer)
-	    (comint-send-input))
-      (ess-switch-to-end-of-ESS))))
+  (ess-switch-to-end-of-ESS)
+  (when arg (erase-buffer) (comint-send-input)))
 ;;}}}
 (provide 'ess-R-snps)
 ;;; ess-R-snps.el ends here
