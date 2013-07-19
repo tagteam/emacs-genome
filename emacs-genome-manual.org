@@ -1,0 +1,150 @@
+
+* Required and recommended software 
+
+git, auctex, ess, latexmk, anything-el, recoll, aspell, org-mode
+
+** Install recommended software on Debian/Ubuntu
+
+#+BEGIN_SRC sh 
+sudo apt-get install git
+sudo apt-get install recoll
+sudo apt-get aspell 
+cd ~/emacs-genome/genes/; git clone git://github.com/ieure/ssh-el.git
+#+END_SRC
+
+** Customize latexmk
+
+Create a file "~/.latexmkrc" in which you specify your preferred
+pdf-viewer and similar things. My file currently looks like this:
+
+#+BEGIN_EXAMPLE
+$pdf_previewer = 'start evince';
+$print_type = 'pdf';
+$pdf_mode = 1;
+$pdflatex = 'pdflatex -interaction=nonstopmode -halt-on-error';
+#+END_EXAMPLE
+
+** Initialize recoll
+
+* Usage
+** Copy-and-paste
+
+Whenever you copy (M-w) or kill (C-w) text in a region, it will be
+copied to the "kill-ring". The emacs default key bindings are C-y for
+yank (paste) and M-y for yank-pop (paste earlier copies/kills). The
+function yank-pop works when the previous command was yank. It takes
+the text that was yanked and replaces it with the text from an earlier
+kill. Repeatedly pressing M-y then cycles through the ring of earlier
+copies/kills.
+
+The emacs-genome has the following modifications:
+
+M-y is bound to yank-or-pop which combines yank and yank-pop such that
+the same key (M-y) is used for both commands.
+
+My fingers have difficulties to reach M-w, so I use M-r instead.
+
+** Completion
+
+*** Completing words and sequences of words
+
+Start typing, press M-i (dabbrev-expand). This inserts the closest
+completion. Completions are found in all buffers. "Closest" starts at
+the current point in the current buffer.
+
+Hit M-i again to replace the previous completion by the next closest
+completion.
+
+After inserting a completion, hit first SPACE and directly after M-i
+to insert the next word after the completion from the place where the
+completion was found.
+
+*** Hippie expand
+
+Hit M-i (hippie-expand) to expand file-names and symbols and even R objects in R buffers.
+
+See file ~/emacs-genome/snps/hippie-snps.el for functions that are
+used for completion.
+
+** Evaluating R code
+
+highlight region (e.g. M-h or M-l) then M-j 
+
+** Latexing a document
+
+M-j RETURN make-pdf RETURN
+
+** Opening a maybe existing file  
+
+Recoll (xapian) text indexing engine plugin, derived from
+anything-c-source-locate
+
+The command anything-recoll-search (short-cut: C-v) is an emacs
+interface to the recoll search.
+
+Example:
+
+C-v  then type "ext:bib helen blanche"
+
+shows list of bibtex files which include all of the words "helen" and
+"blanche".
+
+* Modifying the settings
+
+If you want overwrite some of the emacs-genome way of doing things,
+like changing keybindings or the start-up behaviour, then you need to
+place these changes in your ~/.emacs file *after* the line which loads
+the sample init file.
+
+** Changing keybindings
+
+http://www.masteringemacs.org/articles/2011/02/08/mastering-key-bindings-emacs/
+
+
+:PROPERTIES:
+#+TITLE: 
+#+LANGUAGE:  en
+#+OPTIONS:   H:3 num:t toc:nil \n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil tags:not-in-toc author:nil
+#+LaTeX_HEADER:\usepackage{authblk}
+#+LaTeX_HEADER:\usepackage{natbib}
+#+LaTeX_HEADER:\usepackage[table,usenames,dvipsnames]{xcolor}
+#+LaTeX_HEADER:\definecolor{lightGray}{gray}{0.98}
+#+LaTeX_HEADER:\definecolor{medioGray}{gray}{0.83}
+#+LaTeX_HEADER:\rowcolors{1}{medioGray}{lightGray}
+#+LaTeX_HEADER:\usepackage{attachfile}
+#+LaTeX_HEADER:\usepackage{array}
+#+LaTeX_HEADER:\usepackage[T1]{fontenc}
+#+LaTeX_HEADER:\renewcommand*\familydefault{\sfdefault}
+#+LaTeX_HEADER:\author{Thomas Alexander Gerds}
+#+LaTeX_HEADER:\affil{Department of Biostatistics, University of Copenhagen}
+#+LaTeX_HEADER:\newcommand{\sfootnote}[1]{\renewcommand{\thefootnote}{\fnsymbol{footnote}}\footnote{#1}\setcounter{footnote}{0}\renewcommand{\thefootnote}{\arabic{foot note}}}
+#+LaTeX_HEADER:\makeatletter\def\blfootnote{\xdef\@thefnmark{}\@footnotetext}\makeatother
+#+EXPORT_SELECT_TAGS: export
+#+EXPORT_EXCLUDE_TAGS: noexport
+#+LaTeX_HEADER \itemsep2pt
+#+COLUMNS: %40ITEM %10BEAMER_env(Env) %9BEAMER_envargs(Env Args) %4BEAMER_col(Col) %10BEAMER_extra(Extra)
+#+LaTeX_HEADER: \usepackage{color}
+#+LATEX_HEADER: \lstset{
+#+LATEX_HEADER: keywordstyle=\color{blue},
+#+LATEX_HEADER: commentstyle=\color{red},
+#+LATEX_HEADER: stringstyle=\color[rgb]{0,.5,0},
+#+LATEX_HEADER: basicstyle=\ttfamily\small,
+#+LATEX_HEADER: columns=fullflexible,
+#+LATEX_HEADER: breaklines=true,        % sets automatic line breaking
+#+LATEX_HEADER: breakatwhitespace=false,    % sets if automatic breaks should only happen at whitespace
+#+LATEX_HEADER: numbers=left,
+#+LATEX_HEADER: numberstyle=\ttfamily\tiny\color{gray},
+#+LATEX_HEADER: stepnumber=1,
+#+LATEX_HEADER: numbersep=10pt,
+#+LATEX_HEADER: backgroundcolor=\color{white},
+#+LATEX_HEADER: tabsize=4,
+#+LATEX_HEADER: showspaces=false,
+#+LATEX_HEADER: showstringspaces=false,
+#+LATEX_HEADER: xleftmargin=.23in,
+#+LATEX_HEADER: frame=single,
+#+LATEX_HEADER: basewidth={0.5em,0.4em}
+#+LATEX_HEADER: }
+#+PROPERTY: session *R* 
+#+PROPERTY: cache yes
+:END:
