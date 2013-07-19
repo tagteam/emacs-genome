@@ -2,15 +2,17 @@
 
 * Welcome
 
-Hi!
-  
+Hi! The emacs-genome is an emacs flavour. It consists of extensions
+and smaller code SNPs that make emacs a comprehensive work interface
+for applied (bio)statisticians.
+
 * Install
 
-To use or test the emacs-genome you need to download (clone) the
+To use or test the emacs-genome you should download (i.e. clone) the
 latest version. The recommended way to do this is to use git (the
 stupid content tracker). Once you have git installed on your computer
 just apply the following command in a terminal to clone the
-emacs-genome. 
+emacs-genome.
 
 #+BEGIN_SRC sh
 cd ~
@@ -24,7 +26,7 @@ cd emacs-genome
 make
 #+END_SRC
 
-Finally, prepend the following line to your .emacs file:
+Finally, copy the following line to the end of your .emacs file:
 
 #+BEGIN_SRC  emacs-lisp :export code
 (load-file "~/emacs-genome/emacs-genome.el")
