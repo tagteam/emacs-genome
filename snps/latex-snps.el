@@ -30,9 +30,10 @@
 (add-to-list  'load-path (concat (getenv "HOME") "/emacs-genome/genes/auctex/style"))
 (add-to-list  'load-path (concat (getenv "HOME") "/emacs-genome/genes/auctex/preview"))
 
-(load "auctex.el" nil t t)
-(load "preview-latex.el" nil t t)
-(require 'tex-buf)
+(unless (ignore-errors (load "auctex.el" nil t t))
+  (message "Auctex not loaded"))
+(ignore-errors (load "preview-latex.el" nil t t))
+(try-require 'tex-buf)
 ;;}}}
 ;;{{{ LaTeX mode hook
 (add-hook 'LaTeX-mode-hook
