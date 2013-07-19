@@ -167,12 +167,12 @@ user-full-name
 (add-to-list
  'org-structure-template-alist
  '("Bs" " :PROPERTIES:
- :BEAMER_envargs: [shrink=5]
+ :BEAMER_opt: shrink=25
  :END:"))
 ;;; Two column slides
 (add-to-list
  'org-structure-template-alist
- '("Bt" "
+ '("Bc" "
 *** Column 1                                          :B_ignoreheading:
     :PROPERTIES:
     :BEAMER_env: ignoreheading
@@ -212,6 +212,9 @@ user-full-name
 (add-to-list
  'org-structure-template-alist
  '("Rg" "#+BEGIN_SRC R :results graphics  :file %file :exports results :session *R* :cache yes \n?\n#+END_SRC"))
+(add-to-list
+ 'org-structure-template-alist
+ '("RG" "#+BEGIN_SRC R :results graphics  :file filename :exports results :session *R* :cache yes \n?\n#+END_SRC"))
 (add-to-list
  'org-structure-template-alist
  '("Rt" "SRC_R{}"))
