@@ -20,7 +20,7 @@
 ;;; featuring SAS-mode-hooks and font-lock highlighting of the log-buffer
 ;;; put this file in your emacs load-path and load it from .emacs (init.el)
 ;;; 
-;;;  (require 'tag-sas-snps)
+;;;  (require 'ess-sas-snps)
 ;;;
 ;;;  Then, open a file with some sas code and start an interactive sas session using
 ;;;

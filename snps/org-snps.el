@@ -27,14 +27,14 @@
 (add-to-list 'load-path (concat (getenv "HOME") "/emacs-genome/genes/org-mode/lisp"))
 (add-to-list 'load-path (concat (getenv "HOME") "/emacs-genome/genes/org-mode/contrib/lisp/"))
 
-(require 'org-capture)
-;; (require 'org-exp-bibtex nil t)
-(require 'org-clock)
-(require 'ob-R)
-(require 'ox-latex)
-(require 'ox-beamer)
+(try-require 'org-capture)
+(try-require 'org-exp-bibtex nil t)
+(try-require 'org-clock)
+(try-require 'ob-R)
+(try-require 'ox-latex)
+(try-require 'ox-beamer)
 (condition-case nil 
-    (require 'ox-odt)
+    (try-require 'ox-odt)
   (error nil))
 ;;}}}
 
@@ -211,8 +211,6 @@
                ("\\paragraph{%s}" . "\\paragraph*{%s}")
                ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
 
-
-(require 'ox-latex)
 
 (setq org-export-allow-BIND t)
 ;; (setq org-latex-listings t)
