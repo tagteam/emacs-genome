@@ -56,7 +56,7 @@
   (org-mode))
 
 ;;}}}
-;; {{{adding special project agenda view
+;;{{{adding special project agenda view
 
 ;; (setq org-time-stamp-custom-formats '("<%m/%d/%y %a>" . "<%m/%d/%y %a %H:%M>")
 (setq org-time-stamp-custom-formats '("<%d/%b/%Y %a>" . "<%m/%d/%y %a %H:%M>"))
@@ -70,7 +70,7 @@
 (add-to-list 'auto-mode-alist '("\\.org$" . org-mode))
 (setq org-log-done t)
 (add-hook 'org-mode-hook
-	  '(lambda nil
+	  #'(lambda nil
 	     (define-key org-mode-map (kbd "C-x c") 'superman-view-mode)
 	     (define-key org-mode-map [(control tab)] 'hide-subtree)
 	     (define-key org-mode-map [(meta e)] 'hippie-expand)
@@ -431,7 +431,7 @@ If EXT is given then turn name.xxx into name.ext. EXT must be a string like '.te
 ;;}}}
 ;;{{{ org mode hook
 (add-hook 'org-mode-hook
-	  '(lambda nil
+	  #'(lambda nil
 	     (define-key org-mode-map [(meta k)] 'eg/org-switch-to-assoc-buffer)
 	     (define-key org-mode-map [(meta j)] 'eg/org-export-as-latex)
 	     (define-key org-mode-map [(control shift e)] 'eg/org-lazy-load)
@@ -458,7 +458,7 @@ If EXT is given then turn name.xxx into name.ext. EXT must be a string like '.te
     (if path-regexp
 	(setq files (file-list-select-internal files path-regexp "path" path-inverse-match)))
     (when files 
-      (mapcar '(lambda (x)
+      (mapcar #'(lambda (x)
 		 (concat "[["(replace-in-string (file-list-make-file-name x) (getenv "HOME") "~") "]["
 			 (car x) "]]")) files))))
 
@@ -493,7 +493,7 @@ If EXT is given then turn name.xxx into name.ext. EXT must be a string like '.te
 
 
 ;;}}}
-
+;;{{{ org-run-script
 (defun eg/org-run-script (&optional server R)
   (interactive)
   (let* ((buf (buffer-file-name (current-buffer)))
@@ -524,10 +524,10 @@ If EXT is given then turn name.xxx into name.ext. EXT must be a string like '.te
     (if path-regexp
     (setq files (file-list-select-internal files path-regexp "path" path-inverse-match)))
     (when files 
-      (mapcar '(lambda (x)
+      (mapcar #'(lambda (x)
 		 (concat "[["(replace-in-string (file-list-make-file-name x) (getenv "HOME") "~") "]["
 			 (car x) "]]")) files))))
-
+;;}}}
 
 (provide 'org-snps)
 ;;; org-snps.el ends here
