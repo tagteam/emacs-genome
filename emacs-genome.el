@@ -1,52 +1,56 @@
+(defun try-require (lib)
+  (if (ignore-errors (require lib))
+      (message "library %s loaded" (symbol-name lib))
+    (message "Error loading %s" lib)))
+
 ;; (set-face-attribute 'default nil :font "DejaVu Sans Mono" :height 120)
 (add-to-list 'load-path (concat (getenv "HOME") "/emacs-genome/snps/"))
 ;; general purpose utility functions
-(require 'eg-utility-snps nil t)
+(try-require 'eg-utility-snps)
 ;; look, feel and behaviour
-(require 'appearance-snps nil t)
+(try-require 'appearance-snps)
 ;; anything
-(require 'recentf nil t)
-;; (require 'helm nil t)
-;; (require 'helm-config nil t)
-;; (require 'helm-recoll-snps nil t)
+(try-require 'recentf)
+(try-require 'helm)
+(try-require 'helm-config)
+(try-require 'helm-recoll-snps)
 ;; shell within emacs
-(require 'shell-snps nil t)
+(try-require 'shell-snps)
 ;; completion
-(require 'hippie-exp nil t)
+(try-require 'hippie-exp)
 ;; buffer cycling
-(require 'iswitchb nil t)
+(try-require 'iswitchb)
 (iswitchb-mode t)
 (setq iswitchb-default-method 'samewindow)
 (setq iswitchb-case t)
-(require 'cycle-buffer-snps nil t)
+(try-require 'cycle-buffer-snps)
 ;; window cycling
-(if (require 'winner nil t)
-    
+(if (try-require 'winner)
 (winner-mode))
 ;; Emacs speaks statistics
 ; (setq ess-etc-directory-list nil)
 (add-to-list 'load-path (concat (getenv "HOME") "/emacs-genome/genes/ess/lisp"))
-(require 'ess-site nil t)
-(require 'ess-R-snps nil t)
-(require 'tag-R-keys nil t)
-(require 'ess-edit nil t)
+(try-require 'ess-site)
+(try-require 'ess-R-snps)
+(try-require 'tag-R-keys)
+(try-require 'ess-edit)
 ;; LaTeX
-(require 'latex-snps nil t)
+(try-require 'latex-snps)
 ;; keybindings
-(require 'key-snps nil t)
+(try-require 'key-snps)
 ;; folding
-(when (and (require 'folding nil t) (require 'fold-dwim nil t))
-    (require 'folding-snps nil t))
+(when (and (try-require 'folding) (try-require 'fold-dwim))
+    (try-require 'folding-snps))
 ;; orgmode
-(require 'org-snps nil t)
-(require 'org-structure-snps nil t)
+(try-require 'org-snps)
+(try-require 'org-structure-snps)
 ;; superman
 (add-to-list 'load-path (concat (getenv "HOME") "/emacs-genome/genes/SuperMan/lisp"))
-(require 'superman-manager nil t)
+(try-require 'superman-manager)
 (superman-parse-projects)
 ;; file-list 
 (add-to-list 'load-path (concat (getenv "HOME") "/emacs-genome/genes/file-list/"))
-(require 'file-list nil t)
+(try-require 'file-list)
 ;; start-up behaviour
 (setq inhibit-startup-screen 'yes-please)
 (add-hook 'after-init-hook '(lambda ()
