@@ -32,7 +32,6 @@
 (add-to-list 'load-path (concat (getenv "HOME") "/emacs-genome/genes/ess/lisp"))
 (try-require 'ess-site)
 (try-require 'ess-R-snps)
-(try-require 'tag-R-keys)
 (try-require 'ess-edit)
 ;; LaTeX
 (try-require 'latex-snps)
