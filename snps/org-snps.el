@@ -430,13 +430,14 @@ If EXT is given then turn name.xxx into name.ext. EXT must be a string like '.te
 ;;{{{ org mode hook
 (add-hook 'org-mode-hook
 	  #'(lambda nil
-	     (define-key org-mode-map [(meta k)] 'eg/org-switch-to-assoc-buffer)
-	     (define-key org-mode-map [(meta j)] 'eg/org-export-as-latex)
-	     (define-key org-mode-map [(control shift e)] 'eg/org-lazy-load)
-	     (define-key org-mode-map [(control xx)] 'eg/org-lazy-load)
-	     (define-key org-mode-map "\M-F" 'ess-eval-function-and-go)
-	     (define-key org-mode-map [(meta control i)] 'eg/org-indent)
-	     (define-key org-mode-map "_" 'eg/org-smart-underscore)))
+	      (define-key org-mode-map [(f12)] 'org-shifttab)
+	      (define-key org-mode-map [(meta k)] 'eg/org-switch-to-assoc-buffer)
+	      (define-key org-mode-map [(meta j)] 'eg/org-export-as-latex)
+	      (define-key org-mode-map [(control shift e)] 'eg/org-lazy-load)
+	      (define-key org-mode-map [(control xx)] 'eg/org-lazy-load)
+	      (define-key org-mode-map "\M-F" 'ess-eval-function-and-go)
+	      (define-key org-mode-map [(meta control i)] 'eg/org-indent)
+	      (define-key org-mode-map "_" 'eg/org-smart-underscore)))
 
 ;;}}}
 ;;{{{ list documents
