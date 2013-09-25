@@ -163,11 +163,13 @@ current paragraph, call to function, current line, etc"
   (interactive)
   (ess-eval-linewise "dev.off()"))
 
+(unless (fboundp 'ess-get-process)
+  (fset 'ess-get-process 'get-ess-process))
 (defun ess-edit-insert-vector (&optional vec)
   (interactive)
   (let ((vec (or vec (read-string "vector: ")))
 	(tbuffer (get-buffer-create " *ess-insert*"))
-	(proc (get-ess-process
+	(proc (ess-get-process
 	       (cond (ess-local-process-name)
 		    ((eq (length ess-process-name-list) 1)
 		     (caar ess-process-name-list))
