@@ -29,6 +29,7 @@
 ;; <Rc code only
 ;; <Rr results only
 ;; <Rb both results and code
+;; <Re like Rb but output format example instead of raw
 ;; <Rg graphics, prompts for file name
 ;; <Rt inline text: paste R results into the middle of a sentence 
 
@@ -64,10 +65,9 @@ user-full-name
 #+LaTeX_HEADER:\\affil{Department of Biostatistics, University of Copenhagen}
 #+LaTeX_HEADER:\\newcommand{\\sfootnote}[1]{\\renewcommand{\\thefootnote}{\\fnsymbol{footnote}}\\footnote{#1}\\setcounter{footnote}{0}\\renewcommand{\\thefootnote}{\\arabic{foot note}}}
 #+LaTeX_HEADER:\\makeatletter\\def\\blfootnote{\\xdef\\@thefnmark{}\\@footnotetext}\\makeatother
-#+EXPORT_SELECT_TAGS: export
-#+EXPORT_EXCLUDE_TAGS: noexport
+#+SELECT_TAGS: export
+#+EXCLUDE_TAGS: noexport
 #+LaTeX_HEADER: \\itemsep2pt
-#+COLUMNS: %40ITEM %10BEAMER_env(Env) %9BEAMER_envargs(Env Args) %4BEAMER_col(Col) %10BEAMER_extra(Extra)
 #+LaTeX_HEADER: \\usepackage{color}
 #+LATEX_HEADER: \\lstset{
 #+LATEX_HEADER: keywordstyle=\\color{blue},
@@ -102,8 +102,8 @@ user-full-name
 #+OPTIONS: H:3 num:t toc:nil \\n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
 #+OPTIONS: TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil tags:not-in-toc
 #+INFOJS_OPT: view:nil toc:nil ltoc:t mouse:underline buttons:0 path:http://orgmode.org/org-info.js
-#+EXPORT_SELECT_TAGS: export
-#+EXPORT_EXCLUDE_TAGS: noexport
+#+SELECT_TAGS: export
+#+EXCLUDE_TAGS: noexport
 #+LINK_UP:
 #+LINK_HOME: 
 #+startup: beamer
@@ -157,11 +157,11 @@ user-full-name
 #+LATEX_HEADER: }
 #+LATEX_HEADER: \\RequirePackage{fancyvrb}
 #+LATEX_HEADER: \\DefineVerbatimEnvironment{verbatim}{Verbatim}{fontsize=\\small,formatcom = {\\color[rgb]{0.5,0,0}}}
-#+EXPORT_SELECT_TAGS: export
-#+EXPORT_EXCLUDE_TAGS: noexport
-#+COLUMNS: %40ITEM %10BEAMER_env(Env) %9BEAMER_envargs(Env Args) %4BEAMER_col(Col) %10BEAMER_extra(Extra)
+#+SELECT_TAGS: export
+#+EXCLUDE_TAGS: noexport
 #+PROPERTY: session *R*
 #+PROPERTY: cache yes")))
+
 
 ;; Shrinking a slide
 (add-to-list
@@ -194,6 +194,11 @@ user-full-name
 (add-to-list
  'org-structure-template-alist
  '("Rb" "#+BEGIN_SRC R :exports both :results output raw  :session *R* :cache yes \n?\n#+END_SRC"))
+
+(add-to-list
+ 'org-structure-template-alist
+ '("Re" "#+BEGIN_SRC R :exports both :results output example  :session *R* :cache yes \n?\n#+END_SRC"))
+
 (add-to-list
  'org-structure-template-alist
  '("Rc" "#+BEGIN_SRC R :exports code :results silent  :session *R* :cache yes \n?\n#+END_SRC"))
@@ -221,7 +226,13 @@ user-full-name
 
 ;;}}}
 
+
+
 ;;{{{ graphics
+(add-to-list
+ 'org-structure-template-alist
+ '("Lw" "#+ATTR_LATEX: width=0.7\\textwidth"))
+
 (add-to-list
  'org-structure-template-alist
  '("d" "#+ATTR_LATEX: width=0.5\\textwidth\n\n#+BEGIN_SRC dot :file figure1.png :cmdline -Kdot -Tpng \n digraph overview{\"A\" -> {\"b\",\"c\"};}?\n#+END_SRC"))

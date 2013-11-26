@@ -167,6 +167,20 @@
 	  (query-replace (car args) (cadr args))
 	  (save-buffer))))))
 
+(defun file-list-call-keyboard-macro (&optional file-list)
+  (interactive)
+  (let* ((buffer-read-only nil)
+	 (file-list (or file-list file-list-current-file-list))
+	 (args (query-replace-read-args "Query-replace" nil)))
+    (dolist (file file-list)
+      (save-window-excursion
+	(find-file (file-list-make-file-name file))
+	(save-restriction
+	  (widen)
+	  (goto-char (point-min))
+	  (query-replace (car args) (cadr args))
+	  (save-buffer))))))
+
 
 (defun file-list-replace (&optional file-list)
   (interactive)

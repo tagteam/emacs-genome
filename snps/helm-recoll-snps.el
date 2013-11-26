@@ -76,6 +76,17 @@
   (interactive)
   (helm 'helm-c-source-recoll-mail))
 
+(defun helm-mail ()
+  (interactive)
+  (switch-to-buffer "*Helm-mail*")
+  (insert "Search: ")
+  ;; (local-set-key "RET")
+  ;; (helm-mail-mode)
+  (helm 'helm-c-source-recoll-mail ""))
+
+;; (defun helm-mail-mode ()
+;; )
+
 (global-set-key "\C-x\C-m" 'search-mail)
 
 (setq helm-c-source-recoll
@@ -108,7 +119,7 @@ can be passed as a argument to `helm-c-source-recoll'")
 
 (defun helm-recoll-search ()
   (interactive)
- (helm 'helm-c-source-recoll))
+  (helm 'helm-c-source-recoll))
 
 (defun helm-c-source-recoll (name confdir)
   "Function to create helm source for recoll search results.

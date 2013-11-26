@@ -166,6 +166,21 @@ Switches to the corresponding directory of each file."
 	 (concat "cd " (file-name-directory fname) ";" fcommand))))))
 
 
+(defun file-list-pdf2eps (&optional file-list)
+"Run ps2pdf x.pdf x.eps on all pdf files in file-list-current-file-list.
+  Switches to the corresponding directory of each file."
+  (interactive)
+  (let ((file-list (or file-list file-list-current-file-list)))
+    (dolist (f file-list)
+      (if (string= (file-name-extension (file-list-make-file-name f)) "pdf")
+      (let* ((fname (file-list-make-file-name f))
+	     (epsname (file-list-quote-filename (concat (file-name-sans-extension fname) ".eps")))
+	     (fcommand (concat "ps2ps" " " (file-list-quote-filename fname) " " (file-list-quote-filename epsname))))
+	(message fcommand)
+	(shell-command
+	 (concat "cd " (file-name-directory fname) ";" fcommand)))))))
+
+
 (defun file-list-rename-file-at-point ()
   (interactive)
   (let* ((oldname (file-list-file-at-point))

@@ -216,7 +216,7 @@
 ;; (setq org-latex-listings t)
 (setq org-latex-listings t)
 (setq org-latex-listings-options
-    '(("basicstyle" "\\small")
+    '(("basicstyle" "\\small\\tt")
       ("numbers" "left")))
 (add-to-list 'org-latex-packages-alist '("" "listings"))
 (add-to-list 'org-latex-packages-alist '("" "color"))
@@ -303,7 +303,7 @@
       (save-excursion
 	(when (and delete process) (delete-process process))
 	(when (or start (not (and process (eq (process-status process) 'run))))
-	  (TeX-run-command "make-pdf" (concat "latexmk -pvc -pdf -f " name) name)))
+	  (TeX-run-TeX "make-pdf" (concat "latexmk -pvc -pdf -f " name) name)))
       (when start-new-process
 	(save-excursion
 	  (delete-other-windows)

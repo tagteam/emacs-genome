@@ -181,8 +181,12 @@ Sets the value of file-list-current-file-list in display-buffer."
     (file-list-completion-mode)))
 	
 (defun file-list-toggle-display-mode ()
-  "Toggles display between the three stages 'filename',
-'absolute filename' and 'absolute file-name with attributes and font-lock'."
+  "Toggles display between the 4 stages
+ (1) filename
+ (2) /path/to/filename
+ (3) /path/to/filename with attributes and font-lock
+ (4) [[~/path/to/filename]] i.e. as orgmode link
+"
   (interactive)
     (setq file-list-display-level
 	  (cond ((= file-list-display-level 3) 2)

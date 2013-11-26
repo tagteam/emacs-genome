@@ -24,10 +24,6 @@
 
 ;;; Code:
 
-
-
-
-
 ;; keybindings for the file-list-display-buffer
 
 (define-key file-list-mode-map [(return)] 'file-list-choose-file)
