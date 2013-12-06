@@ -42,6 +42,7 @@
 (setq inferior-ess-font-lock-keywords nil)
 (unless (featurep 'xemacs)
   (setq ess-eval-deactivate-mark t))
+(setq ess-eval-visibly t)
 (setq ess-eval-visibly-p t)
 ;;}}}
 ;;{{{ key bindings

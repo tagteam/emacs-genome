@@ -33,6 +33,8 @@
 (try-require 'ess-site)
 (try-require 'ess-R-snps)
 (try-require 'ess-edit)
+;; ssh
+(try-require 'ssh)
 ;; LaTeX
 (try-require 'latex-snps)
 ;; keybindings
