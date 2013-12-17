@@ -27,7 +27,9 @@
 (add-to-list 'load-path (concat (getenv "HOME") "/emacs-genome/genes/org-mode/lisp"))
 (add-to-list 'load-path (concat (getenv "HOME") "/emacs-genome/genes/org-mode/contrib/lisp/"))
 
+(try-require 'org)
 (try-require 'org-capture)
+(try-require 'org-agenda)
 (try-require 'ox-bibtex)
 (try-require 'org-clock)
 (try-require 'ob-R)
