@@ -26,9 +26,13 @@
 (try-require 'cycle-buffer-snps)
 ;; window cycling
 (if (try-require 'winner)
-(winner-mode))
+    (winner-mode))
+;; pandoc: converting code and documents
+(when (file-exists-p (concat (getenv "HOME") "/emacs-genome/genes/pandoc-mode/"))
+  (add-to-list 'load-path (concat (getenv "HOME") "/emacs-genome/genes/pandoc-mode/"))
+  (try-require 'pandoc-mode))
 ;; Emacs speaks statistics
-; (setq ess-etc-directory-list nil)
+;; (setq ess-etc-directory-list nil)
 (add-to-list 'load-path (concat (getenv "HOME") "/emacs-genome/genes/ess/lisp"))
 (try-require 'ess-site)
 (try-require 'ess-R-snps)
@@ -41,7 +45,7 @@
 (try-require 'key-snps)
 ;; folding
 (when (and (try-require 'folding) (try-require 'fold-dwim))
-    (try-require 'folding-snps))
+  (try-require 'folding-snps))
 ;; orgmode
 (try-require 'org-snps)
 (try-require 'org-structure-snps)
@@ -57,5 +61,5 @@
 (add-hook 'after-init-hook '(lambda ()
 			      (recentf-mode)
 			      (recentf-open-files)))
-			      ;; (split-window-vertically)
-			      ;; (totd)));; tip of the day
+;; (split-window-vertically)
+;; (totd)));; tip of the day
