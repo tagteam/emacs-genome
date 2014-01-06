@@ -31,6 +31,10 @@
 (when (file-exists-p (concat (getenv "HOME") "/emacs-genome/genes/pandoc-mode/"))
   (add-to-list 'load-path (concat (getenv "HOME") "/emacs-genome/genes/pandoc-mode/"))
   (try-require 'pandoc-mode))
+;; pandoc: converting code and documents
+(when (file-exists-p (concat (getenv "HOME") "/emacs-genome/genes/google-translate/"))
+  (add-to-list 'load-path (concat (getenv "HOME") "/emacs-genome/genes/google-translate/"))
+  (try-require 'google-translate))
 ;; Emacs speaks statistics
 ;; (setq ess-etc-directory-list nil)
 (add-to-list 'load-path (concat (getenv "HOME") "/emacs-genome/genes/ess/lisp"))
