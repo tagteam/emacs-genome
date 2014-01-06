@@ -35,6 +35,8 @@
 (when (file-exists-p (concat (getenv "HOME") "/emacs-genome/genes/google-translate/"))
   (add-to-list 'load-path (concat (getenv "HOME") "/emacs-genome/genes/google-translate/"))
   (try-require 'google-translate))
+;; 
+(try-require 'browse-url-snps)
 ;; Emacs speaks statistics
 ;; (setq ess-etc-directory-list nil)
 (add-to-list 'load-path (concat (getenv "HOME") "/emacs-genome/genes/ess/lisp"))
