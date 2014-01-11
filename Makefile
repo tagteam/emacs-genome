@@ -1,8 +1,7 @@
 TMP := /tmp/backup
 _DUMMY_ := $(shell mkdir -p $(TMP))
 ROOTFILES = .latexmkrc 
-#GENOME := $(HOME)/emacs-genome
-GENOME := .
+GENOME := $(HOME)/emacs-genome
 SNPS := $(GENOME)/snps
 GENES := $(GENOME)/genes
 DEFAULTPATH := $(HOME)
@@ -21,26 +20,29 @@ pull:
 init: config root	
 	@$(MAKE) -si initsubmodules
 	@$(MAKE) initcompile
-	@$(MAKE) compiile
+	@$(MAKE) compile
+	@echo "All done"
 
 initsubmodules:
-	git submodule init
-	git submodule update	
+	@git submodule init
+	@git submodule update	
 
 initcompile:
 	@mkdir -p $(TMP)/texmf
 	@cd $(GENES)/auctex; autoconf && ./configure  --with-texmf-dir=$(HOME)/tmp/texmf && $(MAKE)
 
 compile:
-	cd $(GENES)/org-mode; $(MAKE) -si
-	cd $(GENES)/ess; ./configure; $(MAKE) -si
-	cd $(GENES)/auctex; ./configure; $(MAKE) -si 
+	@echo "***** compiling genes..."
+	@cd $(GENES)/org-mode; $(MAKE) -si
+	@cd $(GENES)/ess; ./configure; $(MAKE) -si
+	@cd $(GENES)/auctex; ./configure; $(MAKE) -si 
 
 config: 
 	@echo "***** updating emacs genome..."
 	@git pull
 
 superman: 
+	@echo "***** updating SuperMan..."
 	@cd $(GENES)/SuperMan; git checkout master; git pull
 
 root:
@@ -48,11 +50,14 @@ root:
 
 link: 
 	@echo "$(file) -> $(target)/$(file)"
-	@if [ -f "$(target)/$(name)" ] ; \
+	@if [ -a $(target)/$(name) ] ; \
 	then \
 		cp "$(target)/$(name)" $(TMP) ; rm -rf $(target)/$(name) ; \
 	fi
-	cd $(target); ln -s $(GENOME)/$(file) $(name) ; \
+	@ln -s $(GENOME)/$(file) $(target)/$(name) ; \
+
+
+#@ln -si $(GENOME)/$(file) $(target)/$(name) ;
 
 ls: 
 	@ls -ldaG $(TARGETS)
