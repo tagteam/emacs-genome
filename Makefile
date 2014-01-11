@@ -9,7 +9,7 @@ TARGETS := $(foreach file,$(ROOTFILES),$(patsubst %,$(DEFAULTPATH)/%,$(file)))
 
 default: config superman
 
-all: config root init 
+all: config root master pull
 
 master: 
 	@git submodule foreach git checkout origin/master
@@ -21,7 +21,7 @@ init: config root
 	@$(MAKE) -si initsubmodules
 	@$(MAKE) initcompile
 	@$(MAKE) compile
-	@echo "All done"
+	@echo "**** All done"
 
 initsubmodules:
 	@git submodule init
