@@ -35,7 +35,7 @@ commands in the termninal
 
 #+BEGIN_SRC sh
 cd emacs-genome
-make
+make init
 #+END_SRC
 
 ** Step 3: copy
