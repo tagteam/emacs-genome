@@ -1,7 +1,7 @@
 TMP := /tmp/backup
 _DUMMY_ := $(shell mkdir -p $(TMP))
 ROOTFILES = .latexmkrc 
-GENOME := $(HOME)/emacs-genome
+GENOME := .
 SNPS := $(GENOME)/snps
 GENES := $(GENOME)/genes
 DEFAULTPATH := $(HOME)
@@ -11,13 +11,15 @@ default: config superman
 
 all: config root master pull
 
+submodules: master pull
+
 master: 
 	@git submodule foreach git checkout origin/master
 
 pull: 
 	@git submodule foreach git pull
 
-init: config root	
+init: config root
 	@$(MAKE) -si initsubmodules
 	@$(MAKE) initcompile
 	@$(MAKE) compile
@@ -29,7 +31,7 @@ initsubmodules:
 
 initcompile:
 	@mkdir -p $(TMP)/texmf
-	@cd $(GENES)/auctex; autoconf && ./configure  --with-texmf-dir=$(HOME)/tmp/texmf && $(MAKE)
+	@cd $(GENES)/auctex; ./configure  --with-texmf-dir=$(TMP)/texmf && $(MAKE)
 
 compile:
 	@echo "***** compiling genes..."
@@ -46,7 +48,8 @@ superman:
 	@cd $(GENES)/SuperMan; git checkout master; git pull
 
 root:
-	@$(foreach file,$(ROOTFILES), $(MAKE) link file=$(file) target=$(HOME) name=$(file);)
+	@echo "Fix me"
+#	@$(foreach file,$(ROOTFILES), $(MAKE) link file=$(file) target=$(HOME) name=$(file);)
 
 link: 
 	@echo "$(file) -> $(target)/$(file)"
@@ -56,8 +59,6 @@ link:
 	fi
 	@ln -s $(GENOME)/$(file) $(target)/$(name) ; \
 
-
-#@ln -si $(GENOME)/$(file) $(target)/$(name) ;
 
 ls: 
 	@ls -ldaG $(TARGETS)
