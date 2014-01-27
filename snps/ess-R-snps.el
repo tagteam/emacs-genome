@@ -76,7 +76,8 @@
       (let* ((start (region-beginning))
 	     (end (region-end))
 	     (visibly (< (length (buffer-substring-no-properties start end)) 300)))
-	(ess-eval-region-and-go start end visibly))
+;;	(ess-eval-region-and-go start end visibly))
+	(ess-eval-region-and-go start end (not visibly)))
     (ess-eval-line-and-step)))
 
 (defun r (arg)

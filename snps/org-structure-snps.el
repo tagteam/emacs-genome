@@ -197,7 +197,7 @@ user-full-name
 
 (add-to-list
  'org-structure-template-alist
- '("Re" "#+BEGIN_SRC R :exports both :results output example  :session *R* :cache yes \n?\n#+END_SRC"))
+ '("Re" "#+BEGIN_SRC R :exports both :results output :session *R* :cache yes \n?\n#+END_SRC"))
 
 (add-to-list
  'org-structure-template-alist

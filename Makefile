@@ -57,8 +57,6 @@ link:
 	@ln -s $(GENOME)/$(file) $(target)/$(name) ; \
 
 
-#@ln -si $(GENOME)/$(file) $(target)/$(name) ;
-
 ls: 
 	@ls -ldaG $(TARGETS)
 

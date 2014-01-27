@@ -405,7 +405,7 @@ If EXT is given then turn name.xxx into name.ext. EXT must be a string like '.te
    (latex . t)
    (ditaa . t)
    (dot . t)
-   (sh . t)
+   (shell . t)
    (R . t)))
 
 ;; Do not confirm source block evaluation

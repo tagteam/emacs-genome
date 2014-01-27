@@ -58,7 +58,8 @@ Return  the sublist of the existing files. Does not re-display selected list."
   "Returns sublist of filenames in file-list matched by regexp.
 Changes the file-list-current-file-list. See also file-list-add."
   (setq file-list-reference-buffer (current-buffer))
-  (let* ((gc-cons-threshold file-list-gc-cons-threshold)
+  (let* (
+	 ;; (gc-cons-threshold file-list-gc-cons-threshold)
 	 (display-buffer (or display-buffer
 			     (file-list-current-display-buffer)
 			     file-list-display-buffer))
@@ -66,7 +67,8 @@ Changes the file-list-current-file-list. See also file-list-add."
 			  (dir (when file-list-update
 				 (file-list-update dir nil))
 			       (file-list-list dir nil nil 'recursive nil))
-			  ((eq major-mode 'file-list-completion-mode)
+			  ((or (eq major-mode 'file-list-completion-mode)
+			       (eq major-mode 'superman-file-list-mode))
 			   file-list-current-file-list)
 			  (t (if file-list-update
 				 (file-list-update dir nil))
@@ -146,26 +148,24 @@ Changes the file-list-current-file-list. See also file-list-add."
 			 inverse)))
     (if (null sub-file-list)
 	(progn
-	(message "No files are matched by this criteria." regexp)
-	nil)
+	  (message "No files are matched by this criteria." regexp)
+	  nil)
       (unless dont-display
-	(file-list-display-match-list
-	 sub-file-list
-	 match-info
-	 display-buffer)
-;	(buffer-name)
+	(if (eq major-mode 'superman-file-list-mode)
+	    (superman-display-file-list nil sub-file-list match-info (current-buffer))
+	  (file-list-display-match-list sub-file-list match-info display-buffer))
 	(setq file-list-current-file-list sub-file-list))
       sub-file-list)))
 
 
-(defun file-list-by-name (arg &optional file-list dir)
+(defun file-list-by-name (&optional arg file-list dir)
   "Returns sublist of filenames (in file-list) whose path is matched by regexp.
 This changes the value of file-list-current-file-list."
   (interactive "P")
   (file-list-select-internal file-list nil nil arg dir))
 
 
-(defun file-list-by-name-below-directory (arg &optional file-list)
+(defun file-list-by-name-below-directory (&optional arg file-list)
   "Reads directory name and returns sublist of filenames below directory whose
 raw file-name match a regexp.
 This changes the value of file-list-current-file-list."
@@ -176,13 +176,13 @@ This changes the value of file-list-current-file-list."
   (file-list-select-internal file-list nil nil arg dir)))
 
 
-(defun file-list-by-path (arg &optional file-list)
+(defun file-list-by-path (&optional arg file-list)
  "Returns sublist of filenames (in file-list) whose path-name is matched by regexp.
 This changes the value of file-list-current-file-list."
   (interactive "P")
     (file-list-select-internal file-list nil "path" arg))
 
-(defun file-list-by-path-below-directory (arg &optional file-list)
+(defun file-list-by-path-below-directory (&optional arg file-list)
  "Reads directory name and returns sublist of filenames (in file-list) whose path
 is matched by a regexp. This changes the value of file-list-current-file-list."
   (interactive "P")
@@ -192,14 +192,14 @@ is matched by a regexp. This changes the value of file-list-current-file-list."
     (file-list-select-internal file-list nil "path" arg dir)))
 
 
-(defun file-list-by-time (arg &optional file-list)
+(defun file-list-by-time (&optional arg file-list)
   "Returns sublist of filenames (in file-list) whose size is lower than a given value.
 This changes the value of file-list-current-file-list."
   (interactive "P")
   (file-list-select-internal file-list nil "time" arg))
 
 
-(defun file-list-by-time-below-directory (arg &optional file-list)
+(defun file-list-by-time-below-directory (&optional arg file-list)
   "Reads directory name and returns sublist of filenames (in file-list) whose age
 is less or greater than a number of days which also has to be specified.
 This changes the value of file-list-current-file-list."
@@ -210,14 +210,14 @@ This changes the value of file-list-current-file-list."
   (file-list-select-internal file-list nil "time" arg dir)))
 
 
-(defun file-list-by-size (arg &optional file-list)
+(defun file-list-by-size (&optional arg file-list)
  "Returns sublist of filenames (in file-list) whose size is lower than a given value.
 This changes the value of file-list-current-file-list."
   (interactive "P")
   (file-list-select-internal file-list nil "size" arg))
 
 
-(defun file-list-by-size-below-directory (arg &optional file-list)
+(defun file-list-by-size-below-directory (&optional arg file-list)
   "Reads directory name and returns sublist of filenames (in file-list) whose size
 is less or greater than a number in bytes which also has to be specified.
 This changes the value of file-list-current-file-list."
@@ -289,22 +289,22 @@ Return the difference in the format of a time value."
     (list (- (car t1) (car t2) (if borrow 1 0))
 	  (- (+ (if borrow 65536 0) (cadr t1)) (cadr t2)))))
 
-(defun file-list-sort-by-size (reverse &optional file-list)
+(defun file-list-sort-by-size (&optional reverse file-list)
   (interactive "P")
   (let ((file-list (or file-list file-list-current-file-list)))
     (file-list-sort-internal file-list "size" reverse)))
 
-(defun file-list-sort-by-time (reverse &optional file-list)
+(defun file-list-sort-by-time (&optional reverse file-list)
   (interactive "P")
   (let ((file-list (or file-list file-list-current-file-list)))
      (file-list-sort-internal file-list "time" reverse)))
 
-(defun file-list-sort-by-name (reverse &optional file-list)
+(defun file-list-sort-by-name (&optional reverse file-list)
   (interactive "P")
   (let ((file-list (or file-list file-list-current-file-list)))
      (file-list-sort-internal file-list "name" reverse)))
 
-(defun file-list-sort-by-path (reverse &optional file-list)
+(defun file-list-sort-by-path (&optional reverse file-list)
   (interactive "P")
   (let ((file-list (or file-list file-list-current-file-list)))
      (file-list-sort-internal file-list "path" reverse)))
@@ -372,7 +372,9 @@ Return the difference in the format of a time value."
 	sorted-list
       (setq file-list-current-file-list sorted-list)
       (message "File list sorted by %s%s" by (if reverse " in reverse order" ""))
-      (file-list-display-match-list file-list-current-file-list))))
+      (if (eq major-mode 'superman-file-list-mode)
+	  (superman-display-file-list nil file-list-current-file-list)
+      (file-list-display-match-list file-list-current-file-list)))))
 
 
 

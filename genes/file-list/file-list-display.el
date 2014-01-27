@@ -39,9 +39,90 @@
 
 
 (defun file-list-current-display-buffer ()
-  (if (eq major-mode 'file-list-completion-mode)
+  (if (or (eq major-mode 'file-list-completion-mode)
+	  (eq major-mode 'superman-file-list-mode))
   (buffer-name (current-buffer))
   nil))
+
+(defun file-list-display-match-list* (&optional file-list match-info display-buffer)
+  "This function shows file-list in display-buffer.
+Sets the value of file-list-current-file-list in display-buffer."
+  (let ((file-list (or file-list file-list-current-file-list))
+	(display-buffer (or display-buffer
+			    (file-list-current-display-buffer)
+			    file-list-display-buffer))
+	(active (file-list-current-display-buffer))
+	match-info-string
+	display-list)
+    (switch-to-buffer display-buffer)
+    ;; sort list
+    (setq file-list
+	  (sort file-list
+		(lambda (e f)
+		  (> (length (caddr e)) (length (caddr f))))))
+    (setq display-list
+	  (cond ((= file-list-display-level 2)
+		 (mapcar
+		  (lambda (entry)
+		    (let ((file-name
+			   (if (featurep 'xemacs)
+			       (file-list-replace-in-string
+				(file-list-make-file-name entry) " " "\\\ " 'literal)
+			     (file-list-replace-in-string
+			      (file-list-make-file-name entry) " " "\\ " 'literal)))
+			  (rest (caddr entry))
+			  rest-string)
+		      (while rest
+			(setq rest-string
+			      (concat rest-string "\n" (format "%13s" (caar rest))
+				      " : " (cdar rest)))
+			(setq rest (cdr rest)))
+		      (concat (when rest-string "\n") file-name rest-string)))
+		  file-list))
+		((= file-list-display-level 1)
+		 (mapcar
+		  (lambda (entry)
+		    (if (featurep 'xemacs)
+			(file-list-replace-in-string
+			 (file-list-make-file-name entry) " " "\\\ " 'literal)
+		      (file-list-replace-in-string
+		       (file-list-make-file-name entry) " " "\\ " 'literal)))
+		  file-list))
+		((= file-list-display-level 3)
+		 (mapcar
+		  (lambda (entry)
+		    (org-make-link-string
+		     (file-list-replace-in-string
+		      (file-list-make-file-name~ entry) " " "\\ " 'literal)))
+		  file-list))
+		(t (mapcar
+		    (lambda (entry)
+		      (file-list-replace-in-string
+		       (car entry) " " "\\\ " 'literal)) file-list))))
+    ;; match history
+    (if match-info
+	(if active
+	    (setq file-list-match-history
+		  (concat file-list-match-history match-info))
+	  (setq file-list-match-history match-info))
+      (setq file-list-match-history nil))
+    ;; (message "bla:" file-list-match-history)
+    (setq match-info-string
+	  (format "Match-info: %i files %s\n\ncurrent file-list:\n"
+		  (length display-list)
+		  (or file-list-match-history "match")))
+    (let ((buffer-read-only nil))
+      (erase-buffer)
+      (insert match-info-string)
+      (while display-list
+	(insert (car display-list) "\n")
+	(setq display-list (cdr display-list)))
+      ;; (replace-match match-info-string nil t))))
+      (switch-to-buffer display-buffer)
+      ;; (when (= file-list-display-level 1))
+      ;; (file-list-completion-mode)
+      (setq file-list-current-file-list file-list)
+      (file-list-beginning-of-file-list))))
 
 (defun file-list-display-match-list (&optional file-list match-info display-buffer)
   "This function shows file-list in display-buffer.
