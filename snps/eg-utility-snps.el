@@ -97,6 +97,21 @@ move to with the same argument."
   (forward-line))
 
 
+(defun eg/sort-region (&optional separator)
+  (interactive)
+  (let ((separator (or separator ","))
+	(sort-fold-case nil))
+    (narrow-to-region (region-beginning) (region-end))
+    (goto-char (point-min))
+    (while (re-search-forward (concat "[ \t\n]*" separator "[ \t\n]*") nil t)
+      (replace-match "\n"))
+    (sort-fields 1 (point-min) (point-max))
+    (goto-char (point-min))
+    (while (re-search-forward "\n" nil t)
+      (replace-match ", "))
+    (widen)))
+
+
 (unless (featurep 'xemacs)
   (defun kill-entire-line ()
     (interactive)
