@@ -26,6 +26,10 @@
 
 ;; (customize-set-variable
  ;; 'display-buffer-alist '((".*" . (display-buffer-same-window . nil))))
+;;{{{ Help mode
+(add-hook 'ess-help-mode-hook #'(lambda () (setq truncate-lines t
+						 truncate-partial-width-windows nil)))
+
 ;;{{{ global custom
 (setq ess-use-tracebug nil)
 (setq ess-display-buffer-reuse-frames nil)
