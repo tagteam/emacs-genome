@@ -1,4 +1,7 @@
 #+Title: The Emacs Genome 
+#+LaTeX_CLASS: org-article
+#+LaTeX_HEADER:\author{Thomas Alexander Gerds}
+#+OPTIONS: toc:t
 
 * Welcome
 
@@ -6,46 +9,53 @@ Hi! The emacs-genome is an emacs flavour. It consists of extensions
 and smaller code SNPs that make emacs a comprehensive work interface
 for applied (bio)statisticians.
 
-* Requirement 
+* Requirements
 
-You need to have git (the stupid content tracker) installed on your
-computer.
+Besides the newest emacs (emacs-version > 24), you need to have
+installed git (the stupid content tracker). In order to use all
+functionality a series of other programs is needed, including latex,
+perl and recoll. See the manual
+[[file:emacs-genome-manual.org][manual]] for a longer list of
+recommended programs.
 
-* Install
+* Install (in three steps)
 
 To use or test the emacs-genome you should download (i.e. clone) the
-latest version. There are three steps
+latest version. To do this execute the following three steps in a
+terminal, e.g., to use a terminal inside emacs do M-x shell RET.
 
 ** Step 1: clone
-#+BEGIN_SRC sh
-cd ~
-git clone git://github.com/tagteam/emacs-genome.git
-#+END_SRC
 
+#+BEGIN_SRC sh :eval ever
+cd ~  # or cd ~/tmp/ or cd ~/pathtowhereIwanttheemacsgenome/
+git clone git://github.com/tagteam/emacs-genome.git
+#+END_SRC 
 
 Now, you should have a new directory called emacs-genome in your home
-directory. It contains the smaller code snps. 
-
+directory or in "pathtowhereIwanttheemacsgenome". The emacs-genome
+already contains the code snps. It remains to get the genes, including
+org-mode, auctex, Superman and ESS.
 
 ** Step 2: make
 
-There is a make file which downloads and installs the larger
-extensions (orgmode, ess, auctex, SuperMan). Execute the following
-commands in the termninal
+There is a Makefile which automatically downloads and installs the
+larger extensions. Go back to the termninal and execute the following
+commands:
 
-#+BEGIN_SRC sh
+#+BEGIN_SRC sh :eval ever
 cd emacs-genome
 make init
 #+END_SRC
 
-** Step 3: copy
-   
-Copy the following line to the end of your .emacs file:
+** Step 3: init
 
-#+BEGIN_SRC  emacs-lisp :export code
+To use the emacs-genome add the following line to the end of your
+.emacs file:
+
+#+BEGIN_SRC emacs-lisp :export code :eval ever
 (load-file "~/emacs-genome/emacs-genome.el")
 #+END_SRC
 
-
 Relaunch emacs and read the [[file:emacs-genome-manual.org][manual]].
+
 
