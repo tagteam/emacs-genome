@@ -39,7 +39,6 @@
     (try-require 'ox-odt)
   (error nil))
 ;;}}}
-
 ;;{{{ global keys
 (global-set-key "\C-cl" 'org-store-link)
 (global-set-key "\C-ca" 'org-agenda)
@@ -84,74 +83,141 @@
 	     (define-key org-mode-map [(meta down)] 'forward-paragraph)))
 
 ;;}}}
-;;{{{ export
+;;{{{ eg/org latex/export debug minor mode
 ;; see http://orgmode.org/manual/Export-options.html
 ;; C-c C-e t     (org-insert-export-options-template)
 
-
-(defun eg/org-save-and-run (&optional arg)
-  (interactive)
-  (save-buffer)
-  (let ((cmd (completing-read "Command (default make-pdf): " 
-			      '("make-pdf" "make-html")
-			      nil 'must-match nil nil "make-pdf" nil))
-	(dir (when arg (read-file-name "Publishing directory: " default-directory))))
-    (cond ((string= cmd "make-pdf")
-	   ;;	   (call-interactively 'org-export-as-latex)
-	   (if org-beamer-mode
-	       (org-beamer-export-as-latex 3 nil nil nil nil nil)
-	     (org-latex-export-as-latex 3 nil nil nil nil nil)))
-	  ((string= cmd "make-html")
-	   (org-html-export-as-html-and-open 3)))))
+;; see superman-export.el
 
 ;;}}}
-;;{{{ latex + latexmk
+;;{{{ latex export
+;; There are at least 3 different places/ways to control
+;;  the latex header when exporting an org-document:
+;; (1) GLOBAL
+;;     the variables org-latex-default-packages-alist
+;;     and org-latex-packages-alist control 
+;;     \usepackage statements
+;;     Really the former should not be changed and
+;;     in case of an option clash one should rather
+;;     put [NO-DEFAULT-PACKAGES] into the corresponding
+;;     latex class, see (2).
+;; (2) CLASS LOCAL
+;;     the entries in org-latex-classes control
+;;     packages, default packages and allow other
+;;     additions to the latex header 
+;; (3) FILE LOCAL
+;;     the org-structure-templates (see org-structure-snps.el).
+;;     Note: If there are many statements it is convenient
+;;     to use a setupfile, e.g.
+;;     #+SETUPFILE: ~/emacs-genome/genes/org-templates/bio.org
 
-;; (delete-if (lambda (x) (and (listp x) (string= (nth 1 x) "amssymb"))) org-export-latex-default-packages-alist)
-;; (setq org-entities-user nil)
-;; '(("space" "\\ " nil " " " " " " " "))
-;; (setq org-export-latex-hyperref-format "\\ref{%s}")
+(setq eg/org-latex-listing-options-string
+      (concat "\\lstset{\n"
+	      "keywordstyle=\\color{blue},\n"
+	      "commentstyle=\\color{red},"
+	      "stringstyle=\\color[rgb]{0,.5,0},\n"
+	      "basicstyle=\\ttfamily\\small,\n"
+	      "columns=fullflexible,\n"
+	      "breaklines=true,\n"        
+	      "breakatwhitespace=false,\n"
+	      "numbers=left,\n"
+	      "numberstyle=\\ttfamily\\tiny\\color{gray},\n"
+	      "stepnumber=1,\n"
+	      "numbersep=10pt,\n"
+	      "backgroundcolor=\\color{white},\n"
+	      "tabsize=4,\n"
+	      "showspaces=false,\n"
+	      "showstringspaces=false,\n"
+	      "xleftmargin=.23in,\n"
+	      "frame=single,\n"
+	      "basewidth={0.5em,0.4em}\n"
+	      "}"))
+(setq eg/org-latex-common-header-string
+      (concat
+       eg/org-latex-listing-options-string))
+;; (setq eg/org-latex-special-footnotes
+;; "\newcommand{\sfootnote}[1]{\renewcommand{\thefootnote}{\fnsymbol{footnote}}\footnote{#1}\setcounter{footnote}{0}\renewcommand{\thefootnote}{\arabic{foot note}}}
+  ;; \makeatletter\def\blfootnote{\xdef\@thefnmark{}\@footnotetext}\makeatother")
+       
+(setq org-latex-packages-alist
+      '(("" "listings")
+	("" "color")
+	("" "amsmath")
+	("" "array")
+	;; ("" "attachfile")
+	("T1" "fontenc")
+	;; ("table,usenames,dvipsnames" "xcolor")
+	("" "natbib")))
 
-(setq org-latex-default-packages-alist
-      '(("AUTO" "inputenc" t)
-	("" "graphicx" t)
-	("" "longtable" nil)
-	("" "float" nil)
-	("" "wrapfig" nil)
-	("" "amsmath" t)
-	("" "hyperref" nil)))
+(setq org-export-allow-BIND t)
+(setq org-latex-listings t)
+;; we put listing options into the latex-header-string
 
- ;; [NO-DEFAULT-PACKAGES]
+;; (setq org-latex-listings-options
+      ;; '(("basicstyle" "\\small\\tt")
+	;; ("numbers" "left")
+	;; ("keywordstyle" "\\color{blue}")
+	;; ("commentstyle" "\\color{red}")
+	;; ("stringstyle" "\\color[rgb]{0,.5,0}")
+	;; ("basicstyle" "\\ttfamily\\small")
+	;; ("columns" "fullflexible")
+	;; ("breaklines" "true") ;; sets automatic line breaking
+	;; ("breakatwhitespace" "false") ;; sets if automatic breaks should only happen at whitespace
+	;; ("numbers" "left")
+	;; ("numberstyle" "\\ttfamily\\tiny\\color{gray}")
+	;; ("stepnumber" "1")
+	;; ("numbersep" "10pt")
+	;; ("backgroundcolor" "\\color{white}")
+	;; ("tabsize" "4")
+	;; ("showspaces" "false")
+	;; ("showstringspaces" "false")
+	;; ("xleftmargin" ".23in")
+	;; ("frame" "single")
+	;; ("basewidth" "{0.5em,0.4em}")))
 
+;; [NO-DEFAULT-PACKAGES]
+;; (setq org-latex-classes nil)
 (add-to-list 'org-latex-classes
-      '("org-article"
-         "\\documentclass{article}
-         [PACKAGES]
-         [EXTRA]"
-         ("\\section{%s}" . "\\section*{%s}")
-         ("\\subsection{%s}" . "\\subsection*{%s}")
-         ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
-         ("\\paragraph{%s}" . "\\paragraph*{%s}")
-         ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
-(add-to-list 'org-latex-classes
-      '("beamer"
-         "\\documentclass{beamer}
-         [NO-DEFAULT-PACKAGES]
-         [PACKAGES]
-         [EXTRA]"
-         ("\\section{%s}" . "\\section*{%s}")
-         ("\\subsection{%s}" . "\\subsection*{%s}")
-         ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
-         ("\\paragraph{%s}" . "\\paragraph*{%s}")
-         ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
-
-
-(add-to-list 'org-latex-classes
-             '("jss"
-               "\\documentclass[useAMS,article,shortnames]{jss}
-	       [NO-DEFAULT-PACKAGES]
+	     `("org-article"
+	       ,(concat "\\documentclass{article}
                [PACKAGES]
                [EXTRA]"
+			eg/org-latex-common-header-string
+			"\\renewcommand*\\familydefault{\\sfdefault}\n\\itemsep2pt")
+	       ("\\section{%s}" . "\\section*{%s}")
+	       ("\\subsection{%s}" . "\\subsection*{%s}")
+	       ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+	       ("\\paragraph{%s}" . "\\paragraph*{%s}")
+	       ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
+
+;; [NO-DEFAULT-PACKAGES]
+
+(add-to-list 'org-latex-classes
+	     `("beamer"
+	       ,(concat "\\documentclass{article}
+               [PACKAGES]
+               [EXTRA]"
+			eg/org-latex-common-header-string
+			"\\renewcommand*\\familydefault{\\sfdefault}\n\\itemsep2pt")	     
+	       ("\\section{%s}" . "\\section*{%s}")
+	       ("\\subsection{%s}" . "\\subsection*{%s}")
+	       ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+	       ("\\paragraph{%s}" . "\\paragraph*{%s}")
+	       ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
+
+;; "\\documentclass[useAMS,article,shortnames]{jss}
+;; (setq org-latex-classes nil)
+(add-to-list 'org-latex-classes
+             `("jss"
+	       ,(concat
+		 "\\documentclass[article]{jss}
+\\usepackage{amsmath,amsfonts}
+\\usepackage{float}
+\\usepackage{listings}"
+		 eg/org-latex-listing-options-string
+		 "\n[NO-DEFAULT-PACKAGES]"
+		 "\n[NO-PACKAGES]"
+		 "\n[EXTRA]")
                ("\\section{%s}" . "\\section*{%s}")
                ("\\subsection{%s}" . "\\subsection*{%s}")
                ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
@@ -213,15 +279,9 @@
                ("\\paragraph{%s}" . "\\paragraph*{%s}")
                ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
 
+;;}}}
+;;{{{ org-babel-defaults
 
-(setq org-export-allow-BIND t)
-;; (setq org-latex-listings t)
-(setq org-latex-listings t)
-(setq org-latex-listings-options
-    '(("basicstyle" "\\small\\tt")
-      ("numbers" "left")))
-(add-to-list 'org-latex-packages-alist '("" "listings"))
-(add-to-list 'org-latex-packages-alist '("" "color"))
 ;; (add-to-list 'org-latex-to-pdf-process '("latexmk -f -pdf %s"))
 ;; (setq org-latex-to-pdf-process '("latexmk -f -pdf %s"))
 (setf org-babel-default-inline-header-args
@@ -238,7 +298,7 @@
 ;; (remove-hook 'org-latex-after-save-hook 'latex-save-and-run)
 
 (defun eg/org-indent ()
-  "visit tex-buf or R-buf"
+  "context dependent indent"
   (interactive)
   (if (string= (car (org-babel-get-src-block-info)) "R")
       (ess-edit-indent-call-sophisticatedly)
@@ -255,14 +315,6 @@
 	(goto-char (match-beginning 5))))
     
 
-(defun eg/org-switch-to-assoc-buffer ()
-  "visit tex-buf or R-buf"
-  (interactive)
-  (if (string= (car (org-babel-get-src-block-info)) "R")
-      (ess-switch-to-end-of-ESS)
-    (pop-to-buffer (org-file-name nil nil nil ".tex"))))
-
-
 (defun eg/org-ess-eval-function ()
   "If in R_SRC block, evaluate function at point."
   (interactive)
@@ -277,99 +329,6 @@
 	 (not (ess-inside-string-or-comment-p (point))))
       (ess-insert-S-assign)
       (insert "_")))
-
-(defun eg/org-export-as-latex (&optional start-new-process)
-  "See library tex-buf for help on TeX-process"
-  (interactive "P")
-  (if (string= (car (org-babel-get-src-block-info)) "R")
-      (eg/ess-eval-and-go)
-    (save-buffer)
-    (let* ((obuf (current-buffer))
-	   ;; (org-export-show-temporary-export-buffer nil)
-	   (texbuf (org-file-name nil nil nil ".tex"))
-	   (name (org-file-name nil nil nil ""))
-	   (curdir (file-name-directory (org-file-name nil nil t "")))
-	   (texfile (org-file-name nil nil t ".tex"))
-	   (procbuf (TeX-process-buffer-name name))
-	   (process (TeX-process name))
-	   (delete start-new-process)
-	   (start start-new-process))
-      (save-window-excursion
-	(when (get-file-buffer texbuf)
-	  (kill-buffer (get-file-buffer texbuf))
-	  (find-file texfile)))
-      ;; (org-latex-export-as-latex)
-      (if org-beamer-mode
-	  (org-beamer-export-to-latex)
-	(org-latex-export-to-latex))
-      (save-excursion
-	(when (and delete process) (delete-process process))
-	(when (or start (not (and process (eq (process-status process) 'run))))
-	  (TeX-run-TeX "make-pdf" (concat "latexmk -pvc -pdf -f " name) name)))
-      (when start-new-process
-	(save-excursion
-	  (delete-other-windows)
-	  (split-window-horizontally)
-	  (other-window 1)
-	  ;; (switch-to-buffer texbuf)
-	  (if (get-file-buffer texbuf)
-	      (progn
-	      (switch-to-buffer (get-file-buffer texbuf))
-	      (revert-buffer t t t))
-	  (find-file texfile))
-	  (split-window-vertically)
-	  (other-window 1)
-	  (switch-to-buffer "*R*")
-	  (split-window-vertically)
-	  (other-window 1)
-	  (switch-to-buffer procbuf))))))
-
-
-	  ;; (switch-to-buffer texbuf)
-	  ;; (TeX-next-error))))))
-
-(defun eg/org-next-latex-error (&optional run)
-    "Show next latex error.
-
-If a prefix argument RUN is given run latex first.
-depend on it being positive instead of the entry in `TeX-command-list'."
-    (interactive "P")
-    (let* ((obuf (current-buffer))
-	   (texbuf (org-file-name nil nil nil ".tex")))
-      (save-window-excursion
-	(switch-to-buffer texbuf)
-	(if run
-	    (TeX-command "LaTeX" 'TeX-master-file nil))
-	(TeX-next-error run))))
-
-(defun org-turn-on-auto-export ()
-  (interactive)
-  (add-hook 'after-save-hook 'eg/org-export-as-latex))
-
-(defun org-turn-off-auto-export ()
-  (interactive)
-  (remove-hook 'after-save-hook 'eg/org-export-as-latex))
-
-;; (setq org-export-html-after-blockquotes-hook nil)
-;; (add-hook 'org-export-html-after-blockquotes-hook '(lambda ()
-						     ;; (save-excursion
-						       ;; (re-search-backward "html" nil t)
-						       ;; (beginning-of-line)
-						       ;; (insert "nonesense")
-						     ;; (message (buffer-file-name)))))
-(defun org-file-name (&optional file buf full ext)
-  "Function to turn name.xxx into name.org. When FILE is given
-it must be regular file-name, it may be the absolute filename including
-the directory. If FILE is nil and BUF is given, then use the filename of
-the file visited by buffer BUF. If BUF is also nil then use 
-'current-buffer'. If FULL is non-nil return the absolute filename.
-If EXT is given then turn name.xxx into name.ext. EXT must be a string like '.tex'" 
-  (let ((name (or file (buffer-file-name (or buf (current-buffer))))))
-    (concat (file-name-sans-extension
-	     (if full
-		 name
-	       (file-name-nondirectory name)))
-	    (or ext ".org"))))
 
 ;;}}}
 ;;{{{ bibtex
@@ -394,6 +353,7 @@ If EXT is given then turn name.xxx into name.ext. EXT must be a string like '.te
 
 ;;}}}
 ;;{{{ babel R
+
 ;; for block options see: org-babel-common-header-args-w-values
 ;; org-babel-R-evaluate-session
 ;; org-babel-R-write-object-command
@@ -430,11 +390,13 @@ If EXT is given then turn name.xxx into name.ext. EXT must be a string like '.te
 
 ;;}}}
 ;;{{{ org mode hook
+
 (add-hook 'org-mode-hook
 	  #'(lambda nil
+	      (require 'superman-export)
 	      (define-key org-mode-map [(f12)] 'org-shifttab)
-	      (define-key org-mode-map [(meta k)] 'eg/org-switch-to-assoc-buffer)
-	      (define-key org-mode-map [(meta j)] 'eg/org-export-as-latex)
+	      (define-key org-mode-map [(meta k)] 'superman-control-latex-export)
+	      (define-key org-mode-map [(meta j)] 'superman-export-as-latex)
 	      (define-key org-mode-map [(control shift e)] 'eg/org-lazy-load)
 	      (define-key org-mode-map [(control xx)] 'eg/org-lazy-load)
 	      (define-key org-mode-map "\M-F" 'ess-eval-function-and-go)

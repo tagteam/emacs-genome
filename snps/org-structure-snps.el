@@ -46,49 +46,12 @@
  `("La" ,(concat "#+TITLE: 
 #+LANGUAGE:  en
 #+OPTIONS:   H:3 num:t toc:nil \\n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
-#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil tags:not-in-toc author:nil
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil tags:not-in-toc author:t
 #+LaTeX_CLASS: org-article
-#+LaTeX_HEADER:\\usepackage{amsmath}
 #+LaTeX_HEADER:\\usepackage{authblk}
-#+LaTeX_HEADER:\\usepackage{natbib}
-#+LaTeX_HEADER:\\usepackage[table,usenames,dvipsnames]{xcolor}
-#+LaTeX_HEADER:\\definecolor{lightGray}{gray}{0.98}
-#+LaTeX_HEADER:\\definecolor{medioGray}{gray}{0.83}
-#+LaTeX_HEADER:\\rowcolors{1}{medioGray}{lightGray}
-#+LaTeX_HEADER:\\usepackage{attachfile}
-#+LaTeX_HEADER:\\usepackage{array}
-#+LaTeX_HEADER:\\usepackage[T1]{fontenc}
-#+LaTeX_HEADER:\\renewcommand*\\familydefault{\\sfdefault}
 #+LaTeX_HEADER:\\author{"
 user-full-name
 "}
-#+LaTeX_HEADER:\\affil{Department of Biostatistics, University of Copenhagen}
-#+LaTeX_HEADER:\\newcommand{\\sfootnote}[1]{\\renewcommand{\\thefootnote}{\\fnsymbol{footnote}}\\footnote{#1}\\setcounter{footnote}{0}\\renewcommand{\\thefootnote}{\\arabic{foot note}}}
-#+LaTeX_HEADER:\\makeatletter\\def\\blfootnote{\\xdef\\@thefnmark{}\\@footnotetext}\\makeatother
-#+SELECT_TAGS: export
-#+EXCLUDE_TAGS: noexport
-#+LaTeX_HEADER: \\itemsep2pt
-#+LaTeX_HEADER: \\usepackage{color}
-#+LATEX_HEADER: \\lstset{
-#+LATEX_HEADER: keywordstyle=\\color{blue},
-#+LATEX_HEADER: commentstyle=\\color{red},
-#+LATEX_HEADER: stringstyle=\\color[rgb]{0,.5,0},
-#+LATEX_HEADER: basicstyle=\\ttfamily\\small,
-#+LATEX_HEADER: columns=fullflexible,
-#+LATEX_HEADER: breaklines=true,        % sets automatic line breaking
-#+LATEX_HEADER: breakatwhitespace=false,    % sets if automatic breaks should only happen at whitespace
-#+LATEX_HEADER: numbers=left,
-#+LATEX_HEADER: numberstyle=\\ttfamily\\tiny\\color{gray},
-#+LATEX_HEADER: stepnumber=1,
-#+LATEX_HEADER: numbersep=10pt,
-#+LATEX_HEADER: backgroundcolor=\\color{white},
-#+LATEX_HEADER: tabsize=4,
-#+LATEX_HEADER: showspaces=false,
-#+LATEX_HEADER: showstringspaces=false,
-#+LATEX_HEADER: xleftmargin=.23in,
-#+LATEX_HEADER: frame=single,
-#+LATEX_HEADER: basewidth={0.5em,0.4em}
-#+LATEX_HEADER: }
 #+PROPERTY: session *R*
 #+PROPERTY: cache yes")))
 
@@ -135,26 +98,6 @@ user-full-name
 #+LaTeX_HEADER: \\setbeamertemplate{subitem}[circle]
 #+LaTeX_HEADER: \\newcommand{\\sfootnote}[1]{\\renewcommand{\\thefootnote}{\\fnsymbol{footnote}}\\footnote{#1}\\setcounter{footnote}{0}\\renewcommand{\\thefootnote}{\\arabic{foot note}}}
 #+LaTeX_HEADER:\\makeatletter\\def\\blfootnote{\\xdef\\@thefnmark{}\\@footnotetext}\\makeatother
-#+LATEX_HEADER: \\lstset{
-#+LATEX_HEADER: keywordstyle=\\color{blue},
-#+LATEX_HEADER: commentstyle=\\color{red},
-#+LATEX_HEADER: stringstyle=\\color[rgb]{0,.5,0},
-#+LATEX_HEADER: basicstyle=\\ttfamily\\small,
-#+LATEX_HEADER: columns=fullflexible,
-#+LATEX_HEADER: breaklines=true,        % sets automatic line breaking
-#+LATEX_HEADER: breakatwhitespace=false,    % sets if automatic breaks should only happen at whitespace
-#+LATEX_HEADER: numbers=left,
-#+LATEX_HEADER: numberstyle=\\ttfamily\\tiny\\color{gray},
-#+LATEX_HEADER: stepnumber=1,
-#+LATEX_HEADER: numbersep=10pt,
-#+LATEX_HEADER: backgroundcolor=\\color{white},
-#+LATEX_HEADER: tabsize=4,
-#+LATEX_HEADER: showspaces=false,
-#+LATEX_HEADER: showstringspaces=false,
-#+LATEX_HEADER: xleftmargin=.23in,
-#+LATEX_HEADER: frame=single,
-#+LATEX_HEADER: basewidth={0.5em,0.4em}
-#+LATEX_HEADER: }
 #+LATEX_HEADER: \\RequirePackage{fancyvrb}
 #+LATEX_HEADER: \\DefineVerbatimEnvironment{verbatim}{Verbatim}{fontsize=\\small,formatcom = {\\color[rgb]{0.5,0,0}}}
 #+SELECT_TAGS: export

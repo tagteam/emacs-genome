@@ -1,32 +1,46 @@
-
 * Required and recommended software 
+** External programs
+*** All platforms
 
-git, auctex, ess, latexmk, anything-el, recoll, aspell, org-mode
+ - git
+ - perl
+ - latexmk
+ - aspell 
+ - googlecl 
+   
+*** Linux only
+    
+ - recoll 
 
-** Install recommended software on Debian/Ubuntu
+*** Installation under Debian/Ubuntu
 
-#+BEGIN_SRC sh 
-sudo apt-get install git
-sudo apt-get install recoll
-sudo apt-get aspell 
-cd ~/emacs-genome/genes/; git clone git://github.com/ieure/ssh-el.git
+#+BEGIN_SRC sh :eval never
+sudo apt-get install git perl latexmk aspell recoll
 #+END_SRC
+   
+** Emacs extensions
+   
+*** Emacs extensions downloaded via make init 
 
-** Customize latexmk
+When you in the emacs-genome director execute the command
+#+BEGIN_SRC sh :eval never
+make init
+#+END_SRC
+a couple of emacs extensions are downloaded from github:
+ - org-mode
+ - auctex
+ - ess
+ - SuperMan
+ - ssh.el 
+ - helm
+ - pandoc-mode
+ - google-translate
 
-Create a file "~/.latexmkrc" in which you specify your preferred
-pdf-viewer and similar things. My file currently looks like this:
+See /path/to/emacs-genome/.gitmodules for the addresses.
 
-#+BEGIN_EXAMPLE
-$pdf_previewer = 'start evince';
-$print_type = 'pdf';
-$pdf_mode = 1;
-$pdflatex = 'pdflatex -interaction=nonstopmode -halt-on-error';
-#+END_EXAMPLE
+# *** Emacs extensions not downloaded via make init
 
-** Initialize recoll
-
-* Usage
+* The things you can do when you have the emacs-genome
 ** Copy-and-paste
 
 Whenever you copy (M-w) or kill (C-w) text in a region, it will be
@@ -72,22 +86,35 @@ highlight region (e.g. M-h or M-l) then M-j
 
 ** Latexing a document
 
-M-j RETURN make-pdf RETURN
+#+BEGIN_EXAMPLE   
+\M-j RETURN make-pdf RETURN
+#+END_EXAMPLE
+   
+** Exporting an org document to pdf via latex
 
-** Opening a maybe existing file  
+#+BEGIN_EXAMPLE   
+\M-k
+#+END_EXAMPLE
 
-Recoll (xapian) text indexing engine plugin, derived from
-anything-c-source-locate
+** Finding files based on contents  
 
-The command anything-recoll-search (short-cut: C-v) is an emacs
-interface to the recoll search.
+This requires the text indexing engine recoll (xapian) which you need
+to adapt to your directory structure, and a crontab entry to update
+regularly, e.g.,
+
+#+BEGIN_EXAMPLE
+0 *  * * * RCLCRON_RCLINDEX= RECOLL_CONFDIR="/path/to/.recoll/" recollindex   
+#+END_EXAMPLE
+
+The command helm-recoll-search (short-cut: C-v) is an emacs interface
+to the recoll search.
 
 Example:
 
-C-v  then type "ext:bib helen blanche"
+C-v  then type "ext:bib helene blanche"
 
-shows list of bibtex files which include all of the words "helen" and
-"blanche".
+This should show list of bibtex files which include both words:
+"helene" and "blanche".
 
 * Modifying the settings
 
@@ -101,50 +128,13 @@ the sample init file.
 http://www.masteringemacs.org/articles/2011/02/08/mastering-key-bindings-emacs/
 
 
-:PROPERTIES:
-#+TITLE: 
+#+TITLE: The emacs-genome manual
 #+LANGUAGE:  en
 #+OPTIONS:   H:3 num:t toc:nil \n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
 #+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil tags:not-in-toc author:nil
 #+LaTeX_HEADER:\usepackage{authblk}
 #+LaTeX_HEADER:\usepackage{natbib}
-#+LaTeX_HEADER:\usepackage[table,usenames,dvipsnames]{xcolor}
-#+LaTeX_HEADER:\definecolor{lightGray}{gray}{0.98}
-#+LaTeX_HEADER:\definecolor{medioGray}{gray}{0.83}
-#+LaTeX_HEADER:\rowcolors{1}{medioGray}{lightGray}
-#+LaTeX_HEADER:\usepackage{attachfile}
-#+LaTeX_HEADER:\usepackage{array}
-#+LaTeX_HEADER:\usepackage[T1]{fontenc}
-#+LaTeX_HEADER:\renewcommand*\familydefault{\sfdefault}
 #+LaTeX_HEADER:\author{Thomas Alexander Gerds}
 #+LaTeX_HEADER:\affil{Department of Biostatistics, University of Copenhagen}
-#+LaTeX_HEADER:\newcommand{\sfootnote}[1]{\renewcommand{\thefootnote}{\fnsymbol{footnote}}\footnote{#1}\setcounter{footnote}{0}\renewcommand{\thefootnote}{\arabic{foot note}}}
-#+LaTeX_HEADER:\makeatletter\def\blfootnote{\xdef\@thefnmark{}\@footnotetext}\makeatother
-#+EXPORT_SELECT_TAGS: export
-#+EXPORT_EXCLUDE_TAGS: noexport
-#+LaTeX_HEADER \itemsep2pt
-#+COLUMNS: %40ITEM %10BEAMER_env(Env) %9BEAMER_envargs(Env Args) %4BEAMER_col(Col) %10BEAMER_extra(Extra)
-#+LaTeX_HEADER: \usepackage{color}
-#+LATEX_HEADER: \lstset{
-#+LATEX_HEADER: keywordstyle=\color{blue},
-#+LATEX_HEADER: commentstyle=\color{red},
-#+LATEX_HEADER: stringstyle=\color[rgb]{0,.5,0},
-#+LATEX_HEADER: basicstyle=\ttfamily\small,
-#+LATEX_HEADER: columns=fullflexible,
-#+LATEX_HEADER: breaklines=true,        % sets automatic line breaking
-#+LATEX_HEADER: breakatwhitespace=false,    % sets if automatic breaks should only happen at whitespace
-#+LATEX_HEADER: numbers=left,
-#+LATEX_HEADER: numberstyle=\ttfamily\tiny\color{gray},
-#+LATEX_HEADER: stepnumber=1,
-#+LATEX_HEADER: numbersep=10pt,
-#+LATEX_HEADER: backgroundcolor=\color{white},
-#+LATEX_HEADER: tabsize=4,
-#+LATEX_HEADER: showspaces=false,
-#+LATEX_HEADER: showstringspaces=false,
-#+LATEX_HEADER: xleftmargin=.23in,
-#+LATEX_HEADER: frame=single,
-#+LATEX_HEADER: basewidth={0.5em,0.4em}
-#+LATEX_HEADER: }
 #+PROPERTY: session *R* 
 #+PROPERTY: cache yes
-:END:
