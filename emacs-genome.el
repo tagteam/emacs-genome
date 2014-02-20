@@ -1,10 +1,47 @@
+;;; emacs-genome.el --- loading snps and genes from the emacs-genome
+
+;; Copyright (C) 2014  Thomas Alexander Gerds
+
+;; Author: Thomas Alexander Gerds <tag@biostat.ku.dk>
+;; Keywords: convenience
+
+;; This program is free software; you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; This program is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
+
+;; You should have received a copy of the GNU General Public License
+;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+;;; Commentary:
+
+;; This file loads the available snps and genes from the emacs-genome.
+;; In order to use this put the following lines into your .emacs:
+;;  
+;; (setq emacs-genome "/path/to/emacs-genome")
+;;
+;; E.g., under linux, when you have downloaded
+;; the emacs-genome in your HOME directory you can say:
+;;
+;; (setq emacs-genome (concat (getenv "HOME") "/emacs-genome/"))
+;; 
+
+;;; Code:
+
+
 (defun try-require (lib)
   (if (ignore-errors (require lib))
       (message "library %s loaded" (symbol-name lib))
     (message "Error loading %s" lib)))
+(unless (file-exists-p emacs-genome)
+  (error (concat  "File: " emacs-genome " does not exist")))
 
-;; (set-face-attribute 'default nil :font "DejaVu Sans Mono" :height 120)
-(add-to-list 'load-path (concat (getenv "HOME") "/emacs-genome/snps/"))
+(add-to-list 'load-path (concat emacs-genome "snps/"))
 ;; general purpose utility functions
 (try-require 'eg-utility-snps)
 ;; look, feel and behaviour
@@ -28,18 +65,18 @@
 (if (try-require 'winner)
     (winner-mode))
 ;; pandoc: converting code and documents
-(when (file-exists-p (concat (getenv "HOME") "/emacs-genome/genes/pandoc-mode/"))
-  (add-to-list 'load-path (concat (getenv "HOME") "/emacs-genome/genes/pandoc-mode/"))
+(when (file-exists-p (concat emacs-genome "/genes/pandoc-mode/"))
+  (add-to-list 'load-path (concat emacs-genome "/genes/pandoc-mode/"))
   (try-require 'pandoc-mode))
 ;; pandoc: converting code and documents
-(when (file-exists-p (concat (getenv "HOME") "/emacs-genome/genes/google-translate/"))
-  (add-to-list 'load-path (concat (getenv "HOME") "/emacs-genome/genes/google-translate/"))
+(when (file-exists-p (concat emacs-genome "/genes/google-translate/"))
+  (add-to-list 'load-path (concat emacs-genome "/genes/google-translate/"))
   (try-require 'google-translate))
 ;; 
 (try-require 'browse-url-snps)
 ;; Emacs speaks statistics
 ;; (setq ess-etc-directory-list nil)
-(add-to-list 'load-path (concat (getenv "HOME") "/emacs-genome/genes/ess/lisp"))
+(add-to-list 'load-path (concat emacs-genome "/genes/ess/lisp"))
 (try-require 'ess-site)
 (try-require 'ess-R-snps)
 (try-require 'ess-edit)
@@ -56,11 +93,11 @@
 (try-require 'org-snps)
 (try-require 'org-structure-snps)
 ;; superman
-(add-to-list 'load-path (concat (getenv "HOME") "/emacs-genome/genes/SuperMan/lisp"))
+(add-to-list 'load-path (concat emacs-genome "/genes/SuperMan/lisp"))
 (try-require 'superman-manager)
 (superman-parse-projects)
 ;; file-list 
-(add-to-list 'load-path (concat (getenv "HOME") "/emacs-genome/genes/file-list/"))
+(add-to-list 'load-path (concat emacs-genome "/genes/file-list/"))
 (try-require 'file-list)
 ;; start-up behaviour
 (setq inhibit-startup-screen 'yes-please)
@@ -69,3 +106,7 @@
 			      (recentf-open-files)))
 ;; (split-window-vertically)
 ;; (totd)));; tip of the day
+
+
+(provide 'emacs-genome)
+;;; emacs-genome.el ends here

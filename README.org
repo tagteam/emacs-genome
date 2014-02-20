@@ -49,13 +49,14 @@ make init
 
 ** Step 3: init
 
-To use the emacs-genome add the following line to the end of your
-.emacs file:
+To use the emacs-genome adapt the following lines and add them to the
+end of your .emacs file:
 
 #+BEGIN_SRC emacs-lisp :export code :eval ever
-(load-file "~/emacs-genome/emacs-genome.el")
+(setq emacs-genome "/path/to/emacs-genome")
+(load-file (concat emacs-genome "/emacs-genome.el"))
 #+END_SRC
 
-Relaunch emacs and read the [[file:emacs-genome-manual.org][manual]].
+Relaunch emacs and read the [[file:emacs-genome-manual.org][manual]]. 
 
 

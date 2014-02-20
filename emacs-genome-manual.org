@@ -1,32 +1,113 @@
-* Required and recommended software 
+* Install required and recommended software 
 ** External programs
 *** All platforms
+**** Version control: git
 
- - git
- - perl
- - latexmk
- - aspell 
- - googlecl 
-   
-*** Linux only
-    
- - recoll 
-
-*** Installation under Debian/Ubuntu
+Under Debian/Ubuntu get it like this:     
 
 #+BEGIN_SRC sh :eval never
-sudo apt-get install git perl latexmk aspell recoll
+sudo apt-get install git 
 #+END_SRC
-   
+
+**** Statistics: R
+
+Under Debian/Ubuntu get the latest version like this, see
+http://www.ubuntuupdates.org:
+
+First find your ubuntu version via
+
+#+BEGIN_SRC sh :eval never
+lsb_release -a
+#+END_SRC
+
+Then edit the /et/apt/sources.list (replace "precise" with your ubuntu
+version):
+
+#+BEGIN_SRC sh :eval never
+sudo emacs /etc/apt/sources.list
+deb http://cran.at.r-project.org/bin/linux/ubuntu/ precise/
+#+END_SRC
+
+Add the keys
+
+#+BEGIN_SRC sh :eval never
+gpg --keyserver keyserver.ubuntu.com --recv-key E084DAB9
+gpg -a --export E084DAB9 | sudo apt-key add -
+#+END_SRC
+
+And finally install
+
+#+BEGIN_SRC sh :eval never
+sudo apt-get update && sudo apt-get upgrade
+sudo apt-get update
+sudo apt-get install r-base
+sudo apt-get install r-base-dev
+#+END_SRC
+
+The R init file is called .Rprofile
+
+**** LaTeX compilation: latexmk
+
+A perl script, which requires perl, which surveys the various files
+involved when compiling a latex document and decides what to do next.
+
+Under Debian/Ubuntu get it like this:     
+
+#+BEGIN_SRC sh :eval never
+sudo apt-get install perl latexmk
+#+END_SRC
+
+The user startup file is called ~/.latexmkrc and used to set among
+other things the pdf viewer. Mine currently looks like this:
+
+#+BEGIN_EXAMPLE
+$pdf_previewer = 'start evince';
+$print_type = 'pdf';
+$pdf_mode = 1;
+$pdflatex = 'pdflatex -interaction=nonstopmode -file-line-error -synctex=1 %O %S';
+#+END_EXAMPLE
+
+**** Spell checking: aspell
+
+#+BEGIN_SRC sh :eval never
+sudo apt-get install aspell
+#+END_SRC     
+
+**** Google command line tool
+     
+Under Debian/Ubuntu get it like this
+
+#+BEGIN_SRC sh :eval never
+sudo apt-get install googlecl
+#+END_SRC
+
+**** File synchronization: unison
+
+Under Debian/Ubuntu get it like this
+     
+#+BEGIN_SRC sh :eval never
+sudo apt-get install unison
+#+END_SRC     
+ 
+*** Linux only
+**** Full-text search tool: recoll 
+#+BEGIN_SRC sh :eval never
+sudo apt-get install recoll
+#+END_SRC     
+
+To configure this program open it and choose "Index configuration"
+under menu item Preferences.
+     
 ** Emacs extensions
    
-*** Emacs extensions downloaded via make init 
+*** Emacs extensions
 
-When you in the emacs-genome director execute the command
+The following list of emacs extensions are registered as git
+submodules of the emacs-genome, and hence downloaded when you run:
 #+BEGIN_SRC sh :eval never
 make init
 #+END_SRC
-a couple of emacs extensions are downloaded from github:
+
  - org-mode
  - auctex
  - ess
@@ -36,7 +117,7 @@ a couple of emacs extensions are downloaded from github:
  - pandoc-mode
  - google-translate
 
-See /path/to/emacs-genome/.gitmodules for the addresses.
+See /path/to/emacs-genome/.gitmodules for their addresses.
 
 # *** Emacs extensions not downloaded via make init
 
@@ -59,7 +140,6 @@ the same key (M-y) is used for both commands.
 My fingers have difficulties to reach M-w, so I use M-r instead.
 
 ** Completion
-
 *** Completing words and sequences of words
 
 Start typing, press M-i (dabbrev-expand). This inserts the closest
@@ -82,7 +162,8 @@ used for completion.
 
 ** Evaluating R code
 
-highlight region (e.g. M-h or M-l) then M-j 
+First highlight a region (\M-h) or the line (\M-l) then send the
+region to the R-process (\M-j).
 
 ** Latexing a document
 
@@ -98,23 +179,51 @@ highlight region (e.g. M-h or M-l) then M-j
 
 ** Finding files based on contents  
 
-This requires the text indexing engine recoll (xapian) which you need
-to adapt to your directory structure, and a crontab entry to update
-regularly, e.g.,
-
+The full-text search tool recoll is accessed from within emacs with
+the command
 #+BEGIN_EXAMPLE
-0 *  * * * RCLCRON_RCLINDEX= RECOLL_CONFDIR="/path/to/.recoll/" recollindex   
+M-x helm-recoll-search RET the short-cut is \C-v (control v)
 #+END_EXAMPLE
-
-The command helm-recoll-search (short-cut: C-v) is an emacs interface
-to the recoll search.
-
 Example:
 
-C-v  then type "ext:bib helene blanche"
+C-v  then type somethin like
 
-This should show list of bibtex files which include both words:
-"helene" and "blanche".
+#+BEGIN_EXAMPLE
+ext:bib helene blanche
+#+END_EXAMPLE
+
+to find bibtex files which include both words: "helene" and "blanche".
+
+** Translating text
+
+To translate the text at the cursor position (or the marked region) do
+
+#+BEGIN_EXAMPLE
+M-x google-translate-at-point RET
+#+END_EXAMPLE   
+
+then choose two languages and wait for the result.
+
+Suppose you often translate from one language to another, e.g., from
+Danish to English, then it may be desirable to get rid of the choosing
+the languages step and even to replace the original text by the
+translated text. A simple wrapper command (which can be bound to a
+key) looks like this:
+
+#+BEGIN_SRC  emacs-lisp :export code :eval never
+(defun da2en ()
+  (interactive)
+  (let* ((beg (region-beginning))
+	 (end (region-end))
+	 (text (buffer-substring-no-properties beg end))
+	 (translation (save-excursion
+			(google-translate-translate "da" "en" text)
+			(let* ((t-end (previous-single-property-change (point-max) 'face))
+			       (t-beg (previous-single-property-change t-end 'face)))
+			  (buffer-substring-no-properties t-beg t-end)))))
+    (delete-region beg end)
+    (insert translation)))
+#+END_SRC
 
 * Modifying the settings
 
