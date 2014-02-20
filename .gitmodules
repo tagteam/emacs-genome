@@ -12,13 +12,16 @@
 	url = git://github.com/kkholst/SuperMan.git
 [submodule "genes/ssh-el"]
 	path = genes/ssh-el
-	url =  git://github.com/ieure/ssh-el.git
+	url = git://github.com/ieure/ssh-el.git
 [submodule "genes/helm"]
 	path = genes/helm
-	url =  git://github.com/emacs-helm/helm.git
+	url = git://github.com/emacs-helm/helm.git
 [submodule "genes/pandoc-mode"]
 	path = genes/pandoc-mode
 	url = git://github.com/joostkremers/pandoc-mode
 [submodule "genes/google-translate"]
 	path = genes/google-translate
+	url = git://github.com/manzyuk/google-translate
+[submodule "google-translate"]
+	path = google-translate
 	url = git://github.com/manzyuk/google-translate
