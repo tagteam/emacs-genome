@@ -23,9 +23,8 @@
 ;;; Code:
 
 ;;{{{ loading packages
-
-(add-to-list 'load-path (concat (getenv "HOME") "/emacs-genome/genes/org-mode/lisp"))
-(add-to-list 'load-path (concat (getenv "HOME") "/emacs-genome/genes/org-mode/contrib/lisp/"))
+(add-to-list 'load-path (concat emacs-genome "/genes/org-mode/lisp"))
+(add-to-list 'load-path (concat emacs-genome "/genes/org-mode/contrib/lisp"))
 
 (try-require 'org)
 (try-require 'org-capture)
@@ -45,6 +44,7 @@
 (global-set-key "\C-cb" 'org-iswitchb)
 ;;}}}
 ;;{{{ babel emacs-lisp
+(setq org-babel-hash-show-time t)
 
 (defun eg/indent-elisp-org-buffer ()
   (interactive)
@@ -191,10 +191,9 @@
 	       ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
 
 ;; [NO-DEFAULT-PACKAGES]
-
 (add-to-list 'org-latex-classes
 	     `("beamer"
-	       ,(concat "\\documentclass{article}
+	       ,(concat "\\documentclass{beamer}
                [PACKAGES]
                [EXTRA]"
 			eg/org-latex-common-header-string
@@ -253,7 +252,9 @@
 
 (add-to-list 'org-latex-classes
 	     '("simauth"
-               "\\documentclass{simauth}"
+	       "[NO-DEFAULT-PACKAGES]
+                [NO-PACKAGES]
+                \\documentclass{simauth}"
                ("\\section{%s}" . "\\section*{%s}")
                ("\\subsection{%s}" . "\\subsection*{%s}")
                ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
@@ -364,6 +365,7 @@
    (perl . t)
    (latex . t)
    (ditaa . t)
+   (org . t)
    (dot . t)
    (shell . t)
    (R . t)))

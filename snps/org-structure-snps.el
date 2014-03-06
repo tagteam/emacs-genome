@@ -58,50 +58,16 @@ user-full-name
 (add-to-list
  'org-structure-template-alist
  `("Lb" ,(concat "#+TITLE: 
-#+Author: " user-full-name 
+#+Author: "
+user-full-name 
 "\n#+DATE: 
 #+EMAIL:" user-mail-address
-"\n#+LANGUAGE:  en
-#+OPTIONS: H:3 num:t toc:nil \\n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
+"\n#+OPTIONS: H:3 num:t toc:nil \\n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
 #+OPTIONS: TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil tags:not-in-toc
 #+INFOJS_OPT: view:nil toc:nil ltoc:t mouse:underline buttons:0 path:http://orgmode.org/org-info.js
-#+SELECT_TAGS: export
-#+EXCLUDE_TAGS: noexport
-#+LINK_UP:
-#+LINK_HOME: 
 #+startup: beamer
 #+LaTeX_CLASS: beamer
-#+Latex_header:\\institute{Department of Biostatistics, University of Copenhagen}
 #  #+ LaTeX_class_options: [handout]
-#+LaTeX_HEADER:\\usepackage{natbib}
-#+LaTeX_HEADER: \\usepackage{attachfile}
-#+LaTeX_HEADER: \\usepackage{array}
-#+LATEX_CMD: pdflatex
-#+LaTeX_HEADER: \\usetheme[numbers]{Dresden}
-#+LaTeX_HEADER: \\setbeamercolor{structure}{fg=white}
-#+LaTeX_HEADER: \\setbeamercolor*{palette primary}{fg=black,bg=white}
-#+LaTeX_HEADER: \\setbeamercolor*{palette secondary}{use=structure,fg=white,bg=white}
-#+LaTeX_HEADER: \\setbeamercolor*{palette tertiary}{use=structure,fg=white,bg=structure.fg!50!black}
-#+LaTeX_HEADER: \\setbeamercolor*{palette quaternary}{fg=white,bg=black}
-#+LaTeX_HEADER: \\setbeamercolor{item}{fg=red}
-#+LaTeX_HEADER: \\setbeamercolor{subitem}{fg=orange}
-#+LaTeX_HEADER: \\setbeamercolor*{sidebar}{use=structure,bg=structure.fg}
-#+LaTeX_HEADER: \\setbeamercolor*{palette sidebar primary}{use=structure,fg=structure.fg!10}
-#+LaTeX_HEADER: \\setbeamercolor*{palette sidebar secondary}{fg=white}
-#+LaTeX_HEADER: \\setbeamercolor*{palette sidebar tertiary}{use=structure,fg=structure.fg!50}
-#+LaTeX_HEADER: \\setbeamercolor*{palette sidebar quaternary}{fg=white}
-#+LaTeX_HEADER: \\setbeamercolor*{titlelike}{parent=palette primary}
-#+LaTeX_HEADER: \\setbeamercolor*{separation line}{}
-#+LaTeX_HEADER: \\setbeamercolor*{fine separation line}{}
-#+LaTeX_HEADER: \\setbeamertemplate{footline}[frame number]
-#+LaTeX_HEADER: \\setbeamertemplate{navigation symbols}{}
-#+LaTeX_HEADER: \\setbeamertemplate{subitem}[circle]
-#+LaTeX_HEADER: \\newcommand{\\sfootnote}[1]{\\renewcommand{\\thefootnote}{\\fnsymbol{footnote}}\\footnote{#1}\\setcounter{footnote}{0}\\renewcommand{\\thefootnote}{\\arabic{foot note}}}
-#+LaTeX_HEADER:\\makeatletter\\def\\blfootnote{\\xdef\\@thefnmark{}\\@footnotetext}\\makeatother
-#+LATEX_HEADER: \\RequirePackage{fancyvrb}
-#+LATEX_HEADER: \\DefineVerbatimEnvironment{verbatim}{Verbatim}{fontsize=\\small,formatcom = {\\color[rgb]{0.5,0,0}}}
-#+SELECT_TAGS: export
-#+EXCLUDE_TAGS: noexport
 #+PROPERTY: session *R*
 #+PROPERTY: cache yes")))
 

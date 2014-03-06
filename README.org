@@ -55,6 +55,7 @@ end of your .emacs file:
 #+BEGIN_SRC emacs-lisp :export code :eval ever
 (setq emacs-genome "/path/to/emacs-genome")
 (load-file (concat emacs-genome "/emacs-genome.el"))
+(setq superman-home "~/metropolis") ;; for project management
 #+END_SRC
 
 Relaunch emacs and read the [[file:emacs-genome-manual.org][manual]]. 
