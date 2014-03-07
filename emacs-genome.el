@@ -41,7 +41,7 @@
 (unless (file-exists-p emacs-genome)
   (error (concat  "File: " emacs-genome " does not exist")))
 
-(add-to-list 'load-path (concat emacs-genome "snps/"))
+(add-to-list 'load-path (concat emacs-genome "/snps/"))
 ;; general purpose utility functions
 (try-require 'eg-utility-snps)
 ;; look, feel and behaviour

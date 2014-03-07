@@ -99,7 +99,6 @@ To configure this program open it and choose "Index configuration"
 under menu item Preferences.
      
 ** Emacs extensions
-   
 *** Emacs extensions
 
 The following list of emacs extensions are registered as git
