@@ -82,16 +82,15 @@ user-full-name
 (add-to-list
  'org-structure-template-alist
  '("Bc" "
-*** Column 1                                          :B_ignoreheading:
+**** Untitled column
     :PROPERTIES:
-    :BEAMER_env: ignoreheading
     :BEAMER_col: 0.5
     :END:
 
-*** Column 2                                            :B_ignoreheading:
+**** Titled column 
     :PROPERTIES:
     :BEAMER_col: 0.5
-    :BEAMER_env: ignoreheading
+    :BEAMER_env: block
     :END:
     "))
 

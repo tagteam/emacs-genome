@@ -48,9 +48,11 @@
 (try-require 'appearance-snps)
 ;; anything
 (try-require 'recentf)
-(try-require 'helm)
-(try-require 'helm-config)
-(try-require 'helm-recoll-snps)
+(when (file-exists-p (concat emacs-genome "/genes/helm/"))
+  (add-to-list 'load-path (concat emacs-genome "/genes/helm/"))
+  (try-require 'helm)
+  (try-require 'helm-config)
+  (try-require 'helm-recoll-snps))
 ;; shell within emacs
 (try-require 'shell-snps)
 ;; completion
@@ -90,20 +92,28 @@
 (when (and (try-require 'folding) (try-require 'fold-dwim))
   (try-require 'folding-snps))
 ;; orgmode
-(try-require 'org-snps)
-(try-require 'org-structure-snps)
-;; superman
-(add-to-list 'load-path (concat emacs-genome "/genes/SuperMan/lisp"))
-(try-require 'superman-manager)
-(superman-parse-projects)
-;; file-list 
-(add-to-list 'load-path (concat emacs-genome "/genes/file-list/"))
-(try-require 'file-list)
+(when (file-exists-p (concat emacs-genome "/genes/org-mode/lisp/"))
+  (add-to-list 'load-path (concat emacs-genome "/org-mode/lisp/"))
+  (try-require 'org-snps)
+  (try-require 'org-structure-snps)
+  ;; superman
+  (add-to-list 'load-path (concat emacs-genome "/genes/SuperMan/lisp"))
+  (setq superman (try-require 'superman-manager))
+  (superman-parse-projects))
 ;; start-up behaviour
 (setq inhibit-startup-screen 'yes-please)
-(add-hook 'after-init-hook '(lambda ()
-			      (recentf-mode)
-			      (recentf-open-files)))
+(if (and superman (file-exists-p superman-profile))
+    (add-hook 'after-init-hook '(lambda ()
+				  (recentf-mode)
+				  (recentf-open-files)
+				  (S)
+				  (S-todo)
+				  (superman-calendar)
+				  (recentf-open-files)
+				  (superman-set-config "*SuperMan-Calendar* / *S-TODO* | *S* / *Open Recent*")))
+  (add-hook 'after-init-hook '(lambda ()
+				(recentf-mode)
+				(recentf-open-files))))
 ;; (split-window-vertically)
 ;; (totd)));; tip of the day
 
