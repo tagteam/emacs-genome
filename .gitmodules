@@ -25,3 +25,6 @@
 [submodule "google-translate"]
 	path = google-translate
 	url = git://github.com/manzyuk/google-translate
+[submodule "emacs-iedit"]
+	path = emacs-iedit
+	url = git://github.com/eproxus/emacs-iedit
