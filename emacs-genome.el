@@ -53,6 +53,10 @@
   (try-require 'helm)
   (try-require 'helm-config)
   (try-require 'helm-recoll-snps))
+;; iedit
+(when (file-exists-p (concat emacs-genome "/genes/emacs-iedit/"))
+  (add-to-list 'load-path (concat emacs-genome "/genes/emacs-iedit/"))
+  (try-require 'iedit))
 ;; shell within emacs
 (try-require 'shell-snps)
 ;; completion
