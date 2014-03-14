@@ -28,3 +28,6 @@
 [submodule "emacs-iedit"]
 	path = emacs-iedit
 	url = git://github.com/eproxus/emacs-iedit
+[submodule "genes/emacs-iedit"]
+	path = genes/emacs-iedit
+	url = https://github.com/eproxus/emacs-iedit.git
