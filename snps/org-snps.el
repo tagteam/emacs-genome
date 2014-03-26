@@ -130,15 +130,15 @@
 	      "showstringspaces=false,\n"
 	      "xleftmargin=.23in,\n"
 	      "frame=single,\n"
-	      "basewidth={0.5em,0.4em}\n"
+	      "basewidth={0.5em,0.4em},\n"
+              "literate={<-}{{\\,$\\leftarrow$\\,}}1 {~}{{\\,$\\sim$\\,}}1"
 	      "}"))
 (setq eg/org-latex-common-header-string
       (concat
        eg/org-latex-listing-options-string))
 ;; (setq eg/org-latex-special-footnotes
 ;; "\newcommand{\sfootnote}[1]{\renewcommand{\thefootnote}{\fnsymbol{footnote}}\footnote{#1}\setcounter{footnote}{0}\renewcommand{\thefootnote}{\arabic{foot note}}}
-  ;; \makeatletter\def\blfootnote{\xdef\@thefnmark{}\@footnotetext}\makeatother")
-       
+;; \makeatletter\def\blfootnote{\xdef\@thefnmark{}\@footnotetext}\makeatother")
 (setq org-latex-packages-alist
       '(("" "listings")
 	("" "color")
