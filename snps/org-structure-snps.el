@@ -46,7 +46,7 @@
  `("La" ,(concat "#+TITLE: 
 #+LANGUAGE:  en
 #+OPTIONS:   H:3 num:t toc:nil \\n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
-#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil tags:not-in-toc author:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:t todo:t pri:nil tags:not-in-toc author:nil
 #+LaTeX_CLASS: org-article
 #+LaTeX_HEADER:\\usepackage{authblk}
 #+LaTeX_HEADER:\\author{"
@@ -63,7 +63,7 @@ user-full-name
 "\n#+DATE: 
 #+EMAIL:" user-mail-address
 "\n#+OPTIONS: H:3 num:t toc:nil \\n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
-#+OPTIONS: TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil tags:not-in-toc
+#+OPTIONS: TeX:t LaTeX:t skip:nil d:t todo:t pri:nil tags:not-in-toc
 #+INFOJS_OPT: view:nil toc:nil ltoc:t mouse:underline buttons:0 path:http://orgmode.org/org-info.js
 #+startup: beamer
 #+LaTeX_CLASS: beamer
