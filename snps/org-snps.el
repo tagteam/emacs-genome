@@ -111,6 +111,9 @@
 ;;     to use a setupfile, e.g.
 ;;     #+SETUPFILE: ~/emacs-genome/genes/org-templates/bio.org
 
+(setq org-latex-listing-options
+      '(("numers" "left")))
+
 (setq eg/org-latex-listing-options-string
       (concat "\\lstset{\n"
 	      "keywordstyle=\\color{blue},\n"

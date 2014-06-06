@@ -33,6 +33,17 @@
 
 ;;; Code:
 
+;; (unless (boundp 'emacs-genome)
+  ;; (error "path to emacs-genome not defined"))
+
+
+(if (not (boundp 'emacs-genome))
+    (error "Variable emacs-genome does not locate a directory, your emacs-genome.")
+  (if (file-directory-p emacs-genome)
+      (message "Reading genes and snps in " emacs-genome)
+    (if (string-match "\\(.*/emacs-genome/\\).*" emacs-genome)
+	(setq emacs-genome (match-string 1 emacs-genome))
+      (error "Variable emacs-genome is not a valid directory"))))
 
 (defun try-require (lib)
   (if (ignore-errors (require lib))
@@ -96,21 +107,24 @@
 (when (and (try-require 'folding) (try-require 'fold-dwim))
   (try-require 'folding-snps))
 ;; orgmode
-(when (file-exists-p (concat emacs-genome "/genes/org-mode/lisp/"))
-  (add-to-list 'load-path (concat emacs-genome "/org-mode/lisp/"))
-  (try-require 'org-snps)
-  (try-require 'org-structure-snps)
-  ;; superman
-  (add-to-list 'load-path (concat emacs-genome "/genes/SuperMan/lisp"))
-  (setq superman (try-require 'superman-manager))
-  (superman-parse-projects))
+(if (file-exists-p (concat emacs-genome "/genes/org-mode/lisp/"))
+    (progn
+      (add-to-list 'load-path (concat emacs-genome "/org-mode/lisp/"))
+      (try-require 'org-snps)
+      (try-require 'org-structure-snps)
+      ;; superman
+      (add-to-list 'load-path (concat emacs-genome "/genes/SuperMan/lisp"))
+      (setq superman (try-require 'superman-manager))
+      (if (file-exists-p superman-profile)
+	  (superman-parse-projects)))
+  (setq superman nil))
 ;; start-up behaviour
 (setq inhibit-startup-screen 'yes-please)
 (if (and superman (file-exists-p superman-profile))
     (add-hook 'after-init-hook '(lambda ()
 				  ;;(recentf-mode)
 				  ;;(recentf-open-files)
-				   (S)
+				  (S)
 				  ;; (S-todo)
 				  ;;(superman-calendar)
 				  ;; (recentf-open-files)

@@ -29,7 +29,7 @@
 ;; <Rc code only
 ;; <Rr results only
 ;; <Rb both results and code
-;; <Re like Rb but output format example instead of raw
+;; <Re like Rb but output format example instead of raw org
 ;; <Rg graphics, prompts for file name
 ;; <Rt inline text: paste R results into the middle of a sentence 
 
@@ -67,7 +67,11 @@ user-full-name
 #+INFOJS_OPT: view:nil toc:nil ltoc:t mouse:underline buttons:0 path:http://orgmode.org/org-info.js
 #+startup: beamer
 #+LaTeX_CLASS: beamer
+#  #+LaTeX_HEADER: \\titlegraphic{\\includegraphics[width=3cm]{xx.jpeg}}
 #  #+ LaTeX_class_options: [handout]
+#+LaTeX_HEADER: \\subtitle{}
+#+LaTeX_HEADER: \\setbeamertemplate{footline}[frame number]
+#+LaTeX_HEADER: \\setbeamertemplate{navigation symbols}{}
 #+PROPERTY: session *R*
 #+PROPERTY: cache yes")))
 
@@ -101,7 +105,7 @@ user-full-name
  '("Rs" "#+BEGIN_SRC R :results silent  :exports none :session *R* :cache yes \n?\n#+END_SRC"))
 (add-to-list
  'org-structure-template-alist
- '("Rb" "#+BEGIN_SRC R :exports both :results output raw  :session *R* :cache yes \n?\n#+END_SRC"))
+ '("Rb" "#+BEGIN_SRC R :exports both :results output org  :session *R* :cache yes \n?\n#+END_SRC"))
 
 (add-to-list
  'org-structure-template-alist
@@ -115,13 +119,13 @@ user-full-name
  '("Rl" "#+BEGIN_SRC R  :results output latex   :exports results  :session *R*\n?\n#+END_SRC"))
 (add-to-list
  'org-structure-template-alist
- '("Ro" "#+BEGIN_SRC R  :results output raw  :exports results  :session *R* :cache yes \n?\n#+END_SRC"))
+ '("Ro" "#+BEGIN_SRC R  :results output org  :exports results  :session *R* :cache yes \n?\n#+END_SRC"))
 (add-to-list
  'org-structure-template-alist
  '("Rv" "#+BEGIN_SRC R  :results value  :exports results  :session *R* :cache yes \n?\n#+END_SRC"))
 (add-to-list
  'org-structure-template-alist
- '("Rr" "#+BEGIN_SRC R  :results output raw  :exports results  :session *R* :cache yes \n?\n#+END_SRC"))
+ '("Rr" "#+BEGIN_SRC R  :results output org  :exports results  :session *R* :cache yes \n?\n#+END_SRC"))
 (add-to-list
  'org-structure-template-alist
  '("Rg" "#+BEGIN_SRC R :results graphics  :file %file :exports results :session *R* :cache yes \n?\n#+END_SRC"))
@@ -135,15 +139,14 @@ user-full-name
 ;;}}}
 
 
-
 ;;{{{ graphics
 (add-to-list
  'org-structure-template-alist
- '("Lw" "#+ATTR_LATEX: width=0.7\\textwidth"))
+ '("Lw" "#+ATTR_LATEX: :width 0.7\\textwidth"))
 
 (add-to-list
  'org-structure-template-alist
- '("d" "#+ATTR_LATEX: width=0.5\\textwidth\n\n#+BEGIN_SRC dot :file figure1.png :cmdline -Kdot -Tpng \n digraph overview{\"A\" -> {\"b\",\"c\"};}?\n#+END_SRC"))
+ '("d" "#+ATTR_LATEX: :width 0.5\\textwidth\n\n#+BEGIN_SRC dot :file figure1.png :cmdline -Kdot -Tpng \n digraph overview{\"A\" -> {\"b\",\"c\"};}?\n#+END_SRC"))
 ;;}}}
 
 (provide 'org-structure-snps)

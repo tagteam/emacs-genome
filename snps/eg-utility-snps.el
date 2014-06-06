@@ -54,11 +54,11 @@
   (interactive)
   (if (featurep 'xemacs)
       (progn
-	(set-frame-position (buffer-dedicated-frame) 40 0)
+	(set-frame-position (buffer-dedicated-frame) 40 30)
 	(set-frame-pixel-height (buffer-dedicated-frame) (/ (* (device-pixel-height) 8) 9))
 	(set-frame-pixel-width (buffer-dedicated-frame) (/ (* (device-pixel-width) 23) 24)))
     (when (window-system)
-      (set-frame-position (selected-frame) 40 0)
+      (set-frame-position (selected-frame) 40 30)
       (set-frame-height (selected-frame)
 			(/ (* (/ (x-display-pixel-height) (frame-char-height)) 8) 9))
       (set-frame-width (selected-frame)
