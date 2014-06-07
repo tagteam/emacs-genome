@@ -105,7 +105,7 @@ user-full-name
  '("Rs" "#+BEGIN_SRC R :results silent  :exports none :session *R* :cache yes \n?\n#+END_SRC"))
 (add-to-list
  'org-structure-template-alist
- '("Rb" "#+BEGIN_SRC R :exports both :results output org  :session *R* :cache yes \n?\n#+END_SRC"))
+ '("Rb" "#+BEGIN_SRC R :exports both :results output raw drawer  :session *R* :cache yes \n?\n#+END_SRC"))
 
 (add-to-list
  'org-structure-template-alist
@@ -119,13 +119,13 @@ user-full-name
  '("Rl" "#+BEGIN_SRC R  :results output latex   :exports results  :session *R*\n?\n#+END_SRC"))
 (add-to-list
  'org-structure-template-alist
- '("Ro" "#+BEGIN_SRC R  :results output org  :exports results  :session *R* :cache yes \n?\n#+END_SRC"))
+ '("Ro" "#+BEGIN_SRC R  :results output raw drawer  :exports results  :session *R* :cache yes \n?\n#+END_SRC"))
 (add-to-list
  'org-structure-template-alist
  '("Rv" "#+BEGIN_SRC R  :results value  :exports results  :session *R* :cache yes \n?\n#+END_SRC"))
 (add-to-list
  'org-structure-template-alist
- '("Rr" "#+BEGIN_SRC R  :results output org  :exports results  :session *R* :cache yes \n?\n#+END_SRC"))
+ '("Rr" "#+BEGIN_SRC R  :results output raw drawer  :exports results  :session *R* :cache yes \n?\n#+END_SRC"))
 (add-to-list
  'org-structure-template-alist
  '("Rg" "#+BEGIN_SRC R :results graphics  :file %file :exports results :session *R* :cache yes \n?\n#+END_SRC"))
