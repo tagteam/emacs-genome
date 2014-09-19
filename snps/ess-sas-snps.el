@@ -1,8 +1,9 @@
 ;;
 ;; ess-sas-snps.el
 ;;
-;; Copyright (C) 2002-2011, Thomas A. Gerds <tag@biostat.ku.dk>
+;; Copyright (C) 2002-2014, Thomas A. Gerds <tag@biostat.ku.dk>
 ;; Version: 1.1.1 (21 April 2011)
+;; Version: 1.1.2 (09 July 2014)
 ;;
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -28,6 +29,8 @@
 ;;; 
 ;;; Code
 ;;; --------------------------------------------------------------------
+
+(require 'superman-manager)
 
 (defvar sas-mode-map nil		
   "Keymap for SAS-mode")
@@ -133,11 +136,12 @@ The corresponding face should be set using `customize-faces'.")
 	     temp-dialect))
     (ess-SAS-pre-run-hook temp-dialect)
     (inferior-ess)
-    (switch-to-buffer ess-sas-start-buffer)
-    (let ((ess-sas-log-buffer
-	   (get-buffer (concat "*" ess-current-process-name ".log*")))
-	  (ess-sas-lst-buffer
-	   (get-buffer (concat "*" ess-current-process-name ".lst*"))))
+    (let* ((sas-proc ess-current-process-name)
+	   (ess-sas-log-buffer
+	    (get-buffer (concat "*" sas-proc ".log*")))
+	   (ess-sas-lst-buffer
+	    (get-buffer (concat "*" sas-proc ".lst*"))))
+      ;; (switch-to-buffer ess-sas-start-buffer)
       (set-buffer ess-sas-lst-buffer)
       (eg/SAS-lst-mode)
       (set-buffer ess-sas-log-buffer)
@@ -277,6 +281,7 @@ i.e. let `ess-sas-submit-command' be your local equivalent of
 	     (setq ess-directory (file-name-as-directory
 				  (concat (getenv "HOME"))))))
 
+;; (setq SAS-mode-hook nil)
 (add-hook 'SAS-mode-hook
 	  '(lambda ()
 	     (setq comment-start "\/\*") 
@@ -292,7 +297,6 @@ i.e. let `ess-sas-submit-command' be your local equivalent of
 	       (local-set-key "\M-q" 'indent-region)
 	       (local-set-key "\M-\C-p" 'run-proc-print)
 	       (local-set-key "\M-P" 'run-proc-print1)
-	       (local-set-key 'delete 'delete-char)
 	       (local-unset-key [(meta backspace)])))
 ;	       (if sas-toolbar
 ;		   (sas-toolbar-install-toolbar))

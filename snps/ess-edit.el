@@ -190,17 +190,32 @@ current paragraph, call to function, current line, etc"
     (insert "c(" string ")")))
 
 (defun ess-edit-insert-path (&optional arg)
+  "Insert a directory path as a string.
+If ARG is non-nil prompt for directory path else
+use value of `default-directory' which usually is the
+directory in which the current file lives.
+
+If `ess-edit-expand-file-name-relative' is non-nil
+replace absolute path to home directory by '~'.
+"
   (interactive "P")
-  (if arg
-      (insert "\""
-	      (ess-edit-expand-file-name
-	       (read-directory-name "insert directory name: ")) "\"")
-    (insert "\"" default-directory "\"")
+  (let ((dir (if arg
+		 (read-directory-name "insert directory name: ")
+	       default-directory)))
+    (insert "\""
+	    (ess-edit-expand-file-name dir ) "\"")
     (backward-char 1)))
 
 (defun ess-edit-insert-file-name ()
+  "Prompt for a file name and insert it as a string.
+
+If `ess-edit-expand-file-name-relative' is non-nil
+replace absolute path to home directory by '~'.
+"  
   (interactive)
-  (insert "\"" (ess-edit-expand-file-name (read-file-name "insert filename: ")) "\""))
+  (insert "\""
+	  (ess-edit-expand-file-name
+	   (read-file-name "insert filename: ")) "\""))
   
 
 (defun ess-edit-insert-read ()

@@ -43,7 +43,9 @@
  '("Lf" "#+LaTeX: \\blfootnote{}"))
 (add-to-list
  'org-structure-template-alist
- `("La" ,(concat "#+TITLE: 
+ `("La" ,(concat
+	  "* COMMENT HEADER\n\n"
+	  "#+TITLE: 
 #+LANGUAGE:  en
 #+OPTIONS:   H:3 num:t toc:nil \\n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
 #+OPTIONS:   TeX:t LaTeX:t skip:nil d:t todo:t pri:nil tags:not-in-toc author:nil
@@ -57,10 +59,11 @@ user-full-name
 
 (add-to-list
  'org-structure-template-alist
- `("Lb" ,(concat "#+TITLE: 
-#+Author: "
-user-full-name 
-"\n#+DATE: 
+ `("Lb" ,(concat
+	  "* COMMENT HEADER\n"
+	  "\n#+TITLE:"
+	  "\n#+Author: " user-full-name 
+	  "\n#+DATE: 
 #+EMAIL:" user-mail-address
 "\n#+OPTIONS: H:3 num:t toc:nil \\n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
 #+OPTIONS: TeX:t LaTeX:t skip:nil d:t todo:t pri:nil tags:not-in-toc
@@ -72,6 +75,10 @@ user-full-name
 #+LaTeX_HEADER: \\subtitle{}
 #+LaTeX_HEADER: \\setbeamertemplate{footline}[frame number]
 #+LaTeX_HEADER: \\setbeamertemplate{navigation symbols}{}
+#+LATEX_HEADER: \\RequirePackage{fancyvrb}
+#+LATEX_HEADER: \\RequirePackage{array}
+#+LATEX_HEADER: \\RequirePackage{multirow}
+#+LATEX_HEADER: \\DefineVerbatimEnvironment{verbatim}{Verbatim}{fontsize=\\small,formatcom = {\\color[rgb]{0.5,0,0}}}
 #+PROPERTY: session *R*
 #+PROPERTY: cache yes")))
 
@@ -123,15 +130,18 @@ user-full-name
 (add-to-list
  'org-structure-template-alist
  '("Rv" "#+BEGIN_SRC R  :results value  :exports results  :session *R* :cache yes \n?\n#+END_SRC"))
+
+
 (add-to-list
  'org-structure-template-alist
  '("Rr" "#+BEGIN_SRC R  :results output raw drawer  :exports results  :session *R* :cache yes \n?\n#+END_SRC"))
 (add-to-list
  'org-structure-template-alist
- '("Rg" "#+BEGIN_SRC R :results graphics  :file %file :exports results :session *R* :cache yes \n?\n#+END_SRC"))
+ '("Rg"  "#+BEGIN_SRC R :results graphics :file %file :exports results :session *R* :cache yes \n?\n#+END_SRC"))
 (add-to-list
  'org-structure-template-alist
  '("RG" "#+BEGIN_SRC R :results graphics  :file filename :exports results :session *R* :cache yes \n?\n#+END_SRC"))
+
 (add-to-list
  'org-structure-template-alist
  '("Rt" "SRC_R{}"))
@@ -142,7 +152,7 @@ user-full-name
 ;;{{{ graphics
 (add-to-list
  'org-structure-template-alist
- '("Lw" "#+ATTR_LATEX: :width 0.7\\textwidth"))
+ '("Lw" "#+LABEL: fig:1\n#+ATTR_LATEX: :width 0.7\\textwidth\n#+CAPTION:\n#+results: fig1"))
 
 (add-to-list
  'org-structure-template-alist

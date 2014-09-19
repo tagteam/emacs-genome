@@ -50,8 +50,8 @@
 (global-set-key "\M-r" 'copy-region-as-kill)
 ;;; window cycling
 (global-set-key [(f8)] 'winner-undo)
-(global-set-key [(control f8)] 'winner-redo)
-(global-set-key [(meta f8)] 'winner-redo)
+(global-set-key [(meta f8)] 'winner-cycle)
+(global-set-key [(shift f8)] 'winner-cycle-backwards)
 (global-set-key "\M-o" 'other-window)          ; move to next window clockwise
 (global-set-key "\M-O" '(lambda ()(interactive) (other-window -1))) ; move to next window anti-clockwise
 ;; (global-set-key [M-left] 'windmove-left)          ; move to left windnow
