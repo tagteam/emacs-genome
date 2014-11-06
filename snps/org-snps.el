@@ -264,14 +264,19 @@
                ("\\paragraph{%s}" . "\\paragraph*{%s}")
                ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
 
+
 (add-to-list 'org-latex-classes
-	     '("amsart"
-               "\\documentclass{amsart}"
-               ("\\section{%s}" . "\\section*{%s}")
-               ("\\subsection{%s}" . "\\subsection*{%s}")
-               ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
-               ("\\paragraph{%s}" . "\\paragraph*{%s}")
-               ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
+	     `("amsart"
+	       ,(concat "\\documentclass{amsart}
+               [PACKAGES]
+               [EXTRA]"
+			eg/org-latex-common-header-string
+			"\\renewcommand*\\familydefault{\\sfdefault}\n\\itemsep2pt")
+	       ("\\section{%s}" . "\\section*{%s}")
+	       ("\\subsection{%s}" . "\\subsection*{%s}")
+	       ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+	       ("\\paragraph{%s}" . "\\paragraph*{%s}")
+	       ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
 
 
 (add-to-list 'org-latex-classes
@@ -370,7 +375,7 @@
    (ditaa . t)
    (org . t)
    (dot . t)
-   (shell . t)
+;;   (shell . t)
    (R . t)))
 
 ;; Do not confirm source block evaluation
@@ -495,6 +500,57 @@
       (mapcar #'(lambda (x)
 		 (concat "[["(replace-in-string (file-list-make-file-name x) (getenv "HOME") "~") "]["
 			 (car x) "]]")) files))))
+;;}}}
+
+;;{{{ fix latex $$
+
+(defun fix-latex-$$ ()
+  (interactive)
+  (goto-char (point-min))
+  (while (re-search-forward "\\$\\$" nil t)
+    (replace-match "\n\\begin{equation*}\n" nil t)
+    (when (re-search-forward "\\$\\$" nil t)
+      (replace-match "\n\\end{equation*}\n" nil t))))
+;;}}}
+
+;;{{{ 
+(defun org2rmd ()
+  (interactive)
+  ;; headers
+  (goto-char (point-min))
+  (while (outline-next-heading)
+    (let* ((lev (org-current-level))
+	   len)
+      (beginning-of-line)
+      (looking-at "^[\\*]+ ")
+      (if (> lev 2)
+	  (replace-match (concat
+			  (make-string lev (string-to-char "#"))
+			  " "))
+	(replace-match "")
+	(end-of-line)
+	(setq len (- (point) (point-at-bol)))
+	(insert "\n" (make-string len (string-to-char
+				       (if (= lev 1)
+					   "=" "-")))))))
+  ;; R blocks
+  (goto-char (point-min))
+  (while (re-search-forward org-block-regexp nil t)
+    (goto-char (match-beginning 0))
+    (let ((info (org-babel-get-src-block-info)))
+      (if (string= (car info) "R")
+	  (let ((echo
+		 (cdr
+		  (assoc ':exports (caddr info)))))
+	    (save-excursion
+	      (re-search-forward "#\\+END_?SRC" nil t)
+	      (replace-match "```"))
+	    (kill-whole-line)
+	    (if (member echo (list "none" "results"))
+		(insert "```{r, echo=FALSE}\n")
+	      (insert "```{r, echo=TRUE}\n")))
+	(re-search-forward "#\\+END_?SRC" nil t)))))
+
 ;;}}}
 
 (provide 'org-snps)
