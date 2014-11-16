@@ -31,3 +31,12 @@
 [submodule "genes/emacs-iedit"]
 	path = genes/emacs-iedit
 	url = https://github.com/eproxus/emacs-iedit.git
+[submodule "genes/emacs-sos"]
+	path = genes/emacs-sos
+	url = https://github.com/omouse/emacs-sos.git
+[submodule "genes/emacs-epackage--lib-header-button"]
+	path = genes/emacs-epackage--lib-header-button
+	url = https://github.com/jaalto/emacs-epackage--lib-header-button.git
+[submodule "genes/ido-ubiquitous"]
+	path = genes/ido-ubiquitous
+	url = https://github.com/DarwinAwardWinner/ido-ubiquitous
