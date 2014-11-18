@@ -22,6 +22,9 @@
 
 ;;; Code:
 
+
+
+
 ;;{{{ loading packages
 (add-to-list 'load-path (concat emacs-genome "/genes/org-mode/lisp"))
 (add-to-list 'load-path (concat emacs-genome "/genes/org-mode/contrib/lisp"))
@@ -200,6 +203,38 @@
                [PACKAGES]
                [EXTRA]"
 			eg/org-latex-common-header-string
+			"\\renewcommand*\\familydefault{\\sfdefault}\n\\itemsep2pt")	     
+	       ("\\section{%s}" . "\\section*{%s}")
+	       ("\\subsection{%s}" . "\\subsection*{%s}")
+	       ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+	       ("\\paragraph{%s}" . "\\paragraph*{%s}")
+	       ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
+
+(add-to-list 'org-latex-classes
+	     `("dresdenbeamer"
+	       ,(concat "\\documentclass{beamer}
+               [PACKAGES]
+               [EXTRA]"
+			eg/org-latex-common-header-string
+			"\\usetheme[numbers]{Dresden}
+\\setbeamercolor{structure}{fg=white}
+\\setbeamercolor*{palette primary}{fg=black,bg=white}
+\\setbeamercolor*{palette secondary}{use=structure,fg=white,bg=white}
+\\setbeamercolor*{palette tertiary}{use=structure,fg=white,bg=structure.fg!50!black}
+\\setbeamercolor*{palette quaternary}{fg=white,bg=black}
+\\setbeamercolor{item}{fg=red}
+\\setbeamercolor{subitem}{fg=orange}
+\\setbeamercolor*{sidebar}{use=structure,bg=structure.fg}
+\\setbeamercolor*{palette sidebar primary}{use=structure,fg=structure.fg!10}
+\\setbeamercolor*{palette sidebar secondary}{fg=white}
+\\setbeamercolor*{palette sidebar tertiary}{use=structure,fg=structure.fg!50}
+\\setbeamercolor*{palette sidebar quaternary}{fg=white}
+\\setbeamercolor*{titlelike}{parent=palette primary}
+\\setbeamercolor*{separation line}{}
+\\setbeamercolor*{fine separation line}{}
+\\setbeamertemplate{footline}[frame number]
+\\setbeamertemplate{navigation symbols}{}
+\\setbeamertemplate{subitem}[circle]"
 			"\\renewcommand*\\familydefault{\\sfdefault}\n\\itemsep2pt")	     
 	       ("\\section{%s}" . "\\section*{%s}")
 	       ("\\subsection{%s}" . "\\subsection*{%s}")
@@ -414,6 +449,51 @@
 	      (define-key org-mode-map "_" 'eg/org-smart-underscore)))
 
 ;;}}}
+;;{{{ header line buttons
+
+(defvar org-headline-map (make-sparse-keymap)
+  "Keymap for `org-headline-mode', a minor mode.
+Use this map to set additional keybindings for when Org-mode is used.")
+
+(defvar org-headline-mode-hook nil
+  "Hook for the minor `org-headline-mode'.")
+
+(define-minor-mode org-headline-mode
+  "Minor mode for headline buttons in header line in org buffers."
+  nil "" org-headline-map
+  (org-set-local
+   'header-line-format
+   (concat "Export: "
+	   (header-button-format "PDF" :action 'superman-export-as-latex)
+	   " "
+	   (header-button-format "HTML" :action
+				 #'(lambda (&optional arg)
+				     (let ((org-export-show-temporary-export-buffer nil))
+				       (org-html-export-as-html)
+				       (superman-browse-this-file))))
+	   " "
+	   (header-button-format "DOCX" :action 'org-odt-export-to-odt)
+	   " View: "
+	   (header-button-format "HTML" :action 'superman-browse-this-file)
+	   " "
+	   (header-button-format "PDF" :action  #'(lambda (&optional arg) (interactive)
+						    (org-open-file (concat
+								    (file-name-sans-extension
+								     (buffer-file-name))
+								    ".pdf"))))
+	   " "
+	   (header-button-format "DOCX" :action #'(lambda (&optional arg) (interactive)
+						    (org-open-file (concat
+								    (file-name-sans-extension
+								     (buffer-file-name))
+								    ".docx"))))
+	   )))
+
+
+(add-hook 'org-mode-hook #'(lambda ()
+			     (when (buffer-file-name)
+			       (org-headline-mode))))
+;;}}}
 ;;{{{ list documents
 
  ;; Example:
@@ -510,7 +590,12 @@
   (while (re-search-forward "\\$\\$" nil t)
     (replace-match "\n\\begin{equation*}\n" nil t)
     (when (re-search-forward "\\$\\$" nil t)
-      (replace-match "\n\\end{equation*}\n" nil t))))
+      (replace-match "\n\\end{equation*}\n" nil t)))
+    (goto-char (point-min))
+    ;; (string-to-char " ") 160
+   (while (re-search-forward " " nil t)
+     (replace-match " ")))
+
 ;;}}}
 
 ;;{{{ 

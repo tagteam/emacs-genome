@@ -107,6 +107,9 @@
 (when (and (try-require 'folding) (try-require 'fold-dwim))
   (try-require 'folding-snps))
 ;; orgmode
+(when (file-exists-p (concat emacs-genome "/genes/emacs-epackage--lib-header-button/"))
+  (add-to-list 'load-path (concat emacs-genome "/genes/emacs-epackage--lib-header-button"))
+  (try-require 'header-button))
 (if (file-exists-p (concat emacs-genome "/genes/org-mode/lisp/"))
     (progn
       (add-to-list 'load-path (concat emacs-genome "/org-mode/lisp/"))

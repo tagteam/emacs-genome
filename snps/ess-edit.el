@@ -273,23 +273,23 @@ replace absolute path to home directory by '~'.
 				   (if (looking-at "[ \t]*\n") t nil)) breaks))
 	(if (or (string= (match-string 0) "\"")  (string= (match-string 0) "\'"))
 	    (re-search-forward (match-string 0) nil t)
-	(backward-char 1)
-	(forward-sexp))))
+	  (backward-char 1)
+	  (forward-sexp))))
     ;; if there are more breaks than half the number of
     ;; arguments then delete breaks else add linebreaks
     (setq delete-p
 	  (if force nil
 	    (> (length (delete nil (mapcar 'cdr breaks))) (* 0.5 (length breaks)))))
     (while breaks (goto-char (caar breaks))
-      (if delete-p
-	  (if (cdar breaks)
-	      (delete-region (caar breaks) (+ (point) (skip-chars-forward " \t\n"))))
-	(if (not (cdar breaks))
-	    (insert "\n")))
-      (setq breaks (cdr breaks)))
+	   (if delete-p
+	       (if (cdar breaks)
+		   (delete-region (caar breaks) (+ (point) (skip-chars-forward " \t\n"))))
+	     (if (not (cdar breaks))
+		 (insert "\n")))
+	   (setq breaks (cdr breaks)))
     (goto-char (- beg 1))
-    (ess-indent-exp)
-    (ess-edit-read-call arg 'go)))
+    (ess-indent-exp)))
+;; (ess-edit-read-call arg 'go)))
 
 
 (defun ess-edit-summary-at-point ()
