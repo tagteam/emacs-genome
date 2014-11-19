@@ -57,8 +57,12 @@
 (try-require 'eg-utility-snps)
 ;; look, feel and behaviour
 (try-require 'appearance-snps)
-;; anything
+;; recent files
 (try-require 'recentf)
+;; sos
+(add-to-list 'load-path (concat emacs-genome "/genes/emacs-sos/"))
+(try-require 'sos)
+;; anything/helm
 (when (file-exists-p (concat emacs-genome "/genes/helm/"))
   (add-to-list 'load-path (concat emacs-genome "/genes/helm/"))
   (try-require 'helm)
@@ -135,7 +139,7 @@
   ;; (superman-set-config "*SuperMan-Calendar* / *S-TODO* | *S* / *Open Recent*")))
   (add-hook 'after-init-hook '(lambda ()
 				(recentf-mode)
-				(recentf-open-files))))
+				(ignore-errors (recentf-open-files)))))
 ;; (split-window-vertically)
 ;; (totd)));; tip of the day
 

@@ -436,63 +436,24 @@
 ;;}}}
 ;;{{{ org mode hook
 
+(defun superman-run-R-or-export-as-latex (&optional debug)
+  (interactive "P")
+  (if (string= (car (org-babel-get-src-block-info)) "R")
+      (superman-ess-eval-and-go)
+    (superman-export-as-latex 'debug)))
+
 (add-hook 'org-mode-hook
 	  #'(lambda nil
 	      (require 'superman-export)
 	      (define-key org-mode-map [(f12)] 'org-shifttab)
 	      (define-key org-mode-map [(meta k)] 'superman-control-latex-export)
-	      (define-key org-mode-map [(meta j)] 'superman-export-as-latex)
+	      (define-key org-mode-map [(meta j)] 'superman-run-R-or-export-as-latex)
 	      (define-key org-mode-map [(control shift e)] 'eg/org-lazy-load)
 	      (define-key org-mode-map [(control xx)] 'eg/org-lazy-load)
 	      (define-key org-mode-map "\M-F" 'ess-eval-function-and-go)
 	      (define-key org-mode-map [(meta control i)] 'eg/org-indent)
 	      (define-key org-mode-map "_" 'eg/org-smart-underscore)))
 
-;;}}}
-;;{{{ header line buttons
-
-(defvar org-headline-map (make-sparse-keymap)
-  "Keymap for `org-headline-mode', a minor mode.
-Use this map to set additional keybindings for when Org-mode is used.")
-
-(defvar org-headline-mode-hook nil
-  "Hook for the minor `org-headline-mode'.")
-
-(define-minor-mode org-headline-mode
-  "Minor mode for headline buttons in header line in org buffers."
-  nil "" org-headline-map
-  (org-set-local
-   'header-line-format
-   (concat "Export: "
-	   (header-button-format "PDF" :action 'superman-export-as-latex)
-	   " "
-	   (header-button-format "HTML" :action
-				 #'(lambda (&optional arg)
-				     (let ((org-export-show-temporary-export-buffer nil))
-				       (org-html-export-as-html)
-				       (superman-browse-this-file))))
-	   " "
-	   (header-button-format "DOCX" :action 'org-odt-export-to-odt)
-	   " View: "
-	   (header-button-format "HTML" :action 'superman-browse-this-file)
-	   " "
-	   (header-button-format "PDF" :action  #'(lambda (&optional arg) (interactive)
-						    (org-open-file (concat
-								    (file-name-sans-extension
-								     (buffer-file-name))
-								    ".pdf"))))
-	   " "
-	   (header-button-format "DOCX" :action #'(lambda (&optional arg) (interactive)
-						    (org-open-file (concat
-								    (file-name-sans-extension
-								     (buffer-file-name))
-								    ".docx"))))
-	   )))
-
-
-(add-hook 'org-mode-hook #'(lambda ()
-			     (when (buffer-file-name)
-			       (org-headline-mode))))
 ;;}}}
 ;;{{{ list documents
 
