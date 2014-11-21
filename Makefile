@@ -13,6 +13,10 @@ all: config root master pull
 
 submodules: master pull
 
+update: config pull
+	@$(MAKE) -si initsubmodules
+	@$(MAKE) -si compile
+
 master: 
 	@git submodule foreach git checkout origin/master
 
