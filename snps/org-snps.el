@@ -138,7 +138,7 @@
 	      "frame=single,\n"
 	      "basewidth={0.5em,0.4em},\n"
               "literate={<-}{{\\,$\\leftarrow$\\,}}1 {~}{{\\,$\\sim$\\,}}1"
-	      "}"))
+	      "}\n"))
 (setq eg/org-latex-common-header-string
       (concat
        eg/org-latex-listing-options-string))
@@ -199,10 +199,10 @@
 ;; [NO-DEFAULT-PACKAGES]
 (add-to-list 'org-latex-classes
 	     `("beamer"
-	       ,(concat "\\documentclass{beamer}
-               [PACKAGES]
-               [EXTRA]"
-			eg/org-latex-common-header-string
+	       ,(concat "\\documentclass{beamer}"
+               "[PACKAGES]"
+	       eg/org-latex-common-header-string 
+               "[EXTRA]"
 			"\\renewcommand*\\familydefault{\\sfdefault}\n\\itemsep2pt")	     
 	       ("\\section{%s}" . "\\section*{%s}")
 	       ("\\subsection{%s}" . "\\subsection*{%s}")
@@ -345,7 +345,9 @@
   "context dependent indent"
   (interactive)
   (if (string= (car (org-babel-get-src-block-info)) "R")
-      (ess-edit-indent-call-sophisticatedly)
+      (save-excursion
+	(ess-edit-indent-call-sophisticatedly)
+	(eg/org-tab))
     (pcomplete)))
 
 (defun eg/org-mark-block-or-element ()
@@ -442,10 +444,19 @@
       (superman-ess-eval-and-go)
     (superman-export-as-latex 'debug)))
 
+;; never want tab to do a tab 
+(setq org-cycle-emulate-tab nil)
+(defun eg/org-tab ()
+  (interactive)
+  (if (string= (car (org-babel-get-src-block-info)) "R")
+      (eg/indent-paragraph)
+    (org-cycle)))
+
 (add-hook 'org-mode-hook
 	  #'(lambda nil
 	      (require 'superman-export)
 	      (define-key org-mode-map [(f12)] 'org-shifttab)
+	      (define-key org-mode-map [(tab)] 'eg/org-tab)	      
 	      (define-key org-mode-map [(meta k)] 'superman-control-latex-export)
 	      (define-key org-mode-map [(meta j)] 'superman-run-R-or-export-as-latex)
 	      (define-key org-mode-map [(control shift e)] 'eg/org-lazy-load)

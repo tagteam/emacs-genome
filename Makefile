@@ -22,6 +22,7 @@ submodules:
 	@cd $(GENES)/org-mode; $(MAKE) -si
 	@cd $(GENES)/ess; ./configure; $(MAKE) -si
 	@cd $(GENES)/auctex; ./configure; $(MAKE) -si 
+	@cd $(GENES)/helm; $(MAKE) -si 
 
 # submaster: 
 #	@git submodule foreach git checkout origin/master
