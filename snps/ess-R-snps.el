@@ -59,6 +59,7 @@
   (define-key ess-mode-map "\M-q" 'eg/indent-paragraph)
   (define-key ess-mode-map "\M-l" 'mark-line)
   (define-key ess-mode-map "\M-k" 'eg-switch-to-R)
+  (define-key ess-mode-map "\C-\M-k" #'(lambda () (interactive)(eg-switch-to-R 't)))
   (define-key ess-mode-map [(backspace)] 'delete-backward-char)
   (define-key ess-mode-map [(meta backspace)] 'backward-kill-word))
 ;;}}}
