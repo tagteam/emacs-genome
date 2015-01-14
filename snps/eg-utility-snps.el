@@ -63,11 +63,10 @@
 			(/ (* (/ (x-display-pixel-height) (frame-char-height)) 8) 9))
       (set-frame-width (selected-frame)
 		       (/ (* (/ (x-display-pixel-width)
-				;; (if (string-match "linuxifsv005.sund.root.ku.dk" system-name)
-				(if (string-match "linuxsund" system-name)
-				    (* (frame-char-width) 2)
+				(if (> (length (terminal-list)) 1)
+				    (* (frame-char-width) (length (terminal-list)))
 				  (frame-char-width)))
-				12) 13)))))
+			     12) 13)))))
 
 
 (defun mark-line (arg)
