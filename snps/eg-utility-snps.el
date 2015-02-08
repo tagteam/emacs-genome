@@ -63,8 +63,10 @@
 			(/ (* (/ (x-display-pixel-height) (frame-char-height)) 8) 9))
       (set-frame-width (selected-frame)
 		       (/ (* (/ (x-display-pixel-width)
-				(if (> (length (terminal-list)) 1)
-				    (* (frame-char-width) (length (terminal-list)))
+				;; (if (> (length (terminal-list)) 1)
+				;; (* (frame-char-width) (length (terminal-list)))
+				(if  (string-match "27909\\|29377" (system-name))
+				    (* (frame-char-width) 2)
 				  (frame-char-width)))
 			     12) 13)))))
 
