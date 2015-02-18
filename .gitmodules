@@ -40,3 +40,6 @@
 [submodule "genes/ido-ubiquitous"]
 	path = genes/ido-ubiquitous
 	url = https://github.com/DarwinAwardWinner/ido-ubiquitous
+[submodule "genes/deft"]
+	path = genes/deft
+	url = git://jblevins.org/git/deft.git
