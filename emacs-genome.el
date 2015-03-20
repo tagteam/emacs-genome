@@ -60,8 +60,13 @@
 ;; recent files
 (try-require 'recentf)
 ;; sos
-(add-to-list 'load-path (concat emacs-genome "/genes/emacs-sos/"))
-(try-require 'sos)
+(when (file-exists-p (concat emacs-genome "/genes/emacs-sos/"))
+  (add-to-list 'load-path (concat emacs-genome "/genes/emacs-sos/"))
+  (try-require 'sos))
+;; deft
+(when (file-exists-p (concat emacs-genome "/genes/deft/"))
+  (add-to-list 'load-path (concat emacs-genome "/genes/deft/"))
+  (try-require 'deft))
 ;; anything/helm
 (when (file-exists-p (concat emacs-genome "/genes/helm/"))
   (add-to-list 'load-path (concat emacs-genome "/genes/helm/"))
