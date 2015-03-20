@@ -288,8 +288,15 @@ replace absolute path to home directory by '~'.
 		 (insert "\n")))
 	   (setq breaks (cdr breaks)))
     (goto-char (- beg 1))
-    (ess-indent-exp)))
-;; (ess-edit-read-call arg 'go)))
+    (if (and
+	 (eq major-mode 'org-mode)
+	 (string= (car (org-babel-get-src-block-info)) "R"))
+	(let ((org-src-preserve-indentation t))
+	  (org-edit-special)
+	  (indent-region (point-min) (point-max))
+	  (org-edit-src-exit))
+      (ess-indent-exp))))
+  ;; (ess-edit-read-call arg 'go)))
 
 
 (defun ess-edit-summary-at-point ()

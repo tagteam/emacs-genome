@@ -345,9 +345,10 @@
   "context dependent indent"
   (interactive)
   (if (string= (car (org-babel-get-src-block-info)) "R")
-      (save-excursion
-	(ess-edit-indent-call-sophisticatedly)
-	(eg/org-tab))
+      ;; (save-excursion
+      (ess-edit-indent-call-sophisticatedly)
+    (eg/org-tab)
+    ;; )
     (pcomplete)))
 
 (defun eg/org-mark-block-or-element ()
@@ -442,7 +443,7 @@
   (interactive "P")
   (if (string= (car (org-babel-get-src-block-info)) "R")
       (superman-ess-eval-and-go)
-    (superman-export-as-latex 'debug)))
+    (superman-org-export-as nil)))
 
 ;; never want tab to do a tab 
 (setq org-cycle-emulate-tab nil)

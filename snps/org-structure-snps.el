@@ -25,7 +25,7 @@
 ;; for Beamer
 ;; <Lb
 ;; and several for R
-;; <Rs silent block
+;; <Rs silent block (no export of results) 
 ;; <Rc code only
 ;; <Rr results only
 ;; <Rb both results and code
@@ -63,6 +63,7 @@ user-full-name
 	  "* COMMENT HEADER\n"
 	  "\n#+TITLE:"
 	  "\n#+Author: " user-full-name 
+	  "\n#+Latex_header:\institute{}"
 	  "\n#+DATE: 
 #+EMAIL:" user-mail-address
 "\n#+OPTIONS: H:3 num:t toc:nil \\n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
@@ -72,6 +73,7 @@ user-full-name
 #+LaTeX_CLASS: beamer
 #  #+LaTeX_HEADER: \\titlegraphic{\\includegraphics[width=3cm]{xx.jpeg}}
 #  #+ LaTeX_class_options: [handout]
+#+LaTeX_class_options: [table] 
 #+LaTeX_HEADER: \\subtitle{}
 #+LaTeX_HEADER: \\setbeamertemplate{footline}[frame number]
 #+LaTeX_HEADER: \\setbeamertemplate{navigation symbols}{}
@@ -82,6 +84,11 @@ user-full-name
 #+PROPERTY: session *R*
 #+PROPERTY: cache yes")))
 
+
+;; Shrinking a slide
+(add-to-list
+ 'org-structure-template-alist
+ '("Lt" "#+ATTR_LaTeX: :align lp{8cm}"))
 
 ;; Shrinking a slide
 (add-to-list
@@ -109,7 +116,7 @@ user-full-name
 ;;{{{ R code objects
 (add-to-list
  'org-structure-template-alist
- '("Rs" "#+BEGIN_SRC R :results silent  :exports none :session *R* :cache yes \n?\n#+END_SRC"))
+ '("Rs" "#+BEGIN_SRC R :results output raw  :exports none :session *R* :cache yes \n?\n#+END_SRC"))
 (add-to-list
  'org-structure-template-alist
  '("Rb" "#+BEGIN_SRC R :exports both :results output raw drawer  :session *R* :cache yes \n?\n#+END_SRC"))
@@ -120,7 +127,7 @@ user-full-name
 
 (add-to-list
  'org-structure-template-alist
- '("Rc" "#+BEGIN_SRC R :exports code :results silent  :session *R* :cache yes \n?\n#+END_SRC"))
+ '("Rc" "#+BEGIN_SRC R :exports code :results output raw  :session *R* :cache yes \n?\n#+END_SRC"))
 (add-to-list
  'org-structure-template-alist
  '("Rl" "#+BEGIN_SRC R  :results output latex   :exports results  :session *R*\n?\n#+END_SRC"))

@@ -84,6 +84,60 @@
     (if  url (browse-url url) (call-interactively 'browse-url))
     ))
 
+(defun browse-url-firefox (url &optional new-window)
+  "Ask the Firefox WWW browser to load URL.
+Default to the URL around or before point.  The strings in
+variable `browse-url-firefox-arguments' are also passed to
+Firefox.
+
+When called interactively, if variable
+`browse-url-new-window-flag' is non-nil, load the document in a
+new Firefox window, otherwise use a random existing one.  A
+non-nil interactive prefix argument reverses the effect of
+`browse-url-new-window-flag'.
+
+If `browse-url-firefox-new-window-is-tab' is non-nil, then
+whenever a document would otherwise be loaded in a new window, it
+is loaded in a new tab in an existing window instead.
+
+When called non-interactively, optional second argument
+NEW-WINDOW is used instead of `browse-url-new-window-flag'.
+
+On MS-Windows systems the optional `new-window' parameter is
+ignored.  Firefox for Windows does not support the \"-remote\"
+command line parameter.  Therefore, the
+`browse-url-new-window-flag' and `browse-url-firefox-new-window-is-tab'
+are ignored as well.  Firefox on Windows will always open the requested
+URL in a new window."
+  (interactive (browse-url-interactive-arg "URL: "))
+  (setq url (browse-url-encode-url url))
+  (let* ((process-environment (browse-url-process-environment))
+	 (use-remote nil) ;; fix for firefox version 36.0
+	  ;; (not (memq system-type '(windows-nt ms-dos))))
+	 (process
+	  (apply 'start-process
+		 (concat "firefox " url) nil
+		 browse-url-firefox-program
+		 (append
+		  browse-url-firefox-arguments
+		  (if use-remote
+		      (list "-remote"
+			    (concat
+			     "openURL("
+			     url
+			     (if (browse-url-maybe-new-window new-window)
+				 (if browse-url-firefox-new-window-is-tab
+				     ",new-tab"
+				   ",new-window"))
+			     ")"))
+		    (list url))))))
+    ;; If we use -remote, the process exits with status code 2 if
+    ;; Firefox is not already running.  The sentinel runs firefox
+    ;; directly if that happens.
+    (when use-remote
+      (set-process-sentinel process
+			    `(lambda (process change)
+			       (browse-url-firefox-sentinel process ,url))))))
 
 (defun google (&optional string)
   (interactive "sString: ")
