@@ -1,6 +1,6 @@
 ;;; emacs-genome.el --- loading snps and genes from the emacs-genome
 
-;; Copyright (C) 2014  Thomas Alexander Gerds
+;; Copyright (C) 2014, 2015  Thomas Alexander Gerds
 
 ;; Author: Thomas Alexander Gerds <tag@biostat.ku.dk>
 ;; Keywords: convenience
@@ -35,8 +35,7 @@
 
 ;; (unless (boundp 'emacs-genome)
   ;; (error "path to emacs-genome not defined"))
-
-
+(add-to-list 'load-path (concat emacs-genome "/genes/org-mode/lisp"))
 (if (not (boundp 'emacs-genome))
     (error "Variable emacs-genome does not locate a directory, your emacs-genome.")
   (if (file-directory-p emacs-genome)
@@ -116,6 +115,7 @@
 (when (and (try-require 'folding) (try-require 'fold-dwim))
   (try-require 'folding-snps))
 ;; orgmode
+
 (when (file-exists-p (concat emacs-genome "/genes/emacs-epackage--lib-header-button/"))
   (add-to-list 'load-path (concat emacs-genome "/genes/emacs-epackage--lib-header-button"))
   (try-require 'header-button))
@@ -123,16 +123,19 @@
     (progn
       (add-to-list 'load-path (concat emacs-genome "/org-mode/lisp/"))
       (try-require 'org-snps)
-      (try-require 'org-structure-snps)
-      ;; superman
-      (add-to-list 'load-path (concat emacs-genome "/genes/SuperMan/lisp"))
-      (setq superman (try-require 'superman-manager))
-      (if (file-exists-p superman-profile)
-	  (superman-parse-projects)))
-  (setq superman nil))
+      (try-require 'org-structure-snps)))
+;; superman
+(add-to-list 'load-path (concat emacs-genome "/genes/SuperMan/lisp"))
+(setq superman (try-require 'superman-manager))
 ;; start-up behaviour
 (setq inhibit-startup-screen 'yes-please)
-(if (and superman (file-exists-p superman-profile))
+;; (message (concat "haha" (if (file-exists-p superman-profile) "huhu" "hehe")))
+(unless (file-exists-p superman-profile)
+  (copy-file (concat emacs-genome "/SuperMan.org")
+	     "~/.SuperMan.org")
+  (setq superman-profile "~/.SuperMan.org"))
+(superman-parse-projects)
+(if (file-exists-p superman-profile)
     (add-hook 'after-init-hook '(lambda ()
 				  ;;(recentf-mode)
 				  ;;(recentf-open-files)
