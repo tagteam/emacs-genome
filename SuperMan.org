@@ -1,0 +1,10 @@
+#+TODO: ACTIVE | PENDING WAITING SLEEPING DONE CANCELED ZOMBI
+
+**** ACTIVE EmacsGenome
+:PROPERTIES:
+:NickName: emacs-genome
+:Location: ~/
+:CATEGORY: SoftWare
+:INDEX: ~/emacs-genome/eg.org
+:LastVisit: <2015-03-24 Tue 17:16>
+:END:
