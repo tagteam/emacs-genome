@@ -44,7 +44,7 @@ commands:
 
 #+BEGIN_SRC sh :eval ever
 cd emacs-genome
-make init
+make 
 #+END_SRC
 
 ** Step 3: init

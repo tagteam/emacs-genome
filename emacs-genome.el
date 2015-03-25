@@ -108,6 +108,7 @@
 ;; ssh
 (try-require 'ssh)
 ;; LaTeX
+(add-to-list 'load-path (concat emacs-genome "/genes/auctex"))
 (try-require 'latex-snps)
 ;; keybindings
 (try-require 'key-snps)

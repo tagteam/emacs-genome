@@ -26,9 +26,9 @@
 ;;; Code:
 
 ;;{{{ load auctex
-(add-to-list  'load-path (concat emacs-genome "/emacs-genome/genes/auctex/"))
-(add-to-list  'load-path (concat emacs-genome "/emacs-genome/genes/auctex/style"))
-(add-to-list  'load-path (concat emacs-genome "/emacs-genome/genes/auctex/preview"))
+(add-to-list  'load-path (concat emacs-genome "/genes/auctex/"))
+(add-to-list  'load-path (concat emacs-genome "/genes/auctex/style"))
+(add-to-list  'load-path (concat emacs-genome "/genes/auctex/preview"))
 
 (unless (ignore-errors (load "auctex.el" nil t t))
   (message "Auctex not loaded"))
