@@ -1,6 +1,6 @@
 ;;; emacs-genome.el --- loading snps and genes from the emacs-genome
 
-;; Copyright (C) 2014, 2015  Thomas Alexander Gerds
+;; Copyright (C) 2014 -- 2015  Thomas Alexander Gerds
 
 ;; Author: Thomas Alexander Gerds <tag@biostat.ku.dk>
 ;; Keywords: convenience
@@ -33,8 +33,7 @@
 
 ;;; Code:
 
-;; (unless (boundp 'emacs-genome)
-  ;; (error "path to emacs-genome not defined"))
+		  
 (add-to-list 'load-path (concat emacs-genome "/genes/org-mode/lisp"))
 (if (not (boundp 'emacs-genome))
     (error "Variable emacs-genome does not locate a directory, your emacs-genome.")

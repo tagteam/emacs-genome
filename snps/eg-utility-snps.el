@@ -1,6 +1,6 @@
 ;;; eg-utility-snps.el --- emacs genome utility functions
 
-;; Copyright (C) 2012  Thomas Alexander Gerds
+;; Copyright (C) 2000-2015  Thomas Alexander Gerds
 
 ;; Author: Thomas Alexander Gerds <tag@linuxifsv007>
 ;; Keywords: convenience
@@ -20,8 +20,8 @@
 
 ;;; Commentary:
 
+;; Few functions that are supposed to make life inside emacs easier. 
 ;; 
-
 ;;; Code:
 
 
@@ -123,12 +123,11 @@ move to with the same argument."
     (widen)))
 
 
-(unless (featurep 'xemacs)
-  (defun kill-entire-line ()
-    (interactive)
-    (progn
-      (beginning-of-line)
-      (kill-line))))
+(defun kill-entire-line ()
+  (interactive)
+  (progn
+    (beginning-of-line)
+    (kill-line)))
 
 (defun eg/mark-paragraph (&optional arg)
   (interactive "p")
@@ -189,6 +188,8 @@ move to with the same argument."
 	    (fill-region beg end nil nil nil))
 	  (when (string-match "ess-\\|c-\\|emacs" (symbol-name major-mode))
 	    (indent-region beg end nil)))))))
- 
+
+   
+
 (provide 'eg-utility-snps)
 ;;; eg-utility-snps.el ends here
