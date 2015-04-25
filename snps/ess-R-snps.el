@@ -36,7 +36,7 @@
 
 ;; I don't like if another frame pops up showing the inferior-ess buffer,
 ;; rather I want unconditionally that the buffer is shown in the current frame.
-(defun ess-buffer-visible-other-frame (buf) nil)
+;; (defun ess-buffer-visible-other-frame (buf) nil)
 
 (setq-default ess-ask-for-ess-directory nil)
 (setq-default ess-directory (concat (getenv "HOME") "/R/"))
@@ -44,8 +44,7 @@
 (setq-default ess-language "R")
 (setq-default ess-dialect "R")
 (setq inferior-ess-font-lock-keywords nil)
-(unless (featurep 'xemacs)
-  (setq ess-eval-deactivate-mark t))
+(setq ess-eval-deactivate-mark t)
 (setq ess-eval-visibly 'nowait)
 (setq ess-eval-visibly-p 'nowait)
 ;;}}}
@@ -54,7 +53,7 @@
 (add-hook 'ess-mode-hook 'eg/R-keybindings)
 (defun eg/R-keybindings ()
   (interactive)
-  (define-key ess-mode-map "\M-j" 'ess-eval-region-and-go)
+  (define-key ess-mode-map "\M-j" 'eg/ess-eval-and-go)
   (define-key ess-mode-map "\M-r" 'copy-region-as-kill)
   (define-key ess-mode-map "\M-q" 'eg/indent-paragraph)
   (define-key ess-mode-map "\M-l" 'mark-line)
@@ -157,25 +156,25 @@
 ;;Your other idea of not adding long commands to the history can be
 ;;handled with comint-input-filter.  For example, the default filter
 ;;rejects short commands.
-(setq comint-input-filter
-      #'(lambda (str)
-	  (and (not (string-match "\\`\\s *\\'" str))
-	       ;; Ignore '!!' and kin
-	       (> (length str) 2)
-	       (< (length str) 300))))
+;; (setq comint-input-filter
+      ;; #'(lambda (str)
+	  ;; (and (not (string-match "\\`\\s *\\'" str))
+	       ;; ;; Ignore '!!' and kin
+	       ;; (> (length str) 2)
+	       ;; (< (length str) 300))))
 
-(defun comint-add-to-input-history (cmd)
-  "Maybe add CMD to the input history.  
-CMD is only added to the input history if `comint-input-filter'
-returns non-nil when called on CMD. If `comint-input-ignoredups' is
-non-nil then duplicates are ignored."
-  (if (and (funcall comint-input-filter cmd)
-	   (or (null comint-input-ignoredups)
-	       (not (ring-p comint-input-ring))
-	       (ring-empty-p comint-input-ring)
-	       (not (string-equal (ring-ref comint-input-ring 0)
-				  cmd))))
-      (ring-insert comint-input-ring cmd)))
+;; (defun comint-add-to-input-history (cmd)
+  ;; "Maybe add CMD to the input history.  
+;; CMD is only added to the input history if `comint-input-filter'
+;; returns non-nil when called on CMD. If `comint-input-ignoredups' is
+;; non-nil then duplicates are ignored."
+  ;; (if (and (funcall comint-input-filter cmd)
+	   ;; (or (null comint-input-ignoredups)
+	       ;; (not (ring-p comint-input-ring))
+	       ;; (ring-empty-p comint-input-ring)
+	       ;; (not (string-equal (ring-ref comint-input-ring 0)
+				  ;; cmd))))
+      ;; (ring-insert comint-input-ring cmd)))
 
 ;;}}}
 ;;{{{ smart underscore
