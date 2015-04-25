@@ -35,6 +35,7 @@
 
 		  
 (add-to-list 'load-path (concat emacs-genome "/genes/org-mode/lisp"))
+(setq org-odt-data-dir (concat emacs-genome "/genes/org-mode/etc/"))
 (if (not (boundp 'emacs-genome))
     (error "Variable emacs-genome does not locate a directory, your emacs-genome.")
   (if (file-directory-p emacs-genome)
