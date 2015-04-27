@@ -105,6 +105,9 @@
 (try-require 'ess-site)
 (try-require 'ess-R-snps)
 (try-require 'ess-edit)
+;; google translate
+(try-require 'google-translate-mode)
+(try-require 'google-translate-snps)
 ;; ssh
 (try-require 'ssh)
 ;; LaTeX
