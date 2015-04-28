@@ -102,8 +102,11 @@
 (try-require 'ess-R-snps)
 (try-require 'ess-edit)
 ;; google translate
+(when (file-exists-p (concat emacs-genome "/genes/auto-dictionary-mode/"))
+  (add-to-list 'load-path (concat emacs-genome "/genes/auto-dictionary-mode/")))
 (try-require 'google-translate-mode)
 (try-require 'google-translate-snps)
+(setq trans-command (concat emacs-genome "/snps/trans"))
 ;; ssh
 (try-require 'ssh)
 ;; LaTeX
@@ -134,6 +137,9 @@
   (copy-file (concat emacs-genome "/SuperMan.org")
 	     "~/.SuperMan.org")
   (setq superman-profile "~/.SuperMan.org"))
+(add-hook 'org-mode-hook #'(lambda ()
+			     (when (buffer-file-name)
+			       (superman-org-headline-mode))))
 (superman-parse-projects)
 (if (file-exists-p superman-profile)
     (add-hook 'after-init-hook '(lambda ()
@@ -148,6 +154,8 @@
   (add-hook 'after-init-hook '(lambda ()
 				(recentf-mode)
 				(ignore-errors (recentf-open-files)))))
+
+
 ;; (split-window-vertically)
 ;; (totd)));; tip of the day
 
