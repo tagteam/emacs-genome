@@ -43,3 +43,6 @@
 [submodule "genes/deft"]
 	path = genes/deft
 	url = git://jblevins.org/git/deft.git
+[submodule "genes/auto-dictionary-mode"]
+	path = genes/auto-dictionary-mode
+	url = https://github.com/nschum/auto-dictionary-mode.git
