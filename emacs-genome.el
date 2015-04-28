@@ -93,10 +93,6 @@
 (when (file-exists-p (concat emacs-genome "/genes/pandoc-mode/"))
   (add-to-list 'load-path (concat emacs-genome "/genes/pandoc-mode/"))
   (try-require 'pandoc-mode))
-;; pandoc: converting code and documents
-(when (file-exists-p (concat emacs-genome "/genes/google-translate/"))
-  (add-to-list 'load-path (concat emacs-genome "/genes/google-translate/"))
-  (try-require 'google-translate))
 ;; 
 (try-require 'browse-url-snps)
 ;; Emacs speaks statistics
