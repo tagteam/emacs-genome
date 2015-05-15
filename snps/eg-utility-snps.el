@@ -184,9 +184,9 @@ move to with the same argument."
 	(let ((beg (progn (backward-paragraph 1) (point)))
 	      (end (progn (forward-paragraph 1)
 			  (point))))
-	  (unless (string-match "ess-\\|c-\\|emacs" (symbol-name major-mode))
+	  (unless (string-match "ess-\\|c-\\|c++\\|emacs" (symbol-name major-mode))
 	    (fill-region beg end nil nil nil))
-	  (when (string-match "ess-\\|c-\\|emacs" (symbol-name major-mode))
+	  (when (string-match "ess-\\|c-\||c++\\|emacs" (symbol-name major-mode))
 	    (indent-region beg end nil)))))))
 
    
