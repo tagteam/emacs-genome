@@ -137,8 +137,9 @@
 	      "xleftmargin=.23in,\n"
 	      "frame=single,\n"
 	      "basewidth={0.5em,0.4em},\n"
-              "literate={<-}{{\\,$\\leftarrow$\\,}}1 {~}{{\\,$\\sim$\\,}}1"
 	      "}\n"))
+ ;; "literate={<-}{{\\,$\\leftarrow$\\,}}1 {~}{{\\,$\\sim$\\,}}1"
+
 (setq eg/org-latex-common-header-string
       (concat
        eg/org-latex-listing-options-string))
