@@ -63,7 +63,7 @@ user-full-name
 	  "* COMMENT HEADER\n"
 	  "\n#+TITLE:"
 	  "\n#+Author: " user-full-name 
-	  "\n#+Latex_header:\institute{}"
+	  "\n#+Latex_header:\\institute{}"
 	  "\n#+DATE: 
 #+EMAIL:" user-mail-address
 "\n#+OPTIONS: H:3 num:t toc:nil \\n:nil @:t ::t |:t ^:t -:t f:t *:t <:t

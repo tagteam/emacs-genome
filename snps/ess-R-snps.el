@@ -38,6 +38,7 @@
 ;; rather I want unconditionally that the buffer is shown in the current frame.
 ;; (defun ess-buffer-visible-other-frame (buf) nil)
 
+;; (setq ess-long+replacement "")
 (setq-default ess-ask-for-ess-directory nil)
 (setq-default ess-directory (concat (getenv "HOME") "/R/"))
 (setq-default ess-history-directory (concat (getenv "HOME") "/R/"))
@@ -45,6 +46,8 @@
 (setq-default ess-dialect "R")
 (setq inferior-ess-font-lock-keywords nil)
 (setq ess-eval-deactivate-mark t)
+(setq ess-eval-visibly 't)
+(setq ess-eval-visibly-p 't)
 (setq ess-eval-visibly 'nowait)
 (setq ess-eval-visibly-p 'nowait)
 ;;}}}

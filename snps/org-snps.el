@@ -1,6 +1,6 @@
 ;;; org-snps.el --- 
 
-;; Copyright (C) 2012  Thomas Alexander Gerds
+;; Copyright (C) 2012-2015  Thomas Alexander Gerds
 
 ;; Author: Thomas Alexander Gerds <tag@linuxifsv007>
 ;; Keywords: convenience
@@ -22,7 +22,19 @@
 
 ;;; Code:
 
-
+(defun org-flag-drawer (flag)
+  "When FLAG is non-nil, hide the drawer we are within.
+Otherwise make it visible."
+  (save-excursion
+    (beginning-of-line 1)
+    (when (looking-at "^[ \t]*:[a-zA-Z][a-zA-Z0-9]*:")
+      (let ((b (match-end 0)))
+	(if (re-search-forward
+	     "^[ \t]*:END:"
+	     (save-excursion (outline-next-heading) (point)) t)
+	    (outline-flag-region b (point-at-eol) flag)
+	  (pop-to-buffer (buffer-name))
+	  (user-error ":END: line missing at position %s buffer %s" b (buffer-name)))))))
 
 
 ;;{{{ loading packages
@@ -132,6 +144,7 @@
 	      "numbersep=10pt,\n"
 	      "backgroundcolor=\\color{white},\n"
 	      "tabsize=4,\n"
+              "keepspaces=true,\n"
 	      "showspaces=false,\n"
 	      "showstringspaces=false,\n"
 	      "xleftmargin=.23in,\n"
@@ -558,7 +571,6 @@
 		 (concat "[["(replace-in-string (file-list-make-file-name x) (getenv "HOME") "~") "]["
 			 (car x) "]]")) files))))
 ;;}}}
-
 ;;{{{ fix latex $$
 
 (defun fix-latex-$$ ()
