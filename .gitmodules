@@ -1,9 +1,6 @@
 [submodule "genes/org-mode"]
 	path = genes/org-mode
 	url = git://orgmode.org/org-mode.git
-[submodule "genes/auctex"]
-	path = genes/auctex
-	url = git://github.com/jwiegley/auctex.git
 [submodule "genes/ess"]
 	path = genes/ess
 	url = git://github.com/emacs-ess/ESS.git
