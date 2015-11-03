@@ -5,6 +5,6 @@
 :NickName: emacs-genome
 :Location: ~/
 :CATEGORY: SoftWare
-:INDEX: ~/emacs-genome/eg.org
+:INDEX: ~/.emacs-genome.org
 :LastVisit: <2015-03-24 Tue 17:16>
 :END:

@@ -33,132 +33,122 @@
 
 ;;; Code:
 
-		  
-(add-to-list 'load-path (concat emacs-genome "/genes/org-mode/lisp"))
-(setq org-odt-data-dir (concat emacs-genome "/genes/org-mode/etc/"))
-(if (not (boundp 'emacs-genome))
-    (error "Variable emacs-genome does not locate a directory, your emacs-genome.")
-  (if (file-directory-p emacs-genome)
-      (message "Reading genes and snps in " emacs-genome)
-    (if (string-match "\\(.*/emacs-genome/\\).*" emacs-genome)
-	(setq emacs-genome (match-string 1 emacs-genome))
-      (error "Variable emacs-genome is not a valid directory"))))
+(if (not (and (boundp 'emacs-genome) 
+	      (file-directory-p emacs-genome)))
+    (error "Cannot load emacs-genome: Variable emacs-genome does not locate a directory.")
+  (message (concat "Reading genes and snps from: " emacs-genome))
+  (if (string-match "\\(.*/emacs-genome/\\).*" emacs-genome)
+      (setq emacs-genome (match-string 1 emacs-genome))
+    (error "Variable emacs-genome is not a valid directory")))
+(let ((eg-load-paths 
+       (list "snps/"
+	     "genes/emacs-iedit/"
+	     "genes/emacs-sos/" 
+	     "genes/deft/"
+	     "genes/mic-paren/"
+	     "genes/helm/"
+	     "genes/pandoc-mode/"
+	     "genes/ess/lisp"
+	     "genes/auctex" 
+	     "genes/org-mode/lisp"
+	     "genes/SuperMan/lisp"
+	     "genes/emacs-epackage--lib-header-button/")))
+  (while eg-load-paths 
+    (add-to-list 'load-path
+		 (expand-file-name (car eg-load-paths) emacs-genome))
+    (setq eg-load-paths (cdr eg-load-paths))))
+	     
 
-(defun try-require (lib)
-  (if (ignore-errors (require lib))
-      (message "library %s loaded" (symbol-name lib))
-    (message "Error loading %s" lib)))
-(unless (file-exists-p emacs-genome)
-  (error (concat  "File: " emacs-genome " does not exist")))
-
-(add-to-list 'load-path (concat emacs-genome "/snps/"))
-;; general purpose utility functions
-(try-require 'eg-utility-snps)
+(require 'use-package)
+;; general purpose look feel behaviour snps
+(use-package eg-utility-snps)
 ;; look, feel and behaviour
-(try-require 'appearance-snps)
-;; recent files
-(try-require 'recentf)
-;; sos
-(when (file-exists-p (concat emacs-genome "/genes/emacs-sos/"))
-  (add-to-list 'load-path (concat emacs-genome "/genes/emacs-sos/"))
-  (try-require 'sos))
-;; deft
-(when (file-exists-p (concat emacs-genome "/genes/deft/"))
-  (add-to-list 'load-path (concat emacs-genome "/genes/deft/"))
-  (try-require 'deft))
-;; anything/helm
-(when (file-exists-p (concat emacs-genome "/genes/helm/"))
-  (add-to-list 'load-path (concat emacs-genome "/genes/helm/"))
-  (try-require 'helm)
-  (try-require 'helm-config)
-  (try-require 'helm-recoll-snps))
+(use-package appearance-snps)
+;; keybindings
+(use-package key-snps)
+;; folding
+(use-package folding
+  :if (require 'fold-dwim)
+  :config 
+  (use-package folding-snps)
+  :commands folding-mode)
+;; completion/expansion
+(use-package hippie-exp
+  :commands hippie-expand)
 ;; iedit
-(when (file-exists-p (concat emacs-genome "/genes/emacs-iedit/"))
-  (add-to-list 'load-path (concat emacs-genome "/genes/emacs-iedit/"))
-  (try-require 'iedit))
-;; shell within emacs
-(try-require 'shell-snps)
-;; completion
-(try-require 'hippie-exp)
+(use-package iedit
+  :commands iedit-mode)
+;; goto-last-change
+(use-package goto-chg 
+  :commands goto-chg)
 ;; buffer cycling
-(try-require 'iswitchb)
-(iswitchb-mode t)
-(setq iswitchb-default-method 'samewindow)
-(setq iswitchb-case t)
-(try-require 'cycle-buffer-snps)
+(use-package cycle-buffer-snps
+  :init 
+  (iswitchb-mode t)
+  (setq iswitchb-default-method 'samewindow)
+  (setq iswitchb-case t))
 ;; window cycling
-(if (try-require 'winner)
-    (winner-mode))
+(use-package winner
+  :config
+  (winner-mode))
+;; browse url
+(use-package browse-url-snps
+  :commands (browse-url google-search-prompt))
+;; recent files
+(use-package recentf
+  :commands recentf-open-files)
+;; sos
+(use-package sos
+  :commands sos)
+;; deft
+(use-package deft)
+;; anything/helm
+(use-package helm
+  :config
+  (use-package helm-config)
+  (use-package helm-recoll-snps))
+;; shell and ssh within emacs
+(use-package shell-snps)
+(use-package ssh)
 ;; pandoc: converting code and documents
-(when (file-exists-p (concat emacs-genome "/genes/pandoc-mode/"))
-  (add-to-list 'load-path (concat emacs-genome "/genes/pandoc-mode/"))
-  (try-require 'pandoc-mode))
-;; 
-(try-require 'browse-url-snps)
+(use-package pandoc-mode)
 ;; Emacs speaks statistics
 ;; (setq ess-etc-directory-list nil)
-(add-to-list 'load-path (concat emacs-genome "/genes/ess/lisp"))
-(try-require 'ess-site)
-(try-require 'ess-R-snps)
-(try-require 'ess-edit)
+(use-package ess-site
+  :config
+  (use-package ess-R-snps)
+  (use-package ess-edit))
 ;; google translate
-(when (file-exists-p (concat emacs-genome "/genes/auto-dictionary-mode/"))
-  (add-to-list 'load-path (concat emacs-genome "/genes/auto-dictionary-mode/")))
-(try-require 'google-translate-mode)
-(try-require 'google-translate-snps)
-(setq trans-command (concat emacs-genome "/snps/trans"))
-;; ssh
-(try-require 'ssh)
+;; (when (file-exists-p (expand-file-name "genes/auto-dictionary-mode/" emacs-genome))
+;; (add-to-list 'load-path (expand-file-name "genes/auto-dictionary-mode/" emacs-genome)))
+;; (setq trans-command (expand-file-name "snps/trans" emacs-genome))
 ;; LaTeX
-(add-to-list 'load-path (concat emacs-genome "/genes/auctex"))
-(try-require 'latex-snps)
-;; keybindings
-(try-require 'key-snps)
-;; folding
-(when (and (try-require 'folding) (try-require 'fold-dwim))
-  (try-require 'folding-snps))
+(use-package latex-snps)
 ;; orgmode
-
-(when (file-exists-p (concat emacs-genome "/genes/emacs-epackage--lib-header-button/"))
-  (add-to-list 'load-path (concat emacs-genome "/genes/emacs-epackage--lib-header-button"))
-  (try-require 'header-button))
-(if (file-exists-p (concat emacs-genome "/genes/org-mode/lisp/"))
-    (progn
-      (add-to-list 'load-path (concat emacs-genome "/org-mode/lisp/"))
-      (try-require 'org-snps)
-      (try-require 'org-structure-snps)))
+(use-package org-mode
+  :config
+  (setq org-odt-data-dir (expand-file-name "genes/org-mode/etc/" emacs-genome))
+  (use-package org-snps)
+  (use-package org-structure-snps))
 ;; superman
-(add-to-list 'load-path (concat emacs-genome "/genes/SuperMan/lisp"))
-(setq superman (try-require 'superman-manager))
+(use-package superman-manager
+  :config
+  ;; project profile
+  (unless (file-exists-p superman-profile)
+    (copy-file (expand-file-name "SuperMan.org" emacs-genome)
+	       "~/.SuperMan.org")
+    (setq superman-profile "~/.SuperMan.org"))
+  (superman-parse-projects) 
+  ;; header buttons
+  (use-package header-button)
+  (add-hook 'org-mode-hook #'(lambda ()
+			       (when (buffer-file-name)
+				 (superman-org-headline-mode)))))
 ;; start-up behaviour
 (setq inhibit-startup-screen 'yes-please)
-;; (message (concat "haha" (if (file-exists-p superman-profile) "huhu" "hehe")))
-(unless (file-exists-p superman-profile)
-  (copy-file (concat emacs-genome "/SuperMan.org")
-	     "~/.SuperMan.org")
-  (setq superman-profile "~/.SuperMan.org"))
-(add-hook 'org-mode-hook #'(lambda ()
-			     (when (buffer-file-name)
-			       (superman-org-headline-mode))))
-(superman-parse-projects)
-(if (file-exists-p superman-profile)
-    (add-hook 'after-init-hook '(lambda ()
-				  ;;(recentf-mode)
-				  ;;(recentf-open-files)
-				  (S)
-				  ;; (S-todo)
-				  ;;(superman-calendar)
-				  ;; (recentf-open-files)
-				  ))
-  ;; (superman-set-config "*SuperMan-Calendar* / *S-TODO* | *S* / *Open Recent*")))
-  (add-hook 'after-init-hook '(lambda ()
-				(recentf-mode)
-				(ignore-errors (recentf-open-files)))))
 
-
-;; (split-window-vertically)
-;; (totd)));; tip of the day
-
+(use-package emacs-genes)
+(add-hook 'after-init-hook 'eg)
 
 (provide 'emacs-genome)
 ;;; emacs-genome.el ends here

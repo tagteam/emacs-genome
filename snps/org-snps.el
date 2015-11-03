@@ -22,35 +22,35 @@
 
 ;;; Code:
 
-(defun org-flag-drawer (flag)
-  "When FLAG is non-nil, hide the drawer we are within.
-Otherwise make it visible."
-  (save-excursion
-    (beginning-of-line 1)
-    (when (looking-at "^[ \t]*:[a-zA-Z][a-zA-Z0-9]*:")
-      (let ((b (match-end 0)))
-	(if (re-search-forward
-	     "^[ \t]*:END:"
-	     (save-excursion (outline-next-heading) (point)) t)
-	    (outline-flag-region b (point-at-eol) flag)
-	  (pop-to-buffer (buffer-name))
-	  (user-error ":END: line missing at position %s buffer %s" b (buffer-name)))))))
+;(defun org-flag-drawer (flag)		
+;  "When FLAG is non-nil, hide the drawer we are within.
+;Otherwise make it visible."
+;  (save-excursion
+;    (beginning-of-line 1)
+;    (when (looking-at "^[ \t]*:[a-zA-Z][a-zA-Z0-9]*:")
+;      (let ((b (match-end 0)))
+;	(if (re-search-forward
+;	     "^[ \t]*:END:"
+;	     (save-excursion (outline-next-heading) (point)) t)
+;	    (outline-flag-region b (point-at-eol) flag)
+;	  (pop-to-buffer (buffer-name))
+;	  (user-error ":END: line missing at position %s buffer %s" b (buffer-name)))))))
 
 
 ;;{{{ loading packages
 (add-to-list 'load-path (concat emacs-genome "/genes/org-mode/lisp"))
 (add-to-list 'load-path (concat emacs-genome "/genes/org-mode/contrib/lisp"))
 
-(try-require 'org)
-(try-require 'org-capture)
-(try-require 'org-agenda)
-(try-require 'ox-bibtex)
-(try-require 'org-clock)
-(try-require 'ob-R)
-(try-require 'ox-latex)
-(try-require 'ox-beamer)
+(use-package org)
+(use-package org-capture)
+(use-package org-agenda)
+(use-package ox-bibtex)
+(use-package org-clock)
+(use-package ob-R)
+(use-package ox-latex)
+(use-package ox-beamer)
 (condition-case nil 
-    (try-require 'ox-odt)
+    (use-package ox-odt)
   (error nil))
 ;;}}}
 ;;{{{ global keys

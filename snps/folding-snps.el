@@ -84,7 +84,6 @@
 ;       (setq font-lock-keywords-alist
 ; 	    (assq-delete-all 'muse-mode font-lock-keywords-alist))))
 ;;}}}
-;;{{{ muse
 
 (unless (featurep 'xemacs)
   (defun kill-entire-line ()
@@ -94,45 +93,6 @@
       (kill-line))))
 
 
-(defun muse-fix-folds ()
-  (interactive)
-  (if folding-mode (folding-mode))
-  (goto-char (point-min))
-  (forward-line 1)
-  (insert "; {{{ Header\n")
-  (while (re-search-forward "; {{{\\|; }}}" nil t)
-    (kill-entire-line))
-  (let ((sec 0)
-	(sub 0)
-	(subsub 0))
-    (goto-char (point-min))
-    (while (re-search-forward "^[*]+[ \t]+\\(.*\\)" nil t)
-      (let ((sectitle (match-string 1))
-	    (num (progn (beginning-of-line)
-			(cond
-			 ((looking-at "^\\*\\*\\*[ \t]")
-			  (setq subsub (+ 1 subsub))
-			  (concat (int-to-string sec)
-				  "."
-				  (int-to-string sub)
-				  (int-to-string subsub)))
-			 ((looking-at "^\\*\\*[ \t]")
-			  (setq subsub 0)
-			  (setq sub (+ 1 sub))
-			  (concat (int-to-string sec)
-				  "."
-				  (int-to-string sub)))
-			 ((looking-at "^\\*[ \t]")
-			  (setq sec (+ 1 sec))
-			  (setq subsub 0 sub 0)
-			  (concat (int-to-string sec)))
-			 (t "")))))
-	(insert "\n; }}}\n; {{{" " *" num "* " sectitle "\n")
-	(forward-line 2)))
-    (goto-char (point-max))
-    (beginning-of-line)
-    (insert "; }}}\n")))
-;;}}}
 ;;{{{ latex
 
 (defun R-fix-folds ()
