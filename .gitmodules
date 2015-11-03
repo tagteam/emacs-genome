@@ -46,3 +46,9 @@
 [submodule "genes/org-mode"]
 	path = genes/org-mode
 	url = git://orgmode.org/org-mode.git
+[submodule "genes/use-package"]
+	path = genes/use-package
+	url = git@github.com:jwiegley/use-package.git
+[submodule "genes/mic-paren"]
+	path = genes/mic-paren
+	url = git@github.com:emacsmirror/mic-paren.git
