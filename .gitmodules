@@ -52,3 +52,6 @@
 [submodule "genes/mic-paren"]
 	path = genes/mic-paren
 	url = git@github.com:emacsmirror/mic-paren.git
+[submodule "genes/mark-down"]
+	path = genes/mark-down
+	url = git@github.com:defunkt/markdown-mode.git
