@@ -17,20 +17,20 @@
 
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
-					;----------------------------------------------------------------------
+;;----------------------------------------------------------------------
 ;; created: Apr 12 2015 (09:51) 
 ;; Version: 
-;; last-updated: Apr 20 2015 (06:57) 
+;; last-updated: Nov  5 2015 (06:32) 
 ;;           By: Thomas Alexander Gerds
-;;     Update #: 27
-					;----------------------------------------------------------------------
+;;     Update #: 33
+;;----------------------------------------------------------------------
 ;; 
 ;;; Commentary: Show emacs genes and test functionality. Then 
 ;;              display either featured functions (buttons) and/or help on
 ;;              how to achieve functionality, e.g., install missing
 ;;              software.
 ;;; Change Log:
-					;----------------------------------------------------------------------
+;;----------------------------------------------------------------------
 ;; 
 ;;; Code:
 ;;; Commentary:
@@ -44,24 +44,30 @@
 		   ("Projects" :fun S)
 		   ("Calendar" :fun superman-calendar)
 		   ("Todo-list" :fun superman-todo)
-		   ("org-mode" :test org)
-		   ("superman"
-		    :test (:genes superman-manager)
-		    :fun superman)
-		   ("R" :test ess)
-		   ;; #'(lambda ()
-		   ;; (and (featurep 'ess)
-		   ;; inferior-R-program-name
-		   ;; (ignore-errors
-		   ;; (R)
-		   ;; (eq major-mode 'inferior-ess-mode))))
-		   ("LaTeX" :test tex-site)
+		   ;; ("org-mode" :test org)
+		   ;; ("superman"
+		   ;; :test (:genes superman-manager)
+		   ;; :fun superman)
+		   ("R" :test ess
+		    :fun eg/start-R
+		    #'(lambda ()
+			(interactive)
+			(and (featurep 'ess)
+			     inferior-R-program-name
+			     (ignore-errors
+			       (R)
+			       (eq major-mode 'inferior-ess-mode)))))
+		   ;; ("LaTeX" :test tex-site)
 		   ;; ("helm" :test helm
 		   ;; :emacs-genes eg-helm-emacs-genes)
 		   ;; ("recentf" :test recentf)
 		   ;;("hippie" :test hippie-exp)
 		   )
   "List of emacs-genome emacs-genes")
+
+(defun eg/start-R ()
+  (interactive)
+  (r 1))
 
 (defvar eg-button-faces
   '(("superman" superman-project-button-face)))
@@ -90,14 +96,14 @@ yet non-functional emacs-genes."
       (emacs-genome-mode)
       (let* ((emacs-genes eg-alist)
 	     (button-width 13))
-	;; (button-width (+ 2 (apply 'max (mapcar (lambda (x) (string-width (car x))) emacs-genes)))))
-	(insert
-	 (superman-make-button
-	  "EmacsGenome"
-	  '(lambda () (interactive) (superman-switch-to-project "emacs-genome"))
-	  'eg-default-genes-button-face nil nil button-width)
-	 "\n\n")
-	(put-text-property (point-min) (1+ (point-min)) 'redo-cmd '(eg t t))
+	(insert "\nYour emacs has been genetically modified.\n\n")
+	;; (insert
+	;; (superman-make-button
+	;; "EmacsGenome"
+	;; '(lambda () (interactive) (superman-switch-to-project "emacs-genome"))
+	;; 'eg-default-genes-button-face nil nil button-width)
+	;; "\n\n")
+	;; (put-text-property (point-min) (1+ (point-min)) 'redo-cmd '(eg t t))
 	(while emacs-genes
 	  (let* ((genes (car emacs-genes))
 		 (this-gene (car genes))

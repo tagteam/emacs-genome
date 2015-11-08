@@ -43,6 +43,7 @@
 (let ((eg-load-paths 
        (list "snps/"
 	     "genes/emacs-iedit/"
+	     "genes/mark-down/"
 	     "genes/emacs-sos/" 
 	     "genes/deft/"
 	     "genes/mic-paren/"
@@ -112,6 +113,7 @@
 (use-package ssh)
 ;; pandoc: converting code and documents
 (use-package pandoc-mode)
+(use-package markdown-mode)
 ;; Emacs speaks statistics
 ;; (setq ess-etc-directory-list nil)
 (use-package ess-site
@@ -125,7 +127,7 @@
 ;; LaTeX
 (use-package latex-snps)
 ;; orgmode
-(use-package org-mode
+(use-package org
   :config
   (setq org-odt-data-dir (expand-file-name "genes/org-mode/etc/" emacs-genome))
   (use-package org-snps)
@@ -134,6 +136,7 @@
 (use-package superman-manager
   :config
   ;; project profile
+  (message (concat "SuperMan profile:" superman-profile))
   (unless (file-exists-p superman-profile)
     (copy-file (expand-file-name "SuperMan.org" emacs-genome)
 	       "~/.SuperMan.org")

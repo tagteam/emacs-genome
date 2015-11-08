@@ -98,6 +98,13 @@
 	     (define-key org-mode-map [(meta down)] 'forward-paragraph)))
 
 ;;}}}
+
+;; Setting variable org-latex-prefer-user-labels
+;; will make the exporter export
+;;  #+NAME: fig:1 and #+LABEL: fig:1
+;; to \label{fig:1} instead of \label{orgparagraph1}
+(setq org-latex-prefer-user-labels t)
+
 ;;{{{ eg/org latex/export debug minor mode
 ;; see http://orgmode.org/manual/Export-options.html
 ;; C-c C-e t     (org-insert-export-options-template)
@@ -481,7 +488,8 @@
 	      (define-key org-mode-map [(control xx)] 'eg/org-lazy-load)
 	      (define-key org-mode-map "\M-F" 'ess-eval-function-and-go)
 	      (define-key org-mode-map [(meta control i)] 'eg/org-indent)
-	      (define-key org-mode-map "_" 'eg/org-smart-underscore)))
+	      (define-key org-mode-map "_" 'eg/org-smart-underscore)
+))
 
 ;;}}}
 ;;{{{ list documents
