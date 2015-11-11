@@ -58,9 +58,13 @@
 (global-set-key "\C-ca" 'org-agenda)
 (global-set-key "\C-cb" 'org-iswitchb)
 ;;}}}
-;;{{{ babel emacs-lisp
+;;{{{ babel settings
 (setq org-babel-hash-show-time t)
-
+;; most convenient to *not* let export actions
+;; evaluate code:
+(setq org-export-babel-evaluate nil)
+;;}}}
+;;{{{ babel 
 (defun eg/indent-elisp-org-buffer ()
   (interactive)
   (emacs-lisp-mode)
