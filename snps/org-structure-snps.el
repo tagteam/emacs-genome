@@ -44,7 +44,7 @@
 (add-to-list
  'org-structure-template-alist
  `("La" ,(concat
-	  "* COMMENT HEADER\n\n"
+	  "* HEADER :noexport:\n\n"
 	  "#+TITLE: 
 #+LANGUAGE:  en
 #+OPTIONS:   H:3 num:t toc:nil \\n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
@@ -60,7 +60,10 @@ user-full-name
 (add-to-list
  'org-structure-template-alist
  `("Lb" ,(concat
-	  "* COMMENT HEADER\n"
+	  "* Introduction\n"
+	  "** Part I\n"
+	  "*** First slide\n"
+	  "* HEADER :noexport:\n"
 	  "\n#+TITLE:"
 	  "\n#+Author: " user-full-name 
 	  "\n#+Latex_header:\\institute{}"
