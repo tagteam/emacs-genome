@@ -29,9 +29,10 @@
 ;; (add-to-list  'load-path (concat emacs-genome "/genes/auctex/style"))
 ;; (add-to-list  'load-path (concat emacs-genome "/genes/auctex/preview"))
 
-(unless (ignore-errors (load "auctex.el" nil t t))
-  (message "Auctex not loaded"))
-(ignore-errors (load "preview-latex.el" nil t t))
+;; (unless (ignore-errors (load "auctex.el" nil t t))
+  ;; (message "Auctex not loaded"))
+;; (ignore-errors (load "preview-latex.el" nil t t))
+(use-package preview-latex)
 (use-package tex-buf)
 ;;}}}
 ;;{{{ LaTeX mode hook
