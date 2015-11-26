@@ -55,3 +55,6 @@
 [submodule "genes/mark-down"]
 	path = genes/mark-down
 	url = git@github.com:defunkt/markdown-mode.git
+[submodule "genes/orgmode-accessories"]
+	path = genes/orgmode-accessories
+	url = https://github.com/chasberry/orgmode-accessories.git
