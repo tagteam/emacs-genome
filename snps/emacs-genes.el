@@ -20,13 +20,13 @@
 ;;----------------------------------------------------------------------
 ;; created: Apr 12 2015 (09:51) 
 ;; Version: 
-;; last-updated: Nov  5 2015 (06:32) 
+;; last-updated: Dec 17 2015 (06:39) 
 ;;           By: Thomas Alexander Gerds
-;;     Update #: 33
+;;     Update #: 37
 ;;----------------------------------------------------------------------
 ;; 
-;;; Commentary: Show emacs genes and test functionality. Then 
-;;              display either featured functions (buttons) and/or help on
+;;; Commentary: Show important features {genes}. 
+;;              Display either featured functions (buttons) and/or help on
 ;;              how to achieve functionality, e.g., install missing
 ;;              software.
 ;;; Change Log:
@@ -37,10 +37,12 @@
 ;; 
 ;;; Code:
 
+
 (defvar eg-alist '(
 		   ;; ("emacs-genome"
 		   ;; :test (:var emacs-genome)
 		   ;; :fun (lambda (&optional arg) (interactive) (superman-view-directory emacs-genome)))
+		   ("Recent files" :fun eg/recent-files)
 		   ("Projects" :fun S)
 		   ("Calendar" :fun superman-calendar)
 		   ("Todo-list" :fun superman-todo)
@@ -48,7 +50,8 @@
 		   ;; ("superman"
 		   ;; :test (:genes superman-manager)
 		   ;; :fun superman)
-		   ("R" :test ess
+		   ("R" 
+		    :test ess
 		    :fun eg/start-R
 		    #'(lambda ()
 			(interactive)
@@ -68,6 +71,14 @@
 (defun eg/start-R ()
   (interactive)
   (r 1))
+
+(defun eg/recent-files ()
+  (interactive)
+  (let ((files recentf-list))
+    (unless files 
+      (setq files `(,(expand-file-name "~/.emacs"))))
+    (recentf-open-files files)))
+
 
 (defvar eg-button-faces
   '(("superman" superman-project-button-face)))

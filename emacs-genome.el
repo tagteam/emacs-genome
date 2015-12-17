@@ -49,10 +49,12 @@
 	     "genes/mic-paren/"
 	     "genes/helm/"
 	     "genes/pandoc-mode/"
-	     "genes/ess/lisp"
-	     "genes/auctex" 
-	     "genes/org-mode/lisp"
-	     "genes/SuperMan/lisp"
+	     "genes/ess/lisp/"
+	     "genes/usepackage/"
+	     "genes/auctex/" 
+	     "genes/org-mode/lisp/"
+	     "genes/org-mode/contrib/lisp/"
+	     "genes/SuperMan/lisp/"
 	     "genes/emacs-epackage--lib-header-button/")))
   (while eg-load-paths 
     (add-to-list 'load-path
@@ -96,6 +98,7 @@
 (use-package browse-url-snps
   :commands (browse-url google-search-prompt))
 ;; recent files
+(recentf-mode 1)
 (use-package recentf
   :commands recentf-open-files)
 ;; sos

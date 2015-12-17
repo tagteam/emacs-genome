@@ -119,7 +119,7 @@ user-full-name
 ;;{{{ R code objects
 (add-to-list
  'org-structure-template-alist
- '("Rs" "#+BEGIN_SRC R :results output raw  :exports none :session *R* :cache yes \n?\n#+END_SRC"))
+ '("Rs" "#+BEGIN_SRC R :results output raw drawer  :exports none :session *R* :cache yes \n?\n#+END_SRC"))
 (add-to-list
  'org-structure-template-alist
  '("Rb" "#+BEGIN_SRC R :exports both :results output raw drawer  :session *R* :cache yes \n?\n#+END_SRC"))
