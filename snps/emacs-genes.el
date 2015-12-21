@@ -20,9 +20,9 @@
 ;;----------------------------------------------------------------------
 ;; created: Apr 12 2015 (09:51) 
 ;; Version: 
-;; last-updated: Dec 17 2015 (06:39) 
+;; last-updated: Dec 18 2015 (06:21) 
 ;;           By: Thomas Alexander Gerds
-;;     Update #: 37
+;;     Update #: 38
 ;;----------------------------------------------------------------------
 ;; 
 ;;; Commentary: Show important features {genes}. 
@@ -74,6 +74,7 @@
 
 (defun eg/recent-files ()
   (interactive)
+  (recentf-mode 1)
   (let ((files recentf-list))
     (unless files 
       (setq files `(,(expand-file-name "~/.emacs"))))

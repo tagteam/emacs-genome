@@ -48,9 +48,10 @@
 	     "genes/deft/"
 	     "genes/mic-paren/"
 	     "genes/helm/"
+	     "genes/ssh-el/"
 	     "genes/pandoc-mode/"
 	     "genes/ess/lisp/"
-	     "genes/usepackage/"
+	     "genes/use-package/"
 	     "genes/auctex/" 
 	     "genes/org-mode/lisp/"
 	     "genes/org-mode/contrib/lisp/"
@@ -110,7 +111,8 @@
 (use-package helm
   :config
   (use-package helm-config)
-  (use-package helm-recoll-snps))
+  ;; (use-package helm-recoll-snps)
+)
 ;; shell and ssh within emacs
 (use-package shell-snps)
 (use-package ssh)
@@ -139,10 +141,7 @@
 (use-package superman-manager
   :config
   ;; project profile
-  (message (concat "SuperMan profile:" superman-profile))
   (unless (file-exists-p superman-profile)
-    (copy-file (expand-file-name "SuperMan.org" emacs-genome)
-	       "~/.SuperMan.org")
     (setq superman-profile "~/.SuperMan.org"))
   (superman-parse-projects) 
   ;; header buttons
