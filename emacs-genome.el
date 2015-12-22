@@ -32,7 +32,6 @@
 ;; 
 
 ;;; Code:
-
 (if (not (and (boundp 'emacs-genome) 
 	      (file-directory-p emacs-genome)))
     (error "Cannot load emacs-genome: Variable emacs-genome does not locate a directory.")
@@ -56,12 +55,13 @@
 	     "genes/org-mode/lisp/"
 	     "genes/org-mode/contrib/lisp/"
 	     "genes/SuperMan/lisp/"
+	     "genes/ido-ubiquitous/"
 	     "genes/emacs-epackage--lib-header-button/")))
   (while eg-load-paths 
     (add-to-list 'load-path
 		 (expand-file-name (car eg-load-paths) emacs-genome))
     (setq eg-load-paths (cdr eg-load-paths))))
-	     
+
 
 (require 'use-package)
 ;; general purpose look feel behaviour snps
@@ -85,12 +85,30 @@
 ;; goto-last-change
 (use-package goto-chg 
   :commands goto-chg)
+;; buffer switching
+(use-package ido
+  :config
+  (ido-mode t)
+  ;;flexibly match names via fuzzy matching
+  (setq ido-enable-flex-matching t)
+  ;; use ido-mode everywhere, in buffers and for finding files
+  (setq ido-everywhere t)
+  ;;(setq ido-use-filename-at-point 'guess); for find-file-at-point
+  ;;(setq ido-use-url-at-point t); look for URLs at point
+  ;; sort-order, gives preferences to org 
+  (setq ido-file-extensions-order '("org" "R" "pdf" "tex" "el"))
+  (setq ido-default-buffer-method 'selected-window)
+  ;; Last visited files appear in ido-switch-buffer C-x b
+  (setq ido-use-virtual-buffers t))
+(use-package ido-ubiquitous)
 ;; buffer cycling
 (use-package cycle-buffer-snps
-  :init 
-  (iswitchb-mode t)
-  (setq iswitchb-default-method 'samewindow)
-  (setq iswitchb-case t))
+  :init
+  ;; (icomplete-mode t)
+  ;; (iswitchb-mode t)
+  ;; (setq iswitchb-default-method 'samewindow)
+  ;; (setq iswitchb-case t)
+  )
 ;; window cycling
 (use-package winner
   :config
@@ -112,7 +130,7 @@
   :config
   (use-package helm-config)
   ;; (use-package helm-recoll-snps)
-)
+  )
 ;; shell and ssh within emacs
 (use-package shell-snps)
 (use-package ssh)
@@ -153,7 +171,9 @@
 (setq inhibit-startup-screen 'yes-please)
 
 (use-package emacs-genes)
-(add-hook 'after-init-hook 'eg)
-
+;; (add-hook 'after-init-hook 'eg 'append)
+(eg)
+;; (setq initial-scratch-message (superman-make-button "bla"))
+;; (setq initial-buffer-choice (expand-file-name "EmacsGenome.org" emacs-genome))
 (provide 'emacs-genome)
 ;;; emacs-genome.el ends here
