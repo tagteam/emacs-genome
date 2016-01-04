@@ -71,11 +71,13 @@
 ;; keybindings
 (use-package key-snps)
 ;; folding
-(use-package folding
-  :if (require 'fold-dwim)
-  :config 
-  (use-package folding-snps)
-  :commands folding-mode)
+(use-package folding-snps
+  :commands insert-folds folding-mode)
+;; (use-package folding
+  ;; :if (require 'fold-dwim nil t)
+  ;; :init (require 'folding-snps nil t)
+  ;; :commands folding-mode)
+
 ;; completion/expansion
 (use-package hippie-exp
   :commands hippie-expand)
