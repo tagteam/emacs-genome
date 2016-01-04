@@ -82,11 +82,11 @@ move to with the same argument."
   (interactive)
   (let ((n (ring-length winner-pending-undo-ring)))
    (if backward 
-       (setq winner-counter (max 1 (1- winner-counter)))
-     (setq winner-counter (min n (1+ winner-counter))))
-  (winner-set (ring-ref winner-pending-undo-ring winner-counter))
+       (setq winner-undo-counter (max 1 (1- winner-undo-counter)))
+     (setq winner-undo-counter (min n (1+ winner-undo-counter))))
+  (winner-set (ring-ref winner-pending-undo-ring winner-undo-counter))
   (message "Winner undo ring (%d / %d)"
-	   winner-counter
+	   winner-undo-counter
 	   (1- (ring-length winner-pending-undo-ring)))))
 
 (defun winner-cycle-backwards ()
