@@ -207,16 +207,8 @@ replace absolute path to home directory by '~'.
     (backward-char 1)))
 
 (defun ess-edit-insert-file-name ()
-  "Prompt for a file name and insert it as a string.
-
-If `ess-edit-expand-file-name-relative' is non-nil
-replace absolute path to home directory by '~'.
-"  
   (interactive)
-  (insert "\""
-	  (ess-edit-expand-file-name
-	   (read-file-name "insert filename: ")) "\""))
-  
+  (insert "\"" (ess-edit-expand-file-name (read-file-name "insert filename: ")) "\""))
 
 (defun ess-edit-insert-read ()
   (interactive)
@@ -497,6 +489,21 @@ above point. if MOVE is non-nil leave point after
 	   (goto-char (if move (+ (point) (skip-chars-forward "a-zA-Z0-9."))
 			oldpoint))
 	   (if all fun (car fun)))))
+
+
+(defun ess-edit-hot-key (&optional arg)
+  "Define a hot-key to evaluate a certain piece of code via `ess-eval-linewise'.
+If ARG is non-nil assign to global map otherwise to buffer local map"
+  (interactive "p")
+  (let* ((code (cond ((region-active-p)
+		      (buffer-substring (region-beginning) (region-end)))
+		     (t (read-string "R code for hot-key: "))))
+	 (key (read-key-sequence "Type hot-key: "))
+	 (fun `(lambda () (interactive)
+		(ess-eval-linewise ,code))))
+    (if (= arg 4) 
+	(global-set-key key fun)
+      (local-set-key key fun))))
 
 ;;}}}
 ;;{{{ functions
