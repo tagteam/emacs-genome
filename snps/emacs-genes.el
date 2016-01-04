@@ -20,9 +20,9 @@
 ;;----------------------------------------------------------------------
 ;; created: Apr 12 2015 (09:51) 
 ;; Version: 
-;; last-updated: Dec 18 2015 (06:21) 
+;; last-updated: Dec 31 2015 (10:00) 
 ;;           By: Thomas Alexander Gerds
-;;     Update #: 38
+;;     Update #: 40
 ;;----------------------------------------------------------------------
 ;; 
 ;;; Commentary: Show important features {genes}. 
@@ -109,12 +109,6 @@ yet non-functional emacs-genes."
       (let* ((emacs-genes eg-alist)
 	     (button-width 13))
 	(insert "\nYour emacs has been genetically modified.\n\n")
-	;; (insert
-	;; (superman-make-button
-	;; "EmacsGenome"
-	;; '(lambda () (interactive) (superman-switch-to-project "emacs-genome"))
-	;; 'eg-default-genes-button-face nil nil button-width)
-	;; "\n\n")
 	;; (put-text-property (point-min) (1+ (point-min)) 'redo-cmd '(eg t t))
 	(while emacs-genes
 	  (let* ((genes (car emacs-genes))
@@ -140,11 +134,8 @@ yet non-functional emacs-genes."
 		       (t 'eg-missing-genes))))
 	    (insert (superman-make-button
 		     this-gene
-		     ;; `(lambda () (interactive)
-		     ;; (eg-show-gene
-		     ;; ,(concat emacs-genome "genes/" this-gene "-gene.org")))
-		     fun
-		     'eg-default-genes-button-face nil nil button-width) "\n\n")
+		     `(:fun ,fun
+			    :face eg-default-genes-button-face :width ,button-width)) "\n\n") 
 	    (setq emacs-genes (cdr emacs-genes))))
 	(setq buffer-read-only t)))
     (superman-set-config eg-buf-name)))
