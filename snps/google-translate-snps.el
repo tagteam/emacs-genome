@@ -194,7 +194,6 @@
       (goto-char (point-min))
       (let ((abbr-text (replace-regexp-in-string "\n" " " text)))
 	(insert "Google translate query: " (substring abbr-text 0 (min 80 (length abbr-text))) " (press n for new query)\n\n"))
-      ;; (insert (superman-make-button
       (setq header-line
 	    (concat header-line " "
 		    (header-button-format
