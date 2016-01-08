@@ -71,6 +71,7 @@
 ;; keybindings
 (use-package key-snps)
 ;; folding
+(require 'fold-dwim nil t)
 (use-package folding-snps
   :commands insert-folds folding-mode)
 ;; (use-package folding
