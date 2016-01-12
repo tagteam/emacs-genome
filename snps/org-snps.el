@@ -24,7 +24,7 @@
 
 ;(defun org-flag-drawer (flag)		
 ;  "When FLAG is non-nil, hide the drawer we are within.
-;Otherwise make it visible."
+;Otherwise make it visible."or
 ;  (save-excursion
 ;    (beginning-of-line 1)
 ;    (when (looking-at "^[ \t]*:[a-zA-Z][a-zA-Z0-9]*:")

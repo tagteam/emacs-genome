@@ -1,27 +1,27 @@
 [submodule "genes/ess"]
 	path = genes/ess
-	url = git://github.com/emacs-ess/ESS.git
+	url = https://github.com/emacs-ess/ESS.git
 [submodule "genes/SuperMan"]
 	path = genes/SuperMan
-	url = git://github.com/kkholst/SuperMan.git
+	url = https://github.com/kkholst/SuperMan.git
 [submodule "genes/ssh-el"]
 	path = genes/ssh-el
-	url = git://github.com/ieure/ssh-el.git
+	url = https://github.com/ieure/ssh-el.git
 [submodule "genes/helm"]
 	path = genes/helm
-	url = git://github.com/emacs-helm/helm.git
+	url = https://github.com/emacs-helm/helm.git
 [submodule "genes/pandoc-mode"]
 	path = genes/pandoc-mode
-	url = git://github.com/joostkremers/pandoc-mode
+	url = https://github.com/joostkremers/pandoc-mode
 [submodule "genes/google-translate"]
 	path = genes/google-translate
-	url = git://github.com/manzyuk/google-translate
+	url = https://github.com/manzyuk/google-translate
 [submodule "google-translate"]
 	path = google-translate
-	url = git://github.com/manzyuk/google-translate
+	url = https://github.com/manzyuk/google-translate
 [submodule "emacs-iedit"]
 	path = emacs-iedit
-	url = git://github.com/eproxus/emacs-iedit
+	url = https://github.com/eproxus/emacs-iedit
 [submodule "genes/emacs-iedit"]
 	path = genes/emacs-iedit
 	url = https://github.com/eproxus/emacs-iedit.git
@@ -48,13 +48,13 @@
 	url = git://orgmode.org/org-mode.git
 [submodule "genes/use-package"]
 	path = genes/use-package
-	url = git@github.com:jwiegley/use-package.git
+	url = https://github.com:jwiegley/use-package.git
 [submodule "genes/mic-paren"]
 	path = genes/mic-paren
-	url = git@github.com:emacsmirror/mic-paren.git
+	url = https://github.com:emacsmirror/mic-paren.git
 [submodule "genes/mark-down"]
 	path = genes/mark-down
-	url = git@github.com:defunkt/markdown-mode.git
+	url = https://github.com:defunkt/markdown-mode.git
 [submodule "genes/orgmode-accessories"]
 	path = genes/orgmode-accessories
 	url = https://github.com/chasberry/orgmode-accessories.git
