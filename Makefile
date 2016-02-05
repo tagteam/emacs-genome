@@ -10,6 +10,8 @@ default: update
 
 all: update 
 
+test: @echo "Hi"
+
 update: 
 	@echo "***** updating emacs genome..."
 	@git pull

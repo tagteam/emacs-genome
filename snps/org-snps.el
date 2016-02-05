@@ -178,7 +178,10 @@
 	;; ("" "attachfile")
 	("T1" "fontenc")
 	;; ("table,usenames,dvipsnames" "xcolor")
-	("" "natbib")))
+	;; ("" "natbib")
+	;; ("citestyle=authoryear,bibstyle=authoryear" "biblatex")
+	("" "biblatex")
+	))
 
 (setq org-export-allow-BIND t)
 (setq org-latex-listings t)
