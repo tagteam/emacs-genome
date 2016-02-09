@@ -48,13 +48,13 @@
 	url = git://orgmode.org/org-mode.git
 [submodule "genes/use-package"]
 	path = genes/use-package
-	url = https://github.com:jwiegley/use-package.git
+	url = https://github.com/qxj/use-package.git
 [submodule "genes/mic-paren"]
 	path = genes/mic-paren
-	url = https://github.com:emacsmirror/mic-paren.git
+	url = https://github.com/emacsmirror/mic-paren.git
 [submodule "genes/mark-down"]
 	path = genes/mark-down
-	url = https://github.com:defunkt/markdown-mode.git
+	url = https://github.com/jrblevin/markdown-mode.git
 [submodule "genes/orgmode-accessories"]
 	path = genes/orgmode-accessories
 	url = https://github.com/chasberry/orgmode-accessories.git
