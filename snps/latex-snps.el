@@ -32,8 +32,8 @@
 ;; (unless (ignore-errors (load "auctex.el" nil t t))
   ;; (message "Auctex not loaded"))
 ;; (ignore-errors (load "preview-latex.el" nil t t))
-(use-package preview-latex)
-(use-package tex-buf)
+;; (use-package preview-latex)
+;; (use-package tex-buf)
 ;;}}}
 ;;{{{ LaTeX mode hook
 (add-hook 'LaTeX-mode-hook

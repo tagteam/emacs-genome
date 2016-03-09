@@ -46,7 +46,7 @@
 (use-package org-agenda)
 (use-package ox-bibtex)
 (use-package org-clock)
-(use-package ob-R)
+;; (use-package ob-R)
 (use-package ox-latex)
 (use-package ox-beamer)
 (condition-case nil 
@@ -89,17 +89,21 @@
 ;; (add-to-list 'auto-mode-alist '("\\.org\\'" . org-mode))
 (add-to-list 'auto-mode-alist '("\\.org$" . org-mode))
 (setq org-log-done t)
+
+
 (add-hook 'org-mode-hook
 	  #'(lambda nil
-	     (define-key org-mode-map (kbd "C-x c") 'superman-view-mode)
-	     (define-key org-mode-map [(control tab)] 'hide-subtree)
-	     (define-key org-mode-map [(meta e)] 'hippie-expand)
-	     (define-key org-mode-map [(control e)] 'end-of-line)
-	     (define-key org-mode-map [(control z)] 'org-shifttab)
-	     (define-key org-mode-map "\C-xpd" 'superman-view-documents)
-	     (define-key org-mode-map "\C-c\C-v" 'superman-browse-this-file)
-	     (define-key org-mode-map [(meta up)] 'backward-paragraph)
-	     (define-key org-mode-map [(meta down)] 'forward-paragraph)))
+	      ;; complete on ess
+	      (add-to-list 'hippie-expand-try-functions-list (lambda (old) (ess-complete-object-name)))
+	      (define-key org-mode-map (kbd "C-x c") 'superman-view-mode)
+	      (define-key org-mode-map [(control tab)] 'hide-subtree)
+	      (define-key org-mode-map [(meta e)] 'hippie-expand)
+	      (define-key org-mode-map [(control e)] 'end-of-line)
+	      (define-key org-mode-map [(control z)] 'org-shifttab)
+	      (define-key org-mode-map "\C-xpd" 'superman-view-documents)
+	      (define-key org-mode-map "\C-c\C-v" 'superman-browse-this-file)
+	      (define-key org-mode-map [(meta up)] 'backward-paragraph)
+	      (define-key org-mode-map [(meta down)] 'forward-paragraph)))
 
 ;;}}}
 
@@ -178,9 +182,9 @@
 	;; ("" "attachfile")
 	("T1" "fontenc")
 	;; ("table,usenames,dvipsnames" "xcolor")
-	;; ("" "natbib")
+	("" "natbib")
 	;; ("citestyle=authoryear,bibstyle=authoryear" "biblatex")
-	("" "biblatex")
+	;; ("" "biblatex")
 	))
 
 (setq org-export-allow-BIND t)
@@ -218,6 +222,21 @@
                [EXTRA]"
 			eg/org-latex-common-header-string
 			"\\renewcommand*\\familydefault{\\sfdefault}\n\\itemsep2pt")
+	       ("\\section{%s}" . "\\section*{%s}")
+	       ("\\subsection{%s}" . "\\subsection*{%s}")
+	       ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+	       ("\\paragraph{%s}" . "\\paragraph*{%s}")
+	       ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
+
+;; download: http://www.biometrics.tibs.org/latexdocumentclass.htm
+;; wget http://www.biometrics.tibs.org/biomlatex.zip
+(add-to-list 'org-latex-classes
+	     `("biometrics-article"
+	       ,(concat "\\documentclass[useAMS,usenatbib,referee]{biom}
+                %% \\documentclass[useAMS,usenatbib]{biom}
+               [PACKAGES]
+               [EXTRA]"
+			eg/org-latex-common-header-string)
 	       ("\\section{%s}" . "\\section*{%s}")
 	       ("\\subsection{%s}" . "\\subsection*{%s}")
 	       ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
