@@ -1,6 +1,6 @@
 ;;; emacs-genome.el --- loading snps and genes from the emacs-genome
 
-;; Copyright (C) 2014 -- 2015  Thomas Alexander Gerds
+;; Copyright (C) 2014 -- 2016  Thomas Alexander Gerds
 
 ;; Author: Thomas Alexander Gerds <tag@biostat.ku.dk>
 ;; Keywords: convenience
@@ -32,58 +32,126 @@
 ;; 
 
 ;;; Code:
+
+;; check if emacs-genome is bound 
 (if (not (and (boundp 'emacs-genome) 
 	      (file-directory-p emacs-genome)))
-    (error "Cannot load emacs-genome: Variable emacs-genome does not locate a directory.")
-  (message (concat "Reading genes and snps from: " emacs-genome))
-  (if (string-match "\\(.*/emacs-genome/\\).*" emacs-genome)
-      (setq emacs-genome (match-string 1 emacs-genome))
-    (error "Variable emacs-genome is not a valid directory")))
-(let ((eg-load-paths 
-       (list "snps/"
-	     "genes/emacs-iedit/"
-	     "genes/mark-down/"
-	     "genes/emacs-sos/" 
-	     "genes/deft/"
-	     "genes/mic-paren/"
-	     "genes/helm/"
-	     "genes/ssh-el/"
-	     "genes/pandoc-mode/"
-	     "genes/ess/lisp/"
-	     "genes/use-package/"
-	     "genes/auctex/" 
-	     "genes/org-mode/lisp/"
-	     "genes/org-mode/contrib/lisp/"
-	     "genes/SuperMan/lisp/"
-	     "genes/ido-ubiquitous/"
-	     "genes/emacs-epackage--lib-header-button/")))
-  (while eg-load-paths 
-    (add-to-list 'load-path
-		 (expand-file-name (car eg-load-paths) emacs-genome))
-    (setq eg-load-paths (cdr eg-load-paths))))
+    (let ((mess (concat "Cannot load emacs-genome: Variable emacs-genome does not specify a directory file."
+			"\nTo investigate the problem you could start an interactive lisp session via M-x ielm RET,"
+			"\nand then evaluate the variable\n\nELISP> emacs-genome\n\n and the test\n\nELISP> (file-directory-p emacs-genome)\n\nat the prompt."
+			"\n\nIf you have downloaded the emacs-genome in the folder\n\n" 
+			(expand-file-name "~" nil)
+			"\n\nThen, the value of the variable emacs-genome should be\n\n" (expand-file-name "~/emacs-genome/" nil)
+			"\n\nThat is, you should have a line\n\n(setq emacs-genome '~/emacs-genome/')\n\n in your init file (e.g., ~/.emacs or ~/.emacs.d/init.el).")))
+      (pop-to-buffer "*EG load error*")
+      (erase-buffer)
+      (insert mess) 
+      (error mess))
+  (message (concat "Reading genes and snps from: " emacs-genome)))
 
+;; locate emacs packages to emacs-genome
+
+(require 'package)
+(setq eg-elpa-sources '(("marmalade" . "http://marmalade-repo.org/packages/")
+			("elpa" . "http://tromey.com/elpa/")
+			("gnu" . "http://elpa.gnu.org/packages/")
+			("org" . "http://orgmode.org/elpa/")
+			("melpa" . "http://melpa.org/packages/")
+			("melpa-stable" . "http://stable.melpa.org/packages/")))
+
+
+;; (if (fboundp 'gnutls-available-p)
+    ;; (fmakunbound 'gnutls-available-p))
+;; (setq tls-program '("gnutls-cli --tofu -p %p %h")
+      ;; imap-ssl-program '("gnutls-cli --tofu -p %p %s")
+      ;; smtpmail-stream-type 'starttls
+      ;; starttls-extra-arguments '("--tofu"))
+
+(dolist (source eg-elpa-sources) (add-to-list 'package-archives source t))
+(setq orig-package-user-dir package-user-dir)
+(setq package-user-dir (expand-file-name "genes/" emacs-genome))
+
+(setq package-enable-at-startup nil)   ; To prevent initialising twice
+
+(package-initialize)
+(unless (package-installed-p 'use-package)
+  (package-refresh-contents)
+  (package-install 'use-package))
 
 (require 'use-package)
+
+(use-package bind-key :ensure t)
+
+;;(let ((eg-load-paths  
+       ;; (list "snps/"
+	     ;; "genes/emacs-iedit/"
+	     ;; "genes/mark-down/"
+	     ;; "genes/emacs-sos/" 
+	     ;; "genes/deft/"
+	     ;; "genes/mic-paren/"
+	     ;; "genes/helm/"
+	     ;; "genes/ssh-el/"
+	     ;; "genes/pandoc-mode/"
+	     ;; "genes/ess/lisp/"
+	     ;; "genes/use-package/"
+	     ;; "genes/org-mode/lisp/"
+	     ;; "genes/org-mode/contrib/lisp/"
+	     ;; "genes/SuperMan/lisp/"
+	     ;; "genes/ido-ubiquitous/"
+	     ;; "genes/emacs-epackage--lib-header-button/")))
+  ;; (while eg-load-paths 
+    ;; (add-to-list 'load-path
+		 ;; (expand-file-name (car eg-load-paths) emacs-genome))
+;; (setq eg-load-paths (cdr eg-load-paths))))
+(add-to-list 'load-path (expand-file-name "snps/" emacs-genome))
+(add-to-list 'load-path (expand-file-name "genes/SuperMan/lisp" emacs-genome))
+
+(require 'use-package)
+
 ;; general purpose look feel behaviour snps
 (use-package eg-utility-snps)
 ;; look, feel and behaviour
 (use-package appearance-snps)
+;; (use-package rainbow-mode
+  ;; :ensure t)
 ;; keybindings
 (use-package key-snps)
+;; mic-paren
+;; (use-package mic-paren)
+  ;; :pin gnu
+  ;; :ensure t)
 ;; folding
 (require 'fold-dwim nil t)
 (use-package folding-snps
   :commands insert-folds folding-mode)
 ;; (use-package folding
-  ;; :if (require 'fold-dwim nil t)
-  ;; :init (require 'folding-snps nil t)
-  ;; :commands folding-mode)
+;; :if (require 'fold-dwim nil t)
+;; :init (require 'folding-snps nil t)
+;; :commands folding-mode)
+
+;; indentation and fill
+(use-package aggressive-fill-paragraph
+  :ensure t)
 
 ;; completion/expansion
 (use-package hippie-exp
   :commands hippie-expand)
+
+(use-package auto-complete
+  :ensure t)
+
+(use-package company
+  :ensure t)
+
+(use-package popup-complete
+  :ensure t)
+
+;; header buttons
+(use-package header-button)
+  ;; emacs-epackage--lib-header-button
 ;; iedit
 (use-package iedit
+  :ensure t
   :commands iedit-mode)
 ;; goto-last-change
 (use-package goto-chg 
@@ -103,7 +171,7 @@
   (setq ido-default-buffer-method 'selected-window)
   ;; Last visited files appear in ido-switch-buffer C-x b
   (setq ido-use-virtual-buffers t))
-(use-package ido-ubiquitous)
+(use-package ido-ubiquitous :ensure t)
 ;; buffer cycling
 (use-package cycle-buffer-snps
   :init
@@ -124,47 +192,69 @@
 (use-package recentf
   :commands recentf-open-files)
 ;; sos
-(use-package sos
-  :commands sos)
+;; (use-package sos  :commands sos)
 ;; deft
-(use-package deft)
+(use-package deft
+    :ensure t)
+
 ;; anything/helm
 (use-package helm
+  :ensure t
   :config
   (use-package helm-config)
   ;; (use-package helm-recoll-snps)
   )
 ;; shell and ssh within emacs
 (use-package shell-snps)
-(use-package ssh)
+(use-package ssh
+  :ensure t)
 ;; pandoc: converting code and documents
-(use-package pandoc-mode)
-(use-package markdown-mode)
+(use-package pandoc-mode
+  :ensure t)
+(use-package  markdown-mode :ensure t)
 ;; Emacs speaks statistics
 ;; (setq ess-etc-directory-list nil)
 (use-package ess-site
+  :ensure ess
   :config
+  ;; (setq ess-use-auto-complete 'script-only)
   (use-package ess-R-snps)
   (use-package ess-edit))
-;; google translate
+
+(use-package ac-R :ensure t)
+
+(use-package google-translate
+  :ensure t)
 ;; (when (file-exists-p (expand-file-name "genes/auto-dictionary-mode/" emacs-genome))
 ;; (add-to-list 'load-path (expand-file-name "genes/auto-dictionary-mode/" emacs-genome)))
 ;; (setq trans-command (expand-file-name "snps/trans" emacs-genome))
 ;; LaTeX
+(use-package tex-site
+  :ensure auctex)
 (use-package latex-snps)
 ;; orgmode
 (use-package org
+  :ensure t
+  :pin org
   :config
   (setq org-odt-data-dir (expand-file-name "genes/org-mode/etc/" emacs-genome))
   (use-package org-snps)
   (use-package org-structure-snps))
+;; org-ref
+(use-package org-ref
+  :ensure t)
+(use-package org-ref-snps)
+
+;;(use-package orgmode-accessories 
+;;  :ensure t)
 ;; superman
+
 (use-package superman-manager
   :config
   ;; project profile
   (unless (file-exists-p superman-profile)
     (setq superman-profile "~/.SuperMan.org"))
-  (superman-parse-projects) 
+  (superman-parse-projects)
   ;; header buttons
   (use-package header-button)
   (add-hook 'org-mode-hook #'(lambda ()
@@ -178,5 +268,8 @@
 (eg)
 ;; (setq initial-scratch-message (superman-make-button "bla"))
 ;; (setq initial-buffer-choice (expand-file-name "EmacsGenome.org" emacs-genome))
+
+;; backtransform to original package location
+(setq package-user-dir orig-package-user-dir)
 (provide 'emacs-genome)
 ;;; emacs-genome.el ends here

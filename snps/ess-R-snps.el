@@ -71,10 +71,8 @@
 (setq ess-first-tab-never-complete nil)
 (add-hook 'ess-mode-hook
 	  '(lambda ()
-	     (make-variable-buffer-local 'hippie-expand-try-functions-list)
-	     (setq hippie-expand-try-functions-list
-		   (append (list 'ess-complete-object-name)
-			   hippie-expand-try-functions-list))))
+	     ;; (make-variable-buffer-local 'hippie-expand-try-functions-list)
+	     (add-to-list 'hippie-expand-try-functions-list (lambda (old) (ess-complete-object-name)))))
 ;;}}}
 ;;{{{ R mode
 (defun eg/ess-eval-and-go ()
@@ -83,7 +81,7 @@
       (let* ((start (region-beginning))
 	     (end (region-end))
 	     (visibly (< (length (buffer-substring-no-properties start end)) 300)))
-;;	(ess-eval-region-and-go start end visibly))
+	;;	(ess-eval-region-and-go start end visibly))
 	(ess-eval-region-and-go start end (not visibly)))
     (ess-eval-line-and-step)))
 

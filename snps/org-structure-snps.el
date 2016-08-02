@@ -54,6 +54,7 @@
 #+LaTeX_HEADER:\\author{"
 user-full-name
 "}
+# #+LaTeX_HEADER:\\affil{Department of Biostatistics, University of Copenhagen, Copenhagen, Denmark}
 #+PROPERTY: session *R*
 #+PROPERTY: cache yes")))
 
@@ -112,6 +113,11 @@ user-full-name
     :PROPERTIES:
     :BEAMER_col: 0.5
     :BEAMER_env: block
+    :END:
+
+**** Back to no columns 
+    :PROPERTIES:
+    :BEAMER_env: ignoreheading
     :END:
     "))
 
