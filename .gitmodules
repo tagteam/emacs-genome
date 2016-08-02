@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 [submodule "genes/ess"]
 	path = genes/ess
 	url = https://github.com/emacs-ess/ESS.git
@@ -59,5 +58,3 @@
 [submodule "genes/orgmode-accessories"]
 	path = genes/orgmode-accessories
 	url = https://github.com/chasberry/orgmode-accessories.git
-=======
->>>>>>> a20e6686374c0538c368a9b609aa47f9be9173fb
