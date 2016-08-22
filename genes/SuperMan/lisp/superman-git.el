@@ -176,7 +176,7 @@ passed to `superman-run-cmd'."
   "Pull from remote at DIR."
   (interactive)
   (let ((dir (get-text-property (point-min) 'git-dir)))
-    (save-some-buffers nil)
+    (superman-save-some-buffers nil)
     (when dir
       (superman-git-action "pull" dir))))
 
@@ -499,8 +499,8 @@ given by the filename property of the item at point."
     (if (not files)
 	(message "Apparently, no files are marked.")
       ;; prevent committing unsaved buffers
-      ;; (save-some-buffers nil 'superman-check-if-saved-needed)
-      (save-some-buffers nil)
+      ;; (superman-save-some-buffers nil 'superman-check-if-saved-needed)
+      (superman-save-some-buffers nil)
       (when dir
 	(superman-git-add files dir nil nil)
 	(superman-redo)))))
@@ -515,8 +515,8 @@ given by the filename property of the item at point."
     (if (not files)
 	(message "Apparently, no files are marked.")
       ;; prevent committing unsaved buffers
-      ;; (save-some-buffers nil 'superman-check-if-saved-needed)
-      (save-some-buffers nil)
+      ;; (superman-save-some-buffers nil 'superman-check-if-saved-needed)
+      (superman-save-some-buffers nil)
       (when dir (superman-git-add files dir 'commit nil)
 	    ;; move point inside cat to the first marked entry
 	    ;; FIXME: it would be safer to have a property 'marked
@@ -1016,7 +1016,7 @@ NAME is used to make the section heading.
 	(insert "\n"))
       (superman-view-insert-section-name
        name count balls nil 
-       'superman-cycle-git-display "Cycle git display")
+       'superman-cycle-git-display "Cycle git display (TAB)")
       (insert "\n")
       (end-of-line 0)
       (unless file

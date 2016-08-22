@@ -129,8 +129,10 @@ Use this map to set additional keybindings for when Org-mode is used.")
 
 (defvar superman-org-export-target-list '("pdf" "html" "docx")
   "Export targets.")
-
 (defvar superman-org-export-target "pdf" "current export target")
+(defvar superman-babel-target-list '("this-block" "all-blocks")
+  "Babel R-block targets.")
+(defvar superman-babel-target "all-blocks" "Either 'all-blocks': action on all R-blocks\n or 'this-block': action on current R-block.")
 
 (defun superman-org-export-change-target ()
   (interactive)
@@ -142,19 +144,6 @@ Use this map to set additional keybindings for when Org-mode is used.")
 	   (list (car superman-org-export-target-list))))
   (superman-org-headline-mode))
 
-(defun superman-org-export-as (&optional arg)
-  (cond ((string= superman-org-export-target "pdf")
-	 (superman-export-as-latex arg))
-	((string= superman-org-export-target "docx")
-	 (superman-export-as-docx))
-	((string= superman-org-export-target "html")
-	 (org-html-export-to-html)
-	 (superman-browse-this-file))))
-
-(defvar superman-babel-target-list '("this-block" "all-blocks")
-  "Babel R-block targets.")
-
-(defvar superman-babel-target "all-blocks" "Either 'all-blocks': action on all R-blocks\n or 'this-block': action on current R-block.")
 
 (defun superman-babel-change-target ()
   (interactive)
@@ -166,6 +155,7 @@ Use this map to set additional keybindings for when Org-mode is used.")
 	   (list (car superman-babel-target-list))))
   (superman-org-headline-mode))
 
+
 (defun superman-org-export-as (&optional arg)
   (cond ((string= superman-org-export-target "pdf")
 	 (superman-export-as-latex arg))
@@ -173,8 +163,8 @@ Use this map to set additional keybindings for when Org-mode is used.")
 	 (superman-export-as-docx))
 	((string= superman-org-export-target "html")
 	 (org-html-export-to-html)
-	 (superman-browse-this-file))))
-
+	 ;;(superman-browse-this-file)
+	 )))
 
 (define-minor-mode superman-org-headline-mode
   "Minor mode for headline buttons in header line in org buffers."
@@ -185,7 +175,7 @@ Use this map to set additional keybindings for when Org-mode is used.")
   (make-local-variable 'superman-babel-target-list)
   (setq-local
    header-line-format
-   (concat (header-button-format (concat "Mode:" (or superman-org-export-target "not set")) :action
+   (concat (header-button-format (concat "M-J:" (or superman-org-export-target "not set")) :action
 				 #'(lambda (&optional arg) (interactive)
 				     (superman-org-export-change-target)))
 	   " "
@@ -373,9 +363,13 @@ Use this map to set additional keybindings for when superman-export-header-mode 
 				 #'(lambda (&optional arg) (interactive)
 				     (superman-next-latex-error 1)))
 	   " "
-	   (header-button-format "find" :action 
+	   (header-button-format "find-sec" :action 
 				 #'(lambda (&optional arg) (interactive)
 				     (superman-find-latex-error)))
+	   " "
+	   (header-button-format "find-frame" :action 
+				 #'(lambda (&optional arg) (interactive)
+				     (superman-find-latex-error 'frame)))
 	   " View: "
 	   (header-button-format "Start viewer" :action 
 				 #'(lambda (&optional arg) (interactive)
@@ -432,36 +426,52 @@ If EXT is given then turn name.xxx into name.ext. EXT must be a string like '.te
   
 
 
-(defun superman-find-latex-error ()
+(defun superman-find-latex-error (&optional by-frame)
   (interactive)
   (let ((tex-file (buffer-file-name))
 	(control-buf (buffer-name (current-buffer)))
+	(log-buf (concat (file-name-sans-extension 
+			  (buffer-name (current-buffer)))
+			 ".log"))
 	(last-pos (get-text-property (point-min) 'latex-pos))
 	tex-buf
 	pos)
     (if (get-file-buffer tex-file)
 	(set-buffer (get-file-buffer tex-file))
       (find-file tex-file))
+    (save-excursion (goto-char (point-min))
+		    (while (re-search-forward "\\\\end{document}" nil t)
+		      (replace-match "")))
     (setq tex-buf (current-buffer))
     (goto-char (or last-pos (point-min)))
-    (re-search-forward "\\\\\\(sub\\)*section{" nil t)
-    (previous-line 1)
+    (if by-frame
+	(re-search-forward "\\\\\\(end\\){frame" nil t)
+      (re-search-forward "\\\\\\(sub\\)*section{" nil t)
+      (previous-line 1))
     (end-of-line)
     (insert "\n\\end{document}")
+    (when (get-buffer "*TeX Help*")
+      (save-excursion (set-buffer "*TeX Help*")
+		      (setq buffer-read-only nil)
+		      (erase-buffer)))
     (save-buffer)
     (save-excursion
       (TeX-command "LaTeX" 'TeX-master-file nil))
     (beginning-of-line)
-    (kill-line)
+    ;; (kill-line)
     (save-buffer)
     (forward-line 1)
     (setq pos (point))
+    (if (get-buffer log-buf)
+	(save-excursion 
+	  (set-buffer log-buf)
+	  (revert-buffer t t t)))
     (superman-switch-config
      nil nil
-     (concat tex-file " | *TeX Help* / " control-buf))
+     (concat tex-file " / " log-buf " | *TeX Help* / " control-buf))
     (with-current-buffer control-buf
       (let ((buffer-read-only nil))
-      (put-text-property (point-min) (1+ (point-min)) 'latex-pos pos)))))
+	(put-text-property (point-min) (1+ (point-min)) 'latex-pos pos)))))
     
 ;; (defun superman-latex-export ()
   ;; (interactive)

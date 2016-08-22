@@ -54,8 +54,18 @@
   ;; ("Capture" ("fun" superman-file-capture-button) ("width" 7) ("face" "no-face") ("face" superman-next-project-button-face))
   "balls used to display file-lists.")
 
-  
-(defun superman-display-file-list (dir &optional list filter sort balls view-buffer refresh no-project)
+
+(defun superman-file-list-display-buffer-p (&optional dir)
+  "Return non-nil if current buffer is a file-list display buffer. 
+If optional argument DIR is a directory-file-name nil is returned also in 
+file-list display buffers unless DIR matches the directories associated with
+ the buffer."
+  (and file-list-mode
+       (or (not dir)
+	   (string= (expand-file-name dir)
+		    (expand-file-name (get-text-property (point-min) 'dir))))))
+
+(defun superman-display-file-list (dir &optional list filter sort balls view-buffer no-project)
   "Format file-list displays."
   (let* ((project (if no-project nil
 		    (ignore-errors (superman-view-current-project))))
@@ -65,9 +75,10 @@
 	 (pbuf (if file-list-mode
 		   (get-text-property (point-min) 'project-buffer)
 		 (buffer-name)))
+	 (sort (or sort (get-text-property (point-min) 'sort-key)))
 	 (dir (or dir (get-text-property (point-min) 'dir)
 		  (when project
-		    (superman-project-home project))
+		    (expand-file-name (superman-project-home project)))
 		  (error "Missing location")))
 	 (view-buf (or view-buffer (get-buffer-create (concat "*FileList[ " nick "]*"))))
 	 (list (or list file-list-current-file-list))
@@ -78,9 +89,7 @@
 		    '(("FileName" ("fun" superman-trim-string) ("width" 88) ("face" superman-file-name-face))
 		      ("Path" ("fun" superman-dont-trim) ("face" superman-directory-name-face)))
 		  '(("FileName" ("fun" superman-dont-trim)))))
-	 (count 0)
-	 (new-buffer (not file-list-mode))
-	 cycle)
+	 (new-buffer (not (superman-file-list-display-buffer-p dir))))
     (switch-to-buffer view-buf)
     (setq buffer-read-only t)
     (let ((buffer-read-only nil))
@@ -88,88 +97,97 @@
       (run-hooks 'superman-file-list-pre-display-hook)
       (if new-buffer
 	  (progn
+	    (erase-buffer)
 	    (org-mode)
 	    (font-lock-mode -1)
 	    (file-list-mode)
+	    ;; FIXME: since modes kill local variables
+	    ;; we set again
+	    (setq file-list-current-file-list list)
 	    (goto-char (point-min))
-	    (erase-buffer)
 	    ;; create header (but only in new buffers)
 	    ;; prepare buffer if necessary
 	    (goto-char (point-min))
-	    (insert (superman-make-button
-		     (concat "FileList"
-			     (concat ": " dir))
-		     '(:fun file-list-reload
-			    :face superman-project-button-face
-			    :help "Refresh file-list")))
+	    (insert (superman-make-button (concat "* " (or project "Directory") " files:")
+					  '(:fun file-list-reload
+						 :face superman-project-button-face
+						 :help "Refresh file-list")))
 	    (unless no-project
-	      (put-text-property (point-at-bol) (point-at-eol) 'nickname nick)
+	      (put-text-property (point-min) (1+ (point-min)) 'nickname nick)
 	      (put-text-property (point-min) (1+ (point-min)) 'project-buffer pbuf)
-	      (put-text-property (point-at-bol) (point-at-eol) 'git-dir (superman-git-toplevel dir)))
-	    (put-text-property (point-at-bol) (point-at-eol) 'dir dir)
-	    (put-text-property (point-at-bol) (point-at-eol) 'filter filter)
-	    (put-text-property (point-at-bol) (point-at-eol) 'sort sort)
+	      (put-text-property (point-min) (1+ (point-min)) 'git-dir (superman-git-toplevel dir)))
+	    (put-text-property (point-min) (1+ (point-min)) 'dir (expand-file-name dir))
+	    (insert " " dir " ")
 	    (unless no-project
-	      (put-text-property (point-at-bol) (point-at-eol) 'index (superman-get-index project))
+	      (put-text-property (point-min) (1+ (point-min)) 'index (superman-get-index project))
 	      (insert "  " (superman-make-button "Project view" '(:fun superman-view-back :face superman-next-project-button-face :help "Back to :width view."))
 		      "  " (superman-make-button "Git" '(:fun superman-git-display :face superman-next-project-button-face :help "Control project's :width repository."))
 		      "  " (superman-make-button "Todo" '(:fun superman-project-todo :face superman-next-project-button-face :help "View project's :width list."))
 		      "  " (superman-make-button "Time-line" '(:fun superman-project-timeline :face superman-next-project-button-face :help "View project':width timeline."))))
-	    (insert "\n")
-	    (superman-view-insert-action-buttons
-	     '((" attributes   " (:fun file-list-ls :face file-list-info-button-face :help "Show file attributes"))
-	       ("  ls -la      " (:fun file-list-ls :face file-list-info-button-face :help "Show output of ls -la for all files"))
-	       ("  grep        " (:fun file-list-grep :face file-list-info-button-face :help "Run grep on all files"))
-	       ("  search      " (:fun file-list-grep :face file-list-info-button-face :help "Search through all files")))
-	     nil
-	     "Info     :")
-	    (superman-view-insert-action-buttons
-	     '((" rename files " (:fun file-list-rename :face file-list-action-button-face :help "Rename all files"))
-	       (" copy files   " (:fun file-list-copy :face file-list-action-button-face :help "Copy all files to a new directory"))
-	       (" delete files " (:fun file-list-remove :face file-list-action-button-face :help "Delete all files"))
-	       ("find & replace" (:fun file-list-query-replace :face file-list-action-button-face :help "Run interactive query replace through all files"))
-	       ("shell-command " (:fun file-list-shell-command :face file-list-action-button-face :help "Run the same shell command on all files"))
-	       ;; (" update list  " file-list-reload nil "Update file-list")
-	       )
-	     nil
-	     "Action   :")
-	    (superman-view-insert-action-buttons
-	     `(("  file-name   " (:fun file-list-by-name :face file-list-filter-button-face :help "Filter files with matching name"))
-	       ("      .ext    " (:fun file-list-by-ext :face file-list-filter-button-face :help "Filter files with matching extension"))
-	       ("     /path    " (:fun file-list-by-path :face file-list-filter-button-face :help "Filter files whose path do match"))
-	       ("      time    " (:fun file-list-by-time :face file-list-filter-button-face :help "Filter files younger than"))
-	       ("      size    " (:fun file-list-by-size :face file-list-filter-button-face :help "Filter files bigger than")))
-	     nil
-	     "FilterIn :")
-	    (superman-view-insert-action-buttons
-	     `(("  file-name   " (:fun (lambda () (interactive) (file-list-by-name 1)) :face file-list-inverse-filter-button-face :help "Filter files whose name doesn't match"))
-	       ("      .ext    " (:fun (lambda () (interactive) (file-list-by-ext 1)) :face file-list-inverse-filter-button-face :help "Filter files whose extension doesn't match"))
-	       ("     /path    " (:fun (lambda () (interactive) (file-list-by-path 1)) :face file-list-inverse-filter-button-face :help "Filter files whose path doesn't match"))
-	       ("      time    " (:fun (lambda () (interactive) (file-list-by-time 1)) :face file-list-inverse-filter-button-face :help "Filter files older than"))
-	       ("      size    " (:fun (lambda () (interactive) (file-list-by-size 1)) :face file-list-inverse-filter-button-face :help "Filter files smaller than")))
-	     nil
-	     "FilterOut:")
-	    ;; ("clear display" file-list-clear-display)) 
-	    (insert "\n* ")
-	    (put-text-property (point-at-bol) (point-at-eol) 'file-list-section-start t)
-	    (insert "\n"))
-	;; end of header for new buffers
+	    (insert "\n\n"))
+	;; end of preparation of new buffers
 	;; 
-	;; update existing buffer
+	;; empty file-list section in existing buffer
 	(delete-region 
-	 (previous-single-property-change (point-max) 'column-names)
+	 (previous-single-property-change (point-max) 'point-file-list-start)
 	 (point-max))
-	(goto-char (previous-single-property-change (point-max) 'column-names))
+	(goto-char (previous-single-property-change (point-max) 'point-file-list-start))
 	(end-of-line)
 	(insert "\n"))
+      ;; display cycle
+      (when new-buffer
+	(insert
+	 (superman-make-button
+	  "Sort"
+	  '(:fun file-list-toggle-sort
+		 :face superman-capture-button-face
+		 :width 17
+		 :help "Change order "))
+	 " "
+	 (superman-make-button
+	  "Search"
+	  '(:fun file-list-search-tab
+		 :face superman-capture-button-face
+		 :width 17
+		 :help "Search file-list"))
+	 " "
+	 (superman-make-button
+	  "Display"
+	  '(:fun file-list-reload
+		 :face superman-capture-button-face
+		 :help "Re-read files from disk and update file list" :width 17))
+	 " "
+	 (superman-make-button
+	  "Action"
+	  '(:fun file-list-reload
+		 :face superman-capture-button-face
+		 :help "Re-read files from disk and update file list" :width 17)))
+	(insert "\n\n"))
+      ;; set filter
+      (put-text-property (point-min) (1+ (point-min)) 'filter-list filter)
+      ;; insert or update filter 
+      (file-list-update-filter-line filter)
+      (if new-buffer
+	  (progn
+	    (forward-line 1)
+	    (insert "\n"))
+	(goto-char (previous-single-property-change (point-max) 'point-file-list-start))
+	(beginning-of-line)
+	(kill-line))
+      ;; set file list section header
+      (insert "* File list (n=" (int-to-string (length list)) ")")
+      ;; set sorted
+      (if sort (insert ". Sorted by " (nth 0 sort) (if (nth 1 sort) " (decending)" " (ascending)")) (insert ". unsorted"))
+      (put-text-property (point-at-bol) (point-at-eol) 'point-file-list-start t)
+      (end-of-line)
+      (insert "\n")
       ;; find maximal length of file-name
       (when (= level 0)
 	(let ((maxfile (apply 'max (mapcar #'(lambda (x) (length (car x))) list))))
 	  (setcdr (assoc "width" (assoc "FileName" balls)) `(,maxfile))))
       ;; insert the file-list 
-      (while list
-	(let* ((el (car list))
-	       (file (car el))
+      (dolist (el list)
+	(let* ((file (car el))
 	       (path (cadr el))
 	       (rest (caddr el))
 	       file-path
@@ -185,10 +203,11 @@
 				((= level 2)
 				 `(list (("FileName" . ,(file-list-make-file-name~ el)))))
 				((= level 3)
-				 `(list (("FileName" . ,(concat "[[" path file "]]")))))))
+				 `(list (("FileName" . ,(concat "[[" path file "]]")))))
+				((= level 4)
+				 `(list (("FileName" . ,(concat "[[" (file-list-make-file-name~ el) "]]")))))))
 	  (setq line (superman-format-thing file-path balls 'no-face))
 	  (insert line)
-	  (setq count (1+ count))
 	  ;; results of grep and ls 
 	  (while rest
 	    (let ((key (caar rest))
@@ -204,105 +223,115 @@
 	  (put-text-property (point-at-bol) (1+ (point-at-bol)) 'filename (file-list-make-file-name el))
 	  (put-text-property (point-at-bol) (1+ (point-at-bol)) 'superman-item-marker t)
 	  (when appendix (insert appendix))
-	  (insert "\n")
-	  (setq list (cdr list))))
-      (goto-char (next-single-property-change (point-min) 'file-list-section-start))
-      (goto-char (point-at-bol))
-      (kill-line)
-      (when new-buffer
-	(insert "\n\n"))
-      ;; insert the section name		
-      (superman-view-insert-section-name
-       ;; dir
-       "Files:"
-       count
-       balls
-       nil
-       'file-list-reload
-       "Refresh view")
-      (put-text-property (point-at-bol) (point-at-eol) 'file-list-section-start t)
-      (insert " ")
-      (insert (superman-make-button "Update list"
-				    '(:fun file-list-reload
-					   :face superman-next-project-button-face
-					   :help "Update :width list"))
-	      " "
-	      (superman-make-button "Clear display"
-				    '(:fun file-list-clear-display
-					   :face superman-next-project-button-face
-					   :help "Return to clean :width list"))
-	      " "
-	      (superman-make-button (concat "Mode: " (cond ((= level 0) "file | path")
-							   ((= level 1) "/path/file")
-							   ((= level 2) "~/path/file")
-							   ((= level 3) "[[org-link]]")))
-				    '(:fun file-list-toggle-display-mode
-					   :face superman-next-project-button-face
-					   :help "Change display of file-name and path-name")))
-      ;; insert updated filters		
-      (if (not file-list-filter)
-	  (when (and (not new-buffer)
-		     (next-single-property-change (point) 'active-filters))
-	    (goto-char (next-single-property-change (point) 'active-filters))
-	    (beginning-of-line)
-	    (kill-line))
-	;; (delete-region (point-at-bol) (point-at-eol)))
-	;; insert (updated) filters
-	(if new-buffer
-	    (insert "\n")
-	  (forward-line 1)
-	  (delete-region (point-at-bol) (point-at-eol)))
-	(insert 
-	 (superman-make-button
-	  "* Delete filters:" 
-	  '(:fun file-list-remove-all-filters
-		 :face superman-capture-button-face
-		 :help "Press button to remove all filters"))
-	 (concat " [" (int-to-string (length file-list-filter)) "]"))
-	(put-text-property (1- (point)) (point) 'active-filters t)
-	(save-excursion
-	  (forward-line 1)
-	  (unless (looking-at "^[ \t]*$")
-	    (insert "\n"))))
-      (when file-list-filter
-	(dolist (x file-list-filter nil)
-	  (insert " " (superman-make-button
-		       (car x)
-		       `(:fun (lambda () (interactive)
-				(file-list-remove-filter ,(car x)))
-			      :face file-list-active-filter-button-face
-			      :help "Press button to remove this filter")))))
-      ;; insert the column names
-      (when new-buffer
-	(insert "\n")
-	(when superman-empty-line-after-cat (insert "\n"))
-	;; (insert (superman-column-names balls))
-	(insert "Sort:\t"
-		(superman-make-button "file-name" '(:fun file-list-button-sort-by-name
-							 :face superman-column-name-face
-							 :help "Sort by :width name"))
-		" "
-		(superman-make-button "path" '(:fun file-list-button-sort-by-path
-						    :face superman-column-name-face
-						    :help "Sort by :width name"))
-		" "
-		(superman-make-button "time" '(:fun file-list-button-sort-by-time
-						    :face superman-column-name-face
-						    :help "Sort by :width modified"))
-		" "
-		(superman-make-button "size" '(:fun file-list-button-sort-by-time
-						    :face superman-column-name-face
-						    :help "Sort :width size")))
-	(put-text-property (point-at-bol) (point-at-eol) 'column-names t)
-	(beginning-of-line))
+	  (insert "\n")))
+      (goto-char (1+ (or (previous-single-property-change (point-max) 'point-file-list-start) 0)))
       (run-hooks 'superman-file-list-pre-display-hook))))
+
+(defun file-list-update-filter-line (filter)
+  (save-excursion
+    (let ((f-point (next-single-property-change (point-min) 'filter-line)))
+      ;; remove existing filter line
+      (when f-point
+	(goto-char f-point)
+	(beginning-of-line)
+	(kill-line))
+      (insert 
+       (superman-make-button
+	"Filters (delete):" 
+	'(:fun file-list-remove-all-filters
+	       :face superman-capture-button-face
+	       :width 17
+	       :help "Press button to remove all filters")))
+      (when filter
+	(let ((count 0))
+	  (dolist (x filter nil)
+	    (insert " " (superman-make-button
+			 (concat (plist-get x :name) " (n="
+				 (int-to-string 
+				  (length (plist-get x :filtered-files))) ")")
+			 `(:fun (lambda () (interactive)
+				  (file-list-remove-filter ,(plist-get x :name)))
+				:face file-list-active-filter-button-face
+				:help "Press button to remove this filter"
+				:props (filter ,count))))
+	    (setq count (1+ count)))))
+      (insert " "
+	      (superman-make-button "+" '(:fun file-list-filter
+					       :face file-list-active-filter-button-face
+					       :help "Press button to add a filter")))
+      (put-text-property (point-at-bol) (point-at-eol) 'filter-line t)
+      (insert "\n"))))
+
+(setq file-list-display-tabs nil)
+(setq file-list-default-tabs
+      '("action" "search" "display" "sort"))
+(defvar file-list-tabs-cycle-command-list 
+  '(("action"
+     (insert " " 
+	     (superman-make-button "Rename" '(:fun file-list-rename :face file-list-action-button-face :help "Rename all files"))
+	     " " 
+	     (superman-make-button "Copy" '(:fun file-list-copy :face file-list-action-button-face :help "Copy all files to a new directory"))
+	     " " 
+	     (superman-make-button "Delete" '(:fun file-list-remove :face file-list-action-button-face :help "Delete all files"))
+	     " " 
+	     (superman-make-button "Find & replace" '(:fun file-list-query-replace :face file-list-action-button-face :help "Run interactive query replace through all files"))
+	     " " 
+	     (superman-make-button "Shell-command" '(:fun file-list-shell-command :face file-list-action-button-face :help "Run the same shell command on all files"))))
+    ("sort" 
+     (insert 
+      (superman-make-button "file-name" '(:fun file-list-button-sort-by-name
+					       :face superman-default-button-face
+					       :props (:sorted nil)
+					       :help "Sort by file-name"))
+      " "
+      (superman-make-button "path" '(:fun file-list-button-sort-by-path
+					  :face superman-default-button-face
+					  :props (:sorted nil)
+					  :help "Sort by file-path"))
+      " "
+      (superman-make-button "time" '(:fun file-list-button-sort-by-time
+					  :face superman-default-button-face
+					  :props (:sorted nil)
+					  :help "Sort by time modified"))
+      " "
+      (superman-make-button "size" '(:fun file-list-button-sort-by-time
+					  :face superman-default-button-face
+					  :props (:sorted nil)
+					  :help "Sort file size"))))
+    ("display"
+     (insert 
+      " "
+      (superman-make-button (concat "Format" (cond ((= level 0) "file | path")
+						   ((= level 1) "/path/file")
+						   ((= level 2) "~/path/file")
+						   ((= level 3) "[[org-link]]")
+						   ((= level 4) "[[relative org-link]]")))
+			    '(:fun file-list-toggle-display-mode
+				   :face superman-default-button-face
+				   :help "Change format used to show file-names"))
+      " "
+      (superman-make-button "Clear"
+			    '(:fun file-list-clear-display
+				   :face superman-default-button-face
+				   :help "Remove search results and file attributes from display."))
+      " "
+      (superman-make-button "File attributes"
+			    '(:fun file-list-attributes
+				   :face superman-default-button-face
+				   :help "Show file attributes."))
+      " "
+      (superman-make-button "$ls -lh"
+			    '(:fun file-list-ls
+				   :face superman-default-button-face
+				   :help "Remove search results and file attributes from display."))))))
+
 
 (defun file-list-button-sort-by-name ()
   (interactive)
   (let ((buffer-read-only nil)
 	(reverse (get-text-property (previous-single-property-change (point) 'button) 'reverse))
 	(here (point)))
-    (when (get-text-property (point-at-bol) 'column-names)
+    (when (get-text-property (point-at-bol) 'point-file-list-start)
       (put-text-property
        (previous-single-property-change (point) 'button)
        (next-single-property-change (point) 'button)
@@ -315,7 +344,7 @@
   (let ((buffer-read-only nil)
 	(reverse (get-text-property (previous-single-property-change (point) 'button) 'reverse))
 	(here (point)))
-    (when (get-text-property (point-at-bol) 'column-names)
+    (when (get-text-property (point-at-bol) 'point-file-list-start)
       (put-text-property
        (previous-single-property-change (point) 'button)
        (next-single-property-change (point) 'button)
@@ -328,7 +357,7 @@
   (let ((buffer-read-only nil)
 	(reverse (get-text-property (previous-single-property-change (point) 'button) 'reverse))
 	(here (point)))
-    (when (get-text-property (point-at-bol) 'column-names)
+    (when (get-text-property (point-at-bol) 'point-file-list-start)
       (put-text-property
        (previous-single-property-change (point) 'button)
        (next-single-property-change (point) 'button)
@@ -341,11 +370,11 @@
   (let ((buffer-read-only nil)
 	(reverse (get-text-property (previous-single-property-change (point) 'button) 'reverse))
 	(here (point)))
-	(when (get-text-property (point-at-bol) 'column-names)
-	  (put-text-property
-	   (previous-single-property-change (point) 'button)
-	   (next-single-property-change (point) 'button)
-	   'reverse (not reverse)))
+    (when (get-text-property (point-at-bol) 'point-file-list-start)
+      (put-text-property
+       (previous-single-property-change (point) 'button)
+       (next-single-property-change (point) 'button)
+       'reverse (not reverse)))
     (file-list-sort-by-time reverse)
     (goto-char here)))
 
@@ -354,7 +383,7 @@
   (let ((buffer-read-only nil)
 	(reverse (get-text-property (previous-single-property-change (point) 'button) 'reverse))
 	(here (point)))
-	(when (get-text-property (point-at-bol) 'column-names)
+	(when (get-text-property (point-at-bol) 'point-file-list-start)
 	  (put-text-property
 	   (previous-single-property-change (point) 'button)
 	   (next-single-property-change (point) 'button)
@@ -369,42 +398,32 @@
     (superman-display-file-list
      (get-text-property (point-min) 'dir)
      (or file-list file-list-current-file-list)
-     (get-text-property (point-min) 'filter)
-     (get-text-property (point-min) 'sort)
+     (get-text-property (point-min) 'filter-list)
+     (get-text-property (point-min) 'sort-key)
      (get-text-property (point-min) 'balls)
      (current-buffer)
-     'refresh
      (not (get-text-property (point-min) 'project-buffer)))))
 
 (defun file-list-reload ()
   "Update below the directory which is stored at point-min.
- Then remove non-existing files and redisplay file-list.
-Finally apply filter stored at point-min and all elements of
- `file-list-filter'."
+ Then remove non-existing files and redisplay file-list."
   (interactive)
   (let* ((dir (get-text-property (point-min) 'dir))
-	 (main-filter (get-text-property (point-min) 'filter))
-	 (active-filter-list
-	  (mapcar 'car file-list-filter))
-	 (flist
-	  (progn
-	    (setq file-list-filter nil)
-	    (file-list-update-below-dir dir)
-	    (file-list-select
-	     nil
-	     (nth 0 main-filter)
-	     (nth 1 main-filter)
-	     (nth 2 main-filter)
-	     dir
-	     nil t))))
+	 (active-filter-list (get-text-property (point-min) 'filter-list))
+	 (sort (get-text-property (point-min) 'sort-key))
+	 flist)
+    (file-list-update-below-dir dir)
+    ;; (main-filter (get-text-property (point-min) 'filter))
     (while active-filter-list
       (let* ((filter (car active-filter-list))
-	     (regexp (get-text-property 0 'regexp filter))
-	     (by (get-text-property 0 'by filter))
-	     (inverse (get-text-property 0 'inverse filter)))
+	     (regexp (plist-get filter :regexp))
+	     (by (plist-get filter :by))
+	     (inverse (plist-get filter :inverse)))
 	(setq flist
 	      (file-list-select flist regexp by inverse dir nil t)))
       (setq active-filter-list (cdr active-filter-list)))
+    (when sort
+      (setq flist (file-list-sort-internal flist (nth 0 sort) (nth 1 sort) t)))
     ;; (file-list-select-existing-files)
     (setq file-list-current-file-list flist)
     (superman-file-list-refresh-display)))
@@ -420,23 +439,38 @@ Finally apply filter stored at point-min and all elements of
 
 (defun file-list-remove-all-filters ()
   (interactive)
-  (setq file-list-filter nil)
-  (file-list-reload))
-  
-(defun file-list-remove-filter (filter)
-  (let ((ff (cdr (assoc filter file-list-filter))))
-    (setq file-list-current-file-list
-	  (append file-list-current-file-list (car ff)))
-    (setq file-list-filter
-	  (delete-if '(lambda (x) (string= (car x) filter)) file-list-filter))
+  (let* ((filter-list (get-text-property (point-min) 'filter-list))
+	 (new-filter-list '((:name "file match '.'" :test "." :by "name" :regexp "." :inverse nil))))
+    (while filter-list
+      (setq file-list-current-file-list
+	    (append file-list-current-file-list
+		    (plist-get (car filter-list) :filtered-files))
+	    filter-list (cdr filter-list)))
     (superman-display-file-list
      (get-text-property (point-min) 'dir)
      file-list-current-file-list
-     (get-text-property (point-min) 'filter)
-     (get-text-property (point-min) 'sort)
+     new-filter-list
+     (get-text-property (point-min) 'sort-key)
      (get-text-property (point-min) 'balls)
      (current-buffer)
-     'refresh
+     (not (get-text-property (point-min) 'project-buffer)))))
+  
+(defun file-list-remove-filter (filter)
+  (let* ((old-filter-list (get-text-property (point-min) 'filter-list))
+	 (this-filter (nth (get-text-property (point) 'filter) old-filter-list))
+	 (new-filter-list (delete this-filter old-filter-list)))
+    (unless new-filter-list
+      (setq new-filter-list  '((:name "file match '.'" :test "." :by "name" :regexp "." :inverse nil))))
+    (setq file-list-current-file-list
+	  (append file-list-current-file-list
+		  (plist-get this-filter :filtered-files)))
+    (superman-display-file-list
+     (get-text-property (point-min) 'dir)
+     file-list-current-file-list
+     new-filter-list
+     (get-text-property (point-min) 'sort-key)
+     (get-text-property (point-min) 'balls)
+     (current-buffer)
      (not (get-text-property (point-min) 'project-buffer)))))
 
   
@@ -447,7 +481,6 @@ Finally apply filter stored at point-min and all elements of
   (setq major-mode 'file-list-mode)
   (setq mode-name "file-list")
   (make-local-variable 'file-list-current-file-list)
-  (make-local-variable 'file-list-filter)
   (make-local-variable 'file-list-display-level)
   (make-local-variable 'file-list-mode)
   (make-local-variable 'file-list-match-history)
@@ -502,10 +535,11 @@ Finally apply filter stored at point-min and all elements of
 "
   (interactive)
   (setq file-list-display-level
-	(cond ((= file-list-display-level 3) 2)
+	(cond ((= file-list-display-level 4) 3)
+	      ((= file-list-display-level 3) 2)
 	      ((= file-list-display-level 2) 1)
 	      ((= file-list-display-level 1) 0)
-	      ((= file-list-display-level 0) 3)))
+	      ((= file-list-display-level 0) 4)))
   (superman-file-list-refresh-display))
 
 
@@ -573,10 +607,11 @@ Returns the point at the end of the file-name."
 
 (defun file-list-end-of-file-list ()
   "Return the point of the end of displayed file-list."
+  (interactive)
   (when file-list-mode
     ;; (set-buffer file-list-display-buffer)
     (goto-char (point-max))
-    (re-search-backward "^[^ \t\n]" nil t)
+    (goto-char (previous-single-property-change (point) 'filename))
     (end-of-line)
     (point)))
 
@@ -584,9 +619,8 @@ Returns the point at the end of the file-name."
   "Return the point of the beginning of displayed file-list."
   (interactive)
   (when file-list-mode
-    (goto-char (point-min))
-    (re-search-forward "^current file-list:[\n]+" nil t)
-    (re-search-forward "^[/a-zA-Z]+" nil t)
+    (goto-char (previous-single-property-change (point-max) 'point-file-list-start))
+    (forward-line 1)
     (beginning-of-line)
     (point)))
 

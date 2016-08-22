@@ -50,7 +50,6 @@
   (message (concat "Reading genes and snps from: " emacs-genome)))
 
 ;; locate emacs packages to emacs-genome
-
 (require 'package)
 (setq eg-elpa-sources '(("marmalade" . "http://marmalade-repo.org/packages/")
 			("elpa" . "http://tromey.com/elpa/")
@@ -58,55 +57,43 @@
 			("org" . "http://orgmode.org/elpa/")
 			("melpa" . "http://melpa.org/packages/")
 			("melpa-stable" . "http://stable.melpa.org/packages/")))
-
-
-;; (if (fboundp 'gnutls-available-p)
-    ;; (fmakunbound 'gnutls-available-p))
-;; (setq tls-program '("gnutls-cli --tofu -p %p %h")
-      ;; imap-ssl-program '("gnutls-cli --tofu -p %p %s")
-      ;; smtpmail-stream-type 'starttls
-      ;; starttls-extra-arguments '("--tofu"))
-
 (dolist (source eg-elpa-sources) (add-to-list 'package-archives source t))
 (setq orig-package-user-dir package-user-dir)
 (setq package-user-dir (expand-file-name "genes/" emacs-genome))
-
 (setq package-enable-at-startup nil)   ; To prevent initialising twice
-
 (package-initialize)
 (unless (package-installed-p 'use-package)
   (package-refresh-contents)
   (package-install 'use-package))
-
 (require 'use-package)
+(setq use-package-verbose t)
 
-(use-package bind-key :ensure t)
+(use-package bind-key
+  :ensure t)
 
-;;(let ((eg-load-paths  
-       ;; (list "snps/"
-	     ;; "genes/emacs-iedit/"
-	     ;; "genes/mark-down/"
-	     ;; "genes/emacs-sos/" 
-	     ;; "genes/deft/"
-	     ;; "genes/mic-paren/"
-	     ;; "genes/helm/"
-	     ;; "genes/ssh-el/"
-	     ;; "genes/pandoc-mode/"
-	     ;; "genes/ess/lisp/"
-	     ;; "genes/use-package/"
-	     ;; "genes/org-mode/lisp/"
-	     ;; "genes/org-mode/contrib/lisp/"
-	     ;; "genes/SuperMan/lisp/"
-	     ;; "genes/ido-ubiquitous/"
-	     ;; "genes/emacs-epackage--lib-header-button/")))
-  ;; (while eg-load-paths 
-    ;; (add-to-list 'load-path
-		 ;; (expand-file-name (car eg-load-paths) emacs-genome))
-;; (setq eg-load-paths (cdr eg-load-paths))))
 (add-to-list 'load-path (expand-file-name "snps/" emacs-genome))
 (add-to-list 'load-path (expand-file-name "genes/SuperMan/lisp" emacs-genome))
 
-(require 'use-package)
+;; get appropriate version of orgmode
+(let ((org-version (package-desc-version (car-safe (cdr (assq 'org package-alist))))))
+  (when (or (not org-version)
+	    (version-list-< org-version '(20160509)))
+    (package-install (car-safe (cdr (assq 'org package-archive-contents))))))
+
+(use-package org
+  :ensure t
+  :pin org
+  :config
+  ;; (setq org-odt-data-dir (expand-file-name "genes/org-mode/etc/" emacs-genome))
+  (use-package org-snps)
+  (use-package org-structure-snps))
+;; org-ref
+(use-package org-ref
+  :ensure t)
+(use-package org-ref-snps)
+
+(use-package company
+  :ensure t :config)
 
 ;; general purpose look feel behaviour snps
 (use-package eg-utility-snps)
@@ -159,11 +146,11 @@
 ;; buffer switching
 (use-package ido
   :config
-  (ido-mode t)
+  (ido-mode 'buffers)
   ;;flexibly match names via fuzzy matching
   (setq ido-enable-flex-matching t)
   ;; use ido-mode everywhere, in buffers and for finding files
-  (setq ido-everywhere t)
+  (setq ido-everywhere nil)
   ;;(setq ido-use-filename-at-point 'guess); for find-file-at-point
   ;;(setq ido-use-url-at-point t); look for URLs at point
   ;; sort-order, gives preferences to org 
@@ -232,18 +219,6 @@
 (use-package tex-site
   :ensure auctex)
 (use-package latex-snps)
-;; orgmode
-(use-package org
-  :ensure t
-  :pin org
-  :config
-  (setq org-odt-data-dir (expand-file-name "genes/org-mode/etc/" emacs-genome))
-  (use-package org-snps)
-  (use-package org-structure-snps))
-;; org-ref
-(use-package org-ref
-  :ensure t)
-(use-package org-ref-snps)
 
 ;;(use-package orgmode-accessories 
 ;;  :ensure t)

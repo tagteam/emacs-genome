@@ -60,7 +60,7 @@
 		     (/ (* (/ (x-display-pixel-width)
 			      ;; (if (> (length (terminal-list)) 1)
 			      ;; (* (frame-char-width) (length (terminal-list)))
-			      (if  (string-match "27909\\|29377" (system-name))
+			      (if  (string-match "27909\\|29377\\|siam" (system-name))
 				  (* (frame-char-width) 3)
 				(frame-char-width)))
 			   12) 13))))

@@ -429,7 +429,7 @@ unless LITERAL-NIL is non-nil."
       (save-excursion (set-buffer error-buf) (erase-buffer))
       (kill-buffer error-buf))
     (while (superman-forward-project)
-      (unless (and (org-get-todo-state) (string= (org-get-todo-state) "ZOMBI"))
+      (unless (and (org-get-todo-state) (string-match (org-get-todo-state) "ZOMBI") )
 	(let* ((name (or (superman-get-property nil "nickname"  nil)
 			 (nth 4 (org-heading-components))))
 	       (loc (let ((loc (superman-get-property nil "location" nil)))
@@ -510,15 +510,14 @@ unless LITERAL-NIL is non-nil."
 				   (cons "lastvisit" lastvisit)
 				   (cons "config" config)
 				   (cons 'todo todo)
-				   (cons "publish-directory" publish-dir))))))
-      )
+				   (cons "publish-directory" publish-dir)))))))
     ;; sort by last visit
     (setq superman-project-alist
 	  (sort superman-project-alist (lambda (x y)
 					 (> 
 					  (org-time-stamp-to-now (cdr (assoc "lastvisit" (cadr x))) 'seconds)
 					  (org-time-stamp-to-now (cdr (assoc "lastvisit" (cadr y))) 'seconds)))))
-
+    
     (when (get-buffer "*Superman-parse-errors*")
       (pop-to-buffer  "*Superman-parse-errors*"))
     superman-project-alist))
@@ -760,6 +759,10 @@ project directory tree to the trash."
 ;;}}}
 ;;{{{ listing projects
 
+(defvar superman-ignore-index-buffers t "If non-nil add index buffers to `ido-ignore-buffers'.")
+(defvar superman-has-ignored-index-buffers nil "User should not set this variable. Function `superman-index-list' sets this variable to avoid
+ checking index buffers multiple times into `ido-ignore-buffers'.")
+
 (defun superman-index-list (&optional category state extension not-exist-ok update exclude-regexp)
   "Return a list of project specific indexes.
 Projects are filtered by CATEGORY unless CATEGORY is nil.
@@ -784,7 +787,8 @@ Examples:
 			 (not p-cat)
 			 (string= category p-cat))
 		     (or (not state)
-			 (string-match state (superman-get-state p)))) p))))
+			 (string-match state (superman-get-state p))))
+		p))))
 	 (palist (if (or category state)
 		     (delq nil (mapcar testfun superman-project-alist))
 		   superman-project-alist))
@@ -801,7 +805,15 @@ Examples:
 					 (string= extension (file-name-extension f))))
 			    f))))
 		  palist)))))
+    ;; see if user want's to hide the index buffers
+    (when (and superman-ignore-index-buffers 
+	       (not superman-has-ignored-index-buffers))
+      ;; (setq ido-ignore-buffers  '("\\` "))
+      (mapcar #'(lambda (file) (add-to-list 'ido-ignore-buffers
+					    (concat "^" (file-name-nondirectory file))))
+	      index-list))
     index-list))
+
 
 ;;}}}
 ;;{{{ selecting projects
@@ -856,6 +868,11 @@ If PROMPT is a string use it to ask for project."
 		       (format-time-string "<%Y-%m-%d %a %H:%M>"))
 	(save-buffer)))))
 
+(defun superman-save-some-buffers (&optional arg pred)
+  "Wrapper for `save-some-buffers' which does the same as `save-some-buffers' but never fails."
+  (interactive)
+  (ignore-errors (save-some-buffers arg pred)))
+
 (defun superman-save-project (project)
   (interactive)
   (unless
@@ -870,9 +887,9 @@ If PROMPT is a string use it to ask for project."
     (cond ((functionp superman-save-buffers)
 	   (funcall superman-save-buffers))
 	  ((string= superman-save-buffers "no-questions-asked")
-	   (save-some-buffers t))
+	   (superman-save-some-buffers t))
 	  (superman-save-buffers 
-	   (save-some-buffers nil)))))
+	   (superman-save-some-buffers nil)))))
 
 ;;}}}
 ;;{{{ switching projects (see also superman-config)

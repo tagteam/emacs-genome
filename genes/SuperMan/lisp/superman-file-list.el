@@ -1,9 +1,9 @@
 ;;{{{ Header
 
-;;; superman-file-list.el --- working with alist of filenames
+;;; superman-file-list.el --- working with a list of filenames
 ;;
 ;; Copyright (C) 2002-2016, Thomas A. Gerds <tag@biostat.ku.dk>
-;; Version: 1.1.3 (31 Jan 2014)
+;; Version: 1.1.5 (11 August 2016)
 ;;
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -167,10 +167,6 @@ cdr is the corresponding file-(a)list for that directory.")
   "List of currently selected file-names.")
 
 (make-variable-buffer-local 'file-list-current-file-list)
-
-(defvar file-list-filter nil
-  "List of currently selected file-names.")
-(make-variable-buffer-local 'file-list-filter)
 
 (defvar file-list-excluded-dir-list nil
   "List of directories for which files are excluded.")
@@ -590,9 +586,16 @@ If INCLUDE is non-nil, then SUBDIR is excluded if it does not match REGEXP."
 		regexp-or-test)))
     (delete nil (mapcar test file-list))))
 
-(defun file-list-split-file-list (file-list regexp-or-test filter-name &optional dont-match)
+(defun file-list-filter-file-list (file-list filter &optional dont-match)
+  "Split FILE-LIST according to FILTER into matching files and non-matching files. Return a plist
+with elements :yin and :yang. :yin is the list of matching files and :yang the filter which also is
+ a plist now enlarged with a new property :filtered-files, the list of not matching files.
+
+If DONT-MATCH is non-nil do the inverse operation, i.e., split into non-matching and matching files."
   (let* (yin
 	 yang
+	 fl-result
+	 (regexp-or-test (plist-get filter :test))
 	 (test (if (stringp regexp-or-test)
 		   (if (string= regexp-or-test ".")
 		       nil
@@ -602,28 +605,23 @@ If INCLUDE is non-nil, then SUBDIR is excluded if it does not match REGEXP."
 	 (n (length file-list))
 	 (i 0))
     (if test
-	(progn
-	  (while (< i n)
-	    (let* ((entry (nth i file-list))
-		   (in (funcall test entry)))
-	      (if in
-		  (setq yin (append `(,entry) yin))
-		(setq yang (append `(,entry) yang))))
-	    (setq i (1+ i)))
-	  (if dont-match
-	      (if yang
-		  (setq 
-		   file-list-filter
-		   (append file-list-filter
-			   (list (cons filter-name (list yin))))
-		   file-list-current-file-list yang)
-		(message "No files are matched by this criterion." regexp))
-	    (if yin	  
-		(setq 
-		 file-list-filter (append file-list-filter (list (cons filter-name (list yang))))
-		 file-list-current-file-list yin)
-	      (message "No files are matched by this criterion." regexp))))
-      (setq yin file-list))))
+	(while (< i n)
+	  (let* ((entry (nth i file-list))
+		 (in (funcall test entry)))
+	    (if in
+		(setq yin (append `(,entry) yin))
+	      (setq yang (append `(,entry) yang))))
+	  (setq i (1+ i)))
+      (setq yin file-list yang nil))
+    (cond (dont-match
+	   (setq fl-result yang)
+	   (plist-put filter :filtered-files yin))
+	  (t
+	   (setq fl-result yin)
+	   (plist-put filter :filtered-files yang)))
+    (unless fl-result 
+      (message "No files are matched by filter:" (plist-get filter :name)))
+    (list :yin fl-result :yang filter)))
 
 ;;mapcar this function on a file-list ...
 (defun file-list-make-file-name (entry)
@@ -681,7 +679,10 @@ Return  the sublist of the existing files. Does not re-display selected list."
 Changes the variable `file-list-current-file-list'. See also `file-list-add'."
   (setq file-list-reference-buffer (current-buffer))
   (let* ((display-buffer (or display-buffer
-			     (if file-list-mode (current-buffer)
+			     (if (and file-list-mode (or (not dir)
+							 (string= (expand-file-name dir) 
+								  (expand-file-name (get-text-property (point-min) 'dir)))))
+				 (current-buffer)
 			       file-list-display-buffer)))
 	 (file-list (cond (file-list)
 			  (dir (when file-list-update
@@ -737,39 +738,61 @@ Changes the variable `file-list-current-file-list'. See also `file-list-add'."
 		((string= by "time")
 		 '(lambda (entry)
 		    (file-list-time-less-p
-		     (subtract-time (current-time) (days-to-time
-						    (string-to-int regexp)))
+		     (file-list-time-subtract (current-time) (file-list-days-to-time
+							      (string-to-int regexp)))
 		     (nth 5 (file-attributes (file-list-make-file-name entry))))))
 		(t nil)))
-	 (sub-file-list
-	  (progn
-	    (add-text-properties 0 (length filter-name)
-				 `(by ,by
-				      regexp ,regexp
-				      inverse ,inverse) filter-name)
-	    ;; (file-list-extract-sublist
-	    (file-list-split-file-list
-	     file-list (or test regexp) filter-name inverse))))
-    (unless (stringp sub-file-list)
-      (unless dont-display
-	(let ((sorted (get-text-property (point-min) 'sort)))
-	  (when sorted
-	    (setq sub-file-list
-		  (file-list-sort-internal
-		   sub-file-list
-		   (nth 0 sorted)
-		   (nth 1 sorted)
-		   'dont)))
-	  (superman-display-file-list
-	   dir
-	   sub-file-list
-	   `(,regexp ,by ,inverse)
-	   sorted
-	   nil
-	   display-buffer
-	   nil t))
-	(setq file-list-current-file-list sub-file-list))
-      sub-file-list)))
+	 (new-filter (list :name filter-name
+			   :test (or test regexp)
+			   :by by
+			   :regexp regexp
+			   :inverse inverse))
+	 filter-result
+	 (filter-list (when (superman-file-list-display-buffer-p dir)
+			(get-text-property (point-min) 'filter-list)))
+	 sub-file-list)
+    ;; apply filter
+    (setq filter-result
+	  (file-list-filter-file-list file-list new-filter inverse))
+    (setq
+     sub-file-list (plist-get filter-result :yin)
+     filter-list (add-to-list 'filter-list (plist-get filter-result :yang)))
+    (unless dont-display
+      (let ((sorted (get-text-property (point-min) 'sort-key)))
+	(when sorted
+	  (setq sub-file-list
+		(file-list-sort-internal
+		 sub-file-list
+		 (nth 0 sorted)
+		 (nth 1 sorted)
+		 'dont)))
+	(superman-display-file-list
+	 dir
+	 sub-file-list
+	 filter-list
+	 sorted
+	 nil
+	 display-buffer
+	 t)))
+    sub-file-list))
+
+(defun file-list-filter ()
+  "Apply a filter to a file-list."
+  (interactive)
+  (let ((dbuf (current-buffer))
+	(dir (get-text-property (point-min) 'dir))
+	(inverse (get-text-property (point-min) 'inverse))
+	(file-list file-list-current-file-list)
+	(type (completing-read "Filter list by: " '(("file name")
+						    ("directory name")
+						    ("age")
+						    ("file size")))))
+    (file-list-select file-list nil (cdr (assoc type 
+						'(("file name" "name")
+						  ("directory name" "path")
+						  ("time" "time")
+						  ("file size" "size"))))
+		      inverse dir dbuf)))
 
 (defun file-list-by-name (&optional arg file-list dir)
   "Returns sublist of filenames (in file-list) whose path is matched by regexp.
@@ -901,7 +924,7 @@ See also file-list-select."
 	(and (= (car t1) (car t2))
 	     (< (nth 1 t1) (nth 1 t2))))))
 
-(defun days-to-time (days)
+(defun file-list-days-to-time (days)
   "Convert DAYS into a time value."
   (let* ((seconds (* 1.0 days 60 60 24))
 	 (rest (expt 2 16))
@@ -910,9 +933,9 @@ See also file-list-select."
     (list ms (condition-case nil (round (- seconds (* ms rest)))
 	       (range-error (expt 2 16))))))
 
-(defalias 'subtract-time 'time-subtract)
+;; (defalias 'subtract-time 'time-subtract)
 
-(defun time-subtract (t1 t2)
+(defun file-list-time-subtract (t1 t2)
   "Subtract two time values.
 Return the difference in the format of a time value."
   (let ((borrow (< (cadr t1) (cadr t2))))
@@ -996,13 +1019,13 @@ Return the difference in the format of a time value."
       (setq sorted-list
 	    (if reverse
 		(reverse (sort file-list sortfun))
-	      (sort file-list sortfun))))
+	      (sort file-list sortfun)))
+      (let ((buffer-read-only nil))
+	(put-text-property (point-min) (1+ (point-min)) 'sort-key `(,by ,reverse))))
     (if dont-display
 	sorted-list
       (setq file-list-current-file-list sorted-list)
       (message "File list sorted by %s%s" by (if reverse " in reverse order" ""))
-      (let ((buffer-read-only nil))
-	(put-text-property (point-min) (1+ (point-min)) 'sort `(,by ,reverse)))
       (superman-file-list-refresh-display file-list-current-file-list))))
 
 ;;}}}
@@ -1057,28 +1080,52 @@ Return the difference in the format of a time value."
   (interactive "P")
   (file-list-choose-file arg event extent buffer 'magic))
 
-
 (defun file-list-omit-file-at-point (&optional arg)
   "Omit entry of filename at point from current file list.
 If ARG keep only filename at point."
   (interactive "P")
   (when file-list-mode
-    (let* ((c-list file-list-current-file-list)
-	   (here (point-at-bol))
-	   ;; (or (previous-single-property-change (point-min) 'superman-item-marker)
-	   ;; (save-excursion (forward-line -1) (point))))
-	   (filename (file-list-file-at-point))
-	   (nth-in-list (file-list-nth-in-list filename file-list-current-file-list)))
-      (if arg (progn
-		(setq file-list-current-file-list
-		      (list (file-list-make-entry filename)))
-		(superman-file-list-refresh-display))
-	(setq file-list-current-file-list
-	      (delete (nth nth-in-list file-list-current-file-list)
-		      file-list-current-file-list))
-	(superman-file-list-refresh-display)
-	(goto-char here)))))
-
+    (let* ((ff (get-text-property (point-min) 'filter-list))
+	   (buffer-read-only nil)
+	   ;; manual filter is always in pole position
+	   (is-manual (when (equal (plist-get (nth 0 ff) :name) "manual-filter") ff))
+	   (hf (when is-manual (nth 0 ff)))
+	   filtered-files
+	   (c-list file-list-current-file-list)
+	   (this-file (file-list-make-entry (file-list-file-at-point))))
+      (if arg (setq filtered-files (delete this-file file-list-current-file-list)
+		    file-list-current-file-list (list this-file))
+	(setq filtered-files (list this-file)
+	      file-list-current-file-list
+	      (delete this-file c-list)))
+      ;; set manual filter
+      (if hf (setq hf (plist-put hf :filtered-files 
+				 (append (plist-get hf :filtered-files) filtered-files)))
+	(setq hf `((:name "manual-filter" 
+			  :test nil :by "user-omit" :regexp nil :inverse nil :filtered-files ,filtered-files))))
+      (if is-manual (setcar ff hf) (setq ff (append hf ff)))
+      ;; set filter
+      (put-text-property (point-min) (1+ (point-min)) 'filter-list ff)
+      (file-list-update-filter-line ff)
+      ;; modifiy file-list
+      (if arg
+	  (superman-display-file-list
+	   (get-text-property (point-min) 'dir)
+	   file-list-current-file-list
+	   ff
+	   (get-text-property (point-min) 'sort-key)
+	   (get-text-property (point-min) 'balls)
+	   (current-buffer)
+	   (not (get-text-property (point-min) 'project-buffer)))
+	(beginning-of-line)
+	(kill-line))
+      ;; move 
+      (unless arg
+	(forward-line -1)
+	(when (< (point) 
+		 (previous-single-property-change (point-max) 'point-file-list-start))
+	  (goto-char (1+ (previous-single-property-change (point-max) 'point-file-list-start))))))))
+  
 
 (defun file-list-find (arg &optional file-list)
   (interactive "p")
@@ -1283,7 +1330,7 @@ Switches to the corresponding directory of each file."
 					 " "
 					 (nth 7 rest)))))))
 	   (split-string (shell-command-to-string
-			  (concat "ls -l "
+			  (concat "ls -lh "
 				  (file-list-concat-file-names file-list)))
 			 "\n"))))
     (setq file-list-current-file-list
@@ -1370,8 +1417,7 @@ Switches to the corresponding directory of each file."
 				  entry)) file-list-current-file-list)))
     (superman-file-list-refresh-display)
     (file-list-beginning-of-file-list)))
-    ;; (file-list-switch-to-file-list)))
-
+;; (file-list-switch-to-file-list)))
 
 (defun file-list-remove (&optional file-list)
   (interactive)
@@ -1384,18 +1430,14 @@ Switches to the corresponding directory of each file."
 	(delete-file (file-list-make-file-name fn)))
       ;; update file-list-current-file-list and file-list-alist
       (setq file-list-current-file-list nil)
-      (setq file-list-filter nil)
       (superman-file-list-refresh-display))))
-      
-
 
 (defun file-list-grep (&optional file-list)
   (interactive)
   (when file-list-mode
-    ;; (file-list-switch-to-file-list)
     (let* ((file-list (or file-list file-list-current-file-list))
 	   (grep-regexp (read-string
-			 "Regexp for grep on files in current file-list: "
+			 "Regexp for `grep -n' on current file-list: "
 			 nil file-list-grep-history))
 	   (files (file-list-concat-file-names file-list))
 	   (file-list-buffer (current-buffer))
@@ -1430,7 +1472,6 @@ Switches to the corresponding directory of each file."
 	    (kill-buffer hits-buf))
 	  (switch-to-buffer file-list-buffer)
 	  (file-list-beginning-of-file-list)
-	  ;; (file-list-switch-to-file-list)
 	  (if (not grep-hit-list)
 	      (message "No grep hits for '%s'." grep-regexp)
 	    ;;replace current entry with new entry
@@ -1454,20 +1495,50 @@ Switches to the corresponding directory of each file."
 			  (> (length (caddr e)) (length (caddr f)))))))
 	  (superman-file-list-refresh-display file-list-current-file-list))))))
 
-; (defun file-list-restrict-to-matching-files (&optional file-list)
-;   (interactive)
-;   (let ((file-list (or file-list file-list-current-file-list))
-; 	file)
-;     (while pfile-list
-;       (setq
-;       (if (and (file-list-
-;     (setq file-list-current-file-list
-; 	  (delete (nth nth-in-list file-list-current-file-list)
-; 		  file-list-current-file-list))
-;     (superman-file-list-refresh-display file-list)
+;;}}}
+;;{{{ isearch
+(defun file-list-search ()
+  (interactive)
+  (when file-list-mode
+    (interactive)
+    (let* ((buffer-read-only nil)
+	   (string (read-string "Search string in file-list: "))
+	   (display-buffer (current-buffer))
+	   this-file this-line line-no)
+      (goto-char (1+ (file-list-beginning-of-file-list)))
+      (delete-other-windows)
+      (split-window-vertically)
+      (while (setq this-file (get-text-property (point-at-bol) 'filename))
+	(other-window 1)
+	(find-file this-file)
+	(save-restriction
+	  (widen)
+	  (goto-char (point-min))
+	  (while (search-forward string nil t)
+	    (setq 
+	     line-no (int-to-string (line-number-at-pos))
+	     this-line (buffer-substring-no-properties (point-at-bol) (point-at-eol)))
+	    (put-text-property 0 (length line-no) 'face font-lock-warning-face line-no)
+	    (save-excursion
+	      (set-buffer display-buffer)
+	      (end-of-line)
+	      (insert "\n  " line-no " : " this-line))))
+	(file-list-next-file 1)))))
 
-
-
+(defun file-list-query-replace (&optional file-list)
+  (interactive)
+  (let* ((file-list (or file-list file-list-current-file-list))
+	 (args (query-replace-read-args "Query-replace" nil)))
+    (dolist (file file-list)
+      (save-window-excursion
+	(find-file (file-list-make-file-name file))
+	(save-restriction
+	  (widen)
+	  (goto-char (point-min))
+	  (query-replace (car args) (cadr args))
+	  (save-buffer)
+	  ;; (kill-buffer)
+	  )))))
 ;;}}}
 ;;{{{ iswitchf
  
@@ -1777,36 +1848,6 @@ Switches to the corresponding directory of each file."
       (file-list-quit t)))
 
 
-		     
-;(defun file-list-dummy (&optional file-list)
-;  (interactive)
-;  (let* ((file-list (or file-list file-list-current-file-list)))
-;    (dolist (file file-list)
-;      (save-window-excursion
-;	(find-file (file-list-make-file-name file))
-;	(save-restriction
-;	  (widen)
-;	  (goto-char (point-min))
-;	  (re-search-forward "RQ91" nil t)
-;	  (insert "\n")
-;;	  (insert "RQ70 RQ71 RQ72 RQ73 RQ74 RQ75 RQ76 RQ77 RQ78 RQ79 RQ80 RQ81 RQ82 RQ83 RQ84 RQ85 RQ86 RQ87 RQ88 RQ89 RQ90 RQ91")
-;	  (save-buffer))))))
-
-
-		     
-(defun file-list-query-replace (&optional file-list)
-  (interactive)
-  (let* ((buffer-read-only nil)
-	 (file-list (or file-list file-list-current-file-list))
-	 (args (query-replace-read-args "Query-replace" nil)))
-    (dolist (file file-list)
-      (save-window-excursion
-	(find-file (file-list-make-file-name file))
-	(save-restriction
-	  (widen)
-	  (goto-char (point-min))
-	  (query-replace (car args) (cadr args))
-	  (save-buffer))))))
 
 (defun file-list-call-defun (&optional file-list)
   (interactive)

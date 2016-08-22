@@ -14,11 +14,10 @@ for applied (bio)statisticians.
 Besides the newest emacs (emacs-version > 24), you need to have
 installed git (the stupid content tracker). In order to use all
 functionality a series of other programs is needed, including latex,
-perl and recoll. See the manual
-[[file:emacs-genome-manual.org][manual]] for a longer list of
-recommended programs.
+perl and recoll. See below for further functionality and recommended
+programs.
 
-* Install (in three steps)
+* Install (in 3 steps)
 
 To use or test the emacs-genome you should download (i.e. clone) the
 latest version. To do this execute the following three steps in a
@@ -36,29 +35,29 @@ directory or in "pathtowhereIwanttheemacsgenome". The emacs-genome
 already contains the code snps. It remains to get the genes, including
 org-mode, auctex, Superman and ESS.
 
-** Step 2: make
+** Step 2: modify your .emacs or init.el file
 
-There is a Makefile which automatically downloads and installs the
-larger extensions. Go back to the termninal and execute the following
-commands:
-
-#+BEGIN_SRC sh :eval ever
-cd emacs-genome
-make 
-#+END_SRC
-
-** Step 3: init
-
-To use the emacs-genome adapt the following lines and add them to the
-end of your .emacs file:
+Adapt the following lines (i.e., change path "~/emacs-genome" to the
+path on your computer if it deviates) and add them to the end of your
+.emacs or init.el file:
 
 #+BEGIN_SRC emacs-lisp :export code :eval ever
-(setq emacs-genome "/path/to/emacs-genome")
+(setq emacs-genome "~/emacs-genome")
 (load-file (expand-file-name "emacs-genome.el" emacs-genome))
-(setq superman-home "~/metropolis") ;; for project management
+#+END_SRC
+
+** Step 3:
+   
+Relaunch emacs and wait for packages to be installed. 
+
+# read the [[file:emacs-genome-manual.org][manual]]. 
+
+* Project management
+#+BEGIN_SRC  emacs-lisp :export code
+(make-directory "~/metropolis")
+(setq superman-home "~/metropolis") 
 (setq superman-profile ".SuperMan.org")
 #+END_SRC
 
-Relaunch emacs and read the [[file:emacs-genome-manual.org][manual]]. 
 
 

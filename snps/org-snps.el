@@ -37,10 +37,7 @@
 ;	  (user-error ":END: line missing at position %s buffer %s" b (buffer-name)))))))
 
 
-;;{{{ loading packages
-(add-to-list 'load-path (concat emacs-genome "/genes/org-mode/lisp"))
-(add-to-list 'load-path (concat emacs-genome "/genes/org-mode/contrib/lisp"))
-
+;;{{{ loading org features
 (use-package org)
 (use-package org-capture)
 (use-package org-agenda)
@@ -228,11 +225,38 @@
 	       ("\\paragraph{%s}" . "\\paragraph*{%s}")
 	       ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
 
+(add-to-list 'org-latex-classes
+	     `("Rnews-article"
+	       ,(concat "\\documentclass{report}
+               [NO-PACKAGES]
+               [NO-DEFAULT-PACKAGES]
+               [EXTRA]"
+			eg/org-latex-common-header-string
+			"\\renewcommand*\\familydefault{\\sfdefault}\n\\itemsep2pt")
+	       ("\\section{%s}" . "\\section*{%s}")
+	       ("\\subsection{%s}" . "\\subsection*{%s}")
+	       ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+	       ("\\paragraph{%s}" . "\\paragraph*{%s}")
+	       ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
+
 ;; download: http://www.biometrics.tibs.org/latexdocumentclass.htm
 ;; wget http://www.biometrics.tibs.org/biomlatex.zip
 (add-to-list 'org-latex-classes
 	     `("biometrics-article"
 	       ,(concat "\\documentclass[useAMS,usenatbib,referee]{biom}
+                %% \\documentclass[useAMS,usenatbib]{biom}
+               [PACKAGES]
+               [EXTRA]"
+			eg/org-latex-common-header-string)
+	       ("\\section{%s}" . "\\section*{%s}")
+	       ("\\subsection{%s}" . "\\subsection*{%s}")
+	       ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+	       ("\\paragraph{%s}" . "\\paragraph*{%s}")
+	       ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
+
+(add-to-list 'org-latex-classes
+	     `("ims-article"
+	       ,(concat "\\documentclass[sts]{imsart}
                 %% \\documentclass[useAMS,usenatbib]{biom}
                [PACKAGES]
                [EXTRA]"
@@ -307,6 +331,42 @@
                ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
                ("\\paragraph{%s}" . "\\paragraph*{%s}")
                ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
+
+;; (setq org-latex-classes nil)
+(add-to-list 'org-latex-classes
+             `("monograph"
+	       ,(concat
+		 "\\documentclass{book}"
+		 "\n\\usepackage{amsmath,amsfonts}"
+		 "\n\\usepackage{float}"
+		 "\n\\usepackage{listings}"
+		 "\n\\usepackage{array}"
+		 "\n\\usepackage{graphicx}"
+		 "\n\\usepackage{hyperref}"
+		 "\n\\usepackage{grffile}"
+		 "\n\\usepackage{color}"
+		 "\n\\usepackage{biblatex}"
+		 "\n\\renewcommand*\\familydefault{\\sfdefault}"
+		 "\n[NO-DEFAULT-PACKAGES]"
+		 "\n[NO-PACKAGES]"
+		 "\n[EXTRA]")
+               ("\\chapter{%s}" . "\\chapter*{%s}")
+               ("\\section{%s}" . "\\section*{%s}")
+               ("\\subsection{%s}" . "\\subsection*{%s}")
+               ("\\subsubsection{%s}" . "\\subsubsection*{%s}")))
+(add-to-list 'org-latex-classes
+             `("subfiles"
+	       ,(concat
+		 "\\documentclass[./book.tex]{subfiles}"
+		 "\\usepackage{listings}"
+		 eg/org-latex-listing-options-string
+		 "\n[NO-DEFAULT-PACKAGES]"
+		 "\n[NO-PACKAGES]"
+		 "\n[EXTRA]")
+               ("\\chapter{%s}" . "\\chapter*{%s}")
+               ("\\section{%s}" . "\\section*{%s}")
+               ("\\subsection{%s}" . "\\subsection*{%s}")
+               ("\\subsubsection{%s}" . "\\subsubsection*{%s}")))
 
 (add-to-list 'org-latex-classes
              `("book"
