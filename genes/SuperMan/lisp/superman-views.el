@@ -1397,15 +1397,12 @@ and :BODY stores the body (if WITH-BODY is non-nil)
 		     (org-end-of-meta-data)
 		   (org-end-of-meta-data 't)
 		   (point)))
-	    (kill-whole-line t)
 	    balls)
 	(save-excursion
 	  (goto-char beg)
 	  (when (re-search-forward "PROPERTIES" end 't)
 	    (while (re-search-forward "^[\t ]+:Ball[0-9]+:" end 't)
-	      (beginning-of-line)
-	      (kill-line)
-	      (goto-char (point-at-bol)))
+	      (delete-region (point-at-bol) (1+ (point-at-eol))))
 	    balls))))))
 
 
@@ -2590,11 +2587,9 @@ If BACKWARD is non-nil move backward."
   (interactive)
   (if superman-view-mode
       (let ((marker (org-get-at-bol 'org-hd-marker))
-	    (buffer-read-only nil)
-	    (kill-whole-line t))
+	    (buffer-read-only nil))
 	(when marker
-	  (beginning-of-line)
-	  (kill-line)
+	  (delete-region (point-at-bol) (1+ (point-at-eol)))
 	  (with-current-buffer
 	      (marker-buffer marker)
 	    (widen)
@@ -2729,8 +2724,7 @@ The value is non-nil unless the user regretted and the entry is not deleted.
 	   (set-window-configuration scene)
 	   (unless (or regret dont-kill-line)
 	     (let ((buffer-read-only nil))
-	       (beginning-of-line)
-	       (kill-line)))
+	       (delete-region (point-at-bol) (1+ (point-at-eol)))))
 	   (unless regret
 	     (when marker
 	       (save-excursion
@@ -2846,14 +2840,12 @@ The value is non-nil unless the user regretted and the entry is not deleted.
   "Refresh view of all lines in current category inclusive column names."
   (interactive)
   (let ((start (superman-cat-point))
-	(kill-whole-line t)
 	(end (or (next-single-property-change (point) 'cat) (point-max))))
     (if (not start)
 	(message "Point is not in category.")
       (superman-loop 'superman-view-redo-line nil start end nil)
       (goto-char (next-single-property-change start 'names))
-      (beginning-of-line)
-      (kill-line)
+      (delete-region (point-at-bol) (1+ (point-at-eol)))
       (insert (superman-column-names new-balls) "\n"))))
 
 (defun superman-view-redo-line (&optional marker balls)
@@ -2867,7 +2859,7 @@ The value is non-nil unless the user regretted and the entry is not deleted.
       (beginning-of-line)
       (let ((newline
 	     (org-with-point-at marker
-		 (superman-format-thing marker balls)))
+	       (superman-format-thing marker balls)))
 	    (beg (previous-single-property-change (point-at-eol) 'org-hd-marker))
 	    (end (or (next-single-property-change (point) 'org-hd-marker)
 		     (next-single-property-change (point) 'tail))))
@@ -2875,7 +2867,8 @@ The value is non-nil unless the user regretted and the entry is not deleted.
 	(insert newline)
 	(set-text-properties (point-at-bol) (+ (point-at-bol) 1) props)
 	(beginning-of-line)
-	(while (or (org-activate-bracket-links (point-at-eol)) (org-activate-plain-links (point-at-eol)))
+	(while (or (ignore-errors (org-activate-bracket-links (point-at-eol)))
+		   (ignore-errors (org-activate-plain-links (point-at-eol))))
 	  (add-text-properties
 	   (match-beginning 0) (match-end 0)
 	   '(face org-link)))

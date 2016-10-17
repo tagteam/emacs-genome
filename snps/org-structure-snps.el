@@ -44,9 +44,10 @@
 (add-to-list
  'org-structure-template-alist
  `("La" ,(concat
-	  "* HEADER :noexport:\n\n"
-	  "#+TITLE: 
-#+LANGUAGE:  en
+	  "* HEADER :noexport:\n"
+	  "\n#+TITLE: "
+	  "\n#+Author: " user-full-name 
+"#+LANGUAGE:  en
 #+OPTIONS:   H:3 num:t toc:nil \\n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
 #+OPTIONS:   TeX:t LaTeX:t skip:nil d:t todo:t pri:nil tags:not-in-toc author:nil
 #+LaTeX_CLASS: org-article
@@ -55,8 +56,8 @@
 user-full-name
 "}
 # #+LaTeX_HEADER:\\affil{Department of Biostatistics, University of Copenhagen, Copenhagen, Denmark}
-#+PROPERTY: session *R*
-#+PROPERTY: cache yes")))
+#+PROPERTY: header-args session *R*
+#+PROPERTY: header-args cache yes")))
 
 (add-to-list
  'org-structure-template-alist
@@ -85,8 +86,8 @@ user-full-name
 #+LATEX_HEADER: \\RequirePackage{array}
 #+LATEX_HEADER: \\RequirePackage{multirow}
 #+LATEX_HEADER: \\DefineVerbatimEnvironment{verbatim}{Verbatim}{fontsize=\\small,formatcom = {\\color[rgb]{0.5,0,0}}}
-#+PROPERTY: session *R*
-#+PROPERTY: cache yes")))
+#+PROPERTY: header-args session *R*
+#+PROPERTY: header-args cache yes")))
 
 
 ;; Shrinking a slide
@@ -128,15 +129,15 @@ user-full-name
  '("Rs" "#+BEGIN_SRC R :results output raw drawer  :exports none :session *R* :cache yes \n?\n#+END_SRC"))
 (add-to-list
  'org-structure-template-alist
- '("Rb" "#+BEGIN_SRC R :exports both :results output raw drawer  :session *R* :cache yes \n?\n#+END_SRC"))
+ '("Rb" "#+ATTR_LATEX: :options otherkeywords={}, deletekeywords={}\n#+BEGIN_SRC R :exports both :results output raw drawer  :session *R* :cache yes \n?\n#+END_SRC"))
 
 (add-to-list
  'org-structure-template-alist
- '("Re" "#+BEGIN_SRC R :exports both :results output :session *R* :cache yes \n?\n#+END_SRC"))
+ '("Re" "#+ATTR_LATEX: :options otherkeywords={}, deletekeywords={}\n#+BEGIN_SRC R :exports both :results output :session *R* :cache yes \n?\n#+END_SRC"))
 
 (add-to-list
  'org-structure-template-alist
- '("Rc" "#+BEGIN_SRC R :exports code :results output raw  :session *R* :cache yes \n?\n#+END_SRC"))
+ '("Rc" "#+ATTR_LATEX: :options otherkeywords={}, deletekeywords={}\n#+BEGIN_SRC R :exports code :results output raw  :session *R* :cache yes \n?\n#+END_SRC"))
 (add-to-list
  'org-structure-template-alist
  '("Rl" "#+BEGIN_SRC R  :results output latex   :exports results  :session *R*\n?\n#+END_SRC"))
@@ -150,6 +151,10 @@ user-full-name
 
 (add-to-list
  'org-structure-template-alist
+ '("Bo" "Hi Brice"))
+
+(add-to-list
+ 'org-structure-template-alist
  '("Rr" "#+BEGIN_SRC R  :results output raw drawer  :exports results  :session *R* :cache yes \n?\n#+END_SRC"))
 (add-to-list
  'org-structure-template-alist
@@ -158,6 +163,14 @@ user-full-name
 (add-to-list
  'org-structure-template-alist
  '("g" "\n\n#+LABEL: fig:1\n#+ATTR_LATEX: :width 0.7\\textwidth\n#+CAPTION:\n"))
+
+(add-to-list
+ 'org-structure-template-alist
+ '("Lg" "\n\n#+LABEL: fig:1\n#+ATTR_LATEX: :width 0.7\\textwidth\n#+CAPTION:\n"))
+
+(add-to-list
+ 'org-structure-template-alist
+ '("Bg" "\n\n#+LABEL: fig:1\n#+ATTR_LATEX: :width 0.7\\textwidth\n#+CAPTION:\n"))
 
 (add-to-list
  'org-structure-template-alist

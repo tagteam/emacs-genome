@@ -705,9 +705,6 @@ project directory tree to the trash."
 	(kill-buffer (concat "*Project[" (car pro) "]*")))
       ;; update superman buffer
       (superman))
-    ;; (switch-to-buffer "*S*")
-    ;; (let ((buffer-read-only nil)
-    ;; (kill-line))))
     ;; remove directory tree and index file
     (when (and (file-exists-p dir)
 	       (yes-or-no-p (concat "Remove project directory tree? " dir " ")))

@@ -221,7 +221,6 @@ See also `superman-capture-whatever' for the other arguments."
 
  See `superman-capture' for the other arguments."
   (let* ((level (or level superman-item-level))
-	 (kill-whole-line t)
 	 body-start
 	 (body (or body ""))
 	 (S-buf (generate-new-buffer-name "*Capture of SuperMan*"))
@@ -239,7 +238,7 @@ See also `superman-capture-whatever' for the other arguments."
 	  (org-narrow-to-subtree)
 	  (unless (= level 0) (progn 
 				(skip-chars-forward "[* ]")
-				(kill-line))))
+				(delete-region (point) (point-at-eol)))))
     ;; stuff point-min with text properties
     (goto-char (point-min))
     (insert "Superman captured: ")
@@ -448,7 +447,6 @@ at the requested destination and then reset the window configuration."
       (error "Cannot save in read-only mode")
     (let* ((scene (get-text-property (point-min) 'scene))
 	   (nick (get-text-property (point-min) 'nickname))
-	   (kill-whole-line t)
 	   (edit (get-text-property (point-min) 'edit))
 	   req
 	   (n-error 0)
@@ -460,7 +458,7 @@ at the requested destination and then reset the window configuration."
       (goto-char (point-min))
       (while (setq next (next-single-property-change (point) 'superman-error))
 	(goto-char next)
-	(kill-whole-line 1))
+	(delete-region (point-at-bol) (1+ (point-at-eol))))
       ;; see if hdr is filled correctly
       (goto-char (point-min))
       (ignore-errors (outline-next-heading))
@@ -480,12 +478,13 @@ at the requested destination and then reset the window configuration."
       (while (setq next (next-single-property-change (point-at-eol) 'prop-marker))
 	(goto-char next)
 	(re-search-forward ":[a-zA-Z0-9]+:" nil t)
+	;; make sure that there is a space between : and the value
+	(unless (looking-at " ") (insert " "))
 	;;
 	(let* ((if-empty (get-text-property (point-at-bol) 'if-empty))
 	       (test (or (get-text-property (point-at-bol) 'test)))
 	       test-message
-	       (message (or (get-text-property (point-at-bol) 'message) "Error"))
-	       (kill-whole-line t))
+	       (message (or (get-text-property (point-at-bol) 'message) "Error")))
 	  (cond ((and test (setq test-message (funcall test)))
 		 (beginning-of-line) (insert "<" (if (stringp test-message) test-message message) ">\n")
 		 (forward-line -1)
@@ -498,7 +497,7 @@ at the requested destination and then reset the window configuration."
 		;; empty field
 		((looking-at "[ \t]*\n")
 		 (cl-case if-empty 
-		   ('delete (kill-whole-line 1))
+		   ('delete (delete-region (point-at-bol) (1+ (point-at-eol))))
 		   ('complain 
 		    (beginning-of-line) (insert " <" (or message "Cannot be empty") ">\n")
 		    (forward-line -1)

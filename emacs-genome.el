@@ -73,6 +73,7 @@
 
 (add-to-list 'load-path (expand-file-name "snps/" emacs-genome))
 (add-to-list 'load-path (expand-file-name "genes/SuperMan/lisp" emacs-genome))
+;; (add-to-list 'load-path (expand-file-name "genes/org-mode/lisp/" emacs-genome))
 
 ;; get appropriate version of orgmode
 (let ((org-version (package-desc-version (car-safe (cdr (assq 'org package-alist))))))
@@ -88,8 +89,8 @@
   (use-package org-snps)
   (use-package org-structure-snps))
 ;; org-ref
-(use-package org-ref
-  :ensure t)
+(use-package org-ref :ensure t)
+
 (use-package org-ref-snps)
 
 (use-package company
@@ -201,12 +202,10 @@
 (use-package  markdown-mode :ensure t)
 ;; Emacs speaks statistics
 ;; (setq ess-etc-directory-list nil)
-(use-package ess-site
-  :ensure ess
-  :config
-  ;; (setq ess-use-auto-complete 'script-only)
-  (use-package ess-R-snps)
-  (use-package ess-edit))
+(use-package ess-site :ensure ess)
+(use-package ess-R-snps)
+(use-package ess-edit)
+;; (setq ess-use-auto-complete 'script-only)
 
 (use-package ac-R :ensure t)
 

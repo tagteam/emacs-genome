@@ -330,7 +330,7 @@ given in superman notation."
 	  (lambda ()
 	    (save-excursion
 	      (goto-char (point-min))
-	      (kill-line)
+	      (delete-region (point-at-bol) (1+ (point-at-eol)))
 	      (insert 
 	       "Project ToDo list")
 	      (put-text-property (point-at-bol) (point-at-eol) 'redo-cmd `(superman-project-timeline ,nick))

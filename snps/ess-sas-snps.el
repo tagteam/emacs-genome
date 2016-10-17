@@ -1,4 +1,3 @@
-;;
 ;; ess-sas-snps.el
 ;;
 ;; Copyright (C) 2002-2014, Thomas A. Gerds <tag@biostat.ku.dk>

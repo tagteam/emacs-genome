@@ -22,21 +22,6 @@
 
 ;;; Code:
 
-;(defun org-flag-drawer (flag)		
-;  "When FLAG is non-nil, hide the drawer we are within.
-;Otherwise make it visible."or
-;  (save-excursion
-;    (beginning-of-line 1)
-;    (when (looking-at "^[ \t]*:[a-zA-Z][a-zA-Z0-9]*:")
-;      (let ((b (match-end 0)))
-;	(if (re-search-forward
-;	     "^[ \t]*:END:"
-;	     (save-excursion (outline-next-heading) (point)) t)
-;	    (outline-flag-region b (point-at-eol) flag)
-;	  (pop-to-buffer (buffer-name))
-;	  (user-error ":END: line missing at position %s buffer %s" b (buffer-name)))))))
-
-
 ;;{{{ loading org features
 (use-package org)
 (use-package org-capture)
@@ -57,9 +42,10 @@
 ;;}}}
 ;;{{{ babel settings
 (setq org-babel-hash-show-time t)
-;; most convenient to *not* let export actions
-;; evaluate code:
-(setq org-export-babel-evaluate nil)
+;; it is most transparent and convenient 
+;; if export actions *never* evaluate code:
+(setq org-export-babel-evaluate t)
+(add-to-list 'org-babel-default-header-args '(:eval . "never-export"))
 ;;}}}
 ;;{{{ babel 
 (defun eg/indent-elisp-org-buffer ()
@@ -146,6 +132,7 @@
 	      "keywordstyle=\\color{blue},\n"
 	      "commentstyle=\\color{red},"
 	      "stringstyle=\\color[rgb]{0,.5,0},\n"
+               "literate={~}{$\\sim$}{1},\n"
 	      "basicstyle=\\ttfamily\\small,\n"
 	      "columns=fullflexible,\n"
 	      "breaklines=true,\n"        
@@ -211,14 +198,15 @@
 	;; ("basewidth" "{0.5em,0.4em}")))
 
 ;; [NO-DEFAULT-PACKAGES]
-;; (setq org-latex-classes nil)
+ (setq org-latex-classes nil)
 (add-to-list 'org-latex-classes
 	     `("org-article"
 	       ,(concat "\\documentclass{article}
                [PACKAGES]
                [EXTRA]"
 			eg/org-latex-common-header-string
-			"\\renewcommand*\\familydefault{\\sfdefault}\n\\itemsep2pt")
+			 ;;"\\renewcommand*\\familydefault{\\sfdefault}\n\\itemsep2pt"
+			 )
 	       ("\\section{%s}" . "\\section*{%s}")
 	       ("\\subsection{%s}" . "\\subsection*{%s}")
 	       ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
@@ -358,8 +346,8 @@
              `("subfiles"
 	       ,(concat
 		 "\\documentclass[./book.tex]{subfiles}"
-		 "\\usepackage{listings}"
-		 eg/org-latex-listing-options-string
+		 ;; "\\usepackage{listings}"
+		 ;; eg/org-latex-listing-options-string
 		 "\n[NO-DEFAULT-PACKAGES]"
 		 "\n[NO-PACKAGES]"
 		 "\n[EXTRA]")
@@ -520,7 +508,7 @@
    (ditaa . t)
    (org . t)
    (dot . t)
-;;   (shell . t)
+   ;;   (shell . t)
    (R . t)))
 
 ;; Do not confirm source block evaluation

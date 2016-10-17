@@ -458,7 +458,6 @@ If EXT is given then turn name.xxx into name.ext. EXT must be a string like '.te
     (save-excursion
       (TeX-command "LaTeX" 'TeX-master-file nil))
     (beginning-of-line)
-    ;; (kill-line)
     (save-buffer)
     (forward-line 1)
     (setq pos (point))

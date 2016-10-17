@@ -513,9 +513,7 @@ by listings all the entries of file-list-default-directories."
 
 
 (defun file-list-update-file-alist (&optional file delete)
-  (let* (
-	 ;; (gc-cons-threshold file-list-gc-cons-threshold)
-	 (file-name (expand-file-name
+  (let* ((file-name (expand-file-name
 		     (or file
 			 (buffer-file-name (current-buffer)))))
 	 (file-cons (file-list-make-entry file-name))
@@ -674,20 +672,23 @@ Return  the sublist of the existing files. Does not re-display selected list."
   file-list-current-file-list)
 
 
-(defun file-list-select (&optional file-list regexp by inverse dir display-buffer dont-display)
+(defun file-list-select (file-list regexp by inverse dir display-buffer dont-display)
   "Returns sublist of filenames in file-list matched by regexp.
 Changes the variable `file-list-current-file-list'. See also `file-list-add'."
   (setq file-list-reference-buffer (current-buffer))
-  (let* ((display-buffer (or display-buffer
-			     (if (and file-list-mode (or (not dir)
-							 (string= (expand-file-name dir) 
-								  (expand-file-name (get-text-property (point-min) 'dir)))))
+  (let* ((fl-buffer-p (superman-file-list-display-buffer-p dir))
+	 (display-buffer (or display-buffer
+			     (if fl-buffer-p
 				 (current-buffer)
 			       file-list-display-buffer)))
 	 (file-list (cond (file-list)
-			  (dir (when file-list-update
-				 (file-list-update dir nil))
-			       (file-list-list dir nil nil 'recursive nil))
+			  (fl-buffer-p
+			   ;; same directory as shown in current buffer
+			   file-list-current-file-list)
+			  (dir
+			   (when file-list-update
+			     (file-list-update dir nil))
+			   (file-list-list dir nil nil 'recursive nil))
 			  (file-list-mode file-list-current-file-list)
 			  (t (if file-list-update
 				 (file-list-update dir nil))
@@ -705,10 +706,12 @@ Changes the variable `file-list-current-file-list'. See also `file-list-add'."
 				      ((string= by "time") (format "exceeds%s " (if (not inverse) " *not*" "")))
 				      ((string= by "size") (format "exceeds%s " (if inverse " *not*" "")))
 				      (t (format "is%s matched by regexp" (if inverse " *not*" ""))))))
-	 (regexp (or regexp (read-string
-			     prompt-string
-			     nil
-			     'file-list-regexp-history)))
+	 (regexp (cond (regexp)
+		       ((string= by "user-omit") nil)
+		       (t (read-string
+			   prompt-string
+			   nil
+			   'file-list-regexp-history))))
 	 (filter-name (cond ((string= by "time")
 			     (format (concat "" "%s '%s' day%s")
 				     (if inverse
@@ -717,10 +720,10 @@ Changes the variable `file-list-current-file-list'. See also `file-list-add'."
 			    ((string= by "size")
 			     (format "size %s '%s'" (if inverse "<" ">") regexp))
 			    ((string= by "path")
-			     (format "dir %s '%s'" (if inverse " no-match:" "match:") regexp))
+			     (format "dir %s '%s'" (if inverse "not match:" "match:") regexp))
 			    ((string= by "ext")
-			     (format "ext %s '%s'" (if inverse " no-match:" "match:") regexp))
-			    (t (format "file %s '%s'" (if inverse " no-match:" "match:") regexp))))
+			     (format "ext %s '%s'" (if inverse "not match:" "match:") regexp))
+			    (t (format "file %s '%s'" (if inverse "not match:" "match:") regexp))))
 	 (test (cond 
 		((not by) nil)
 		((string= by "path")
@@ -792,91 +795,91 @@ Changes the variable `file-list-current-file-list'. See also `file-list-add'."
 						  ("directory name" "path")
 						  ("time" "time")
 						  ("file size" "size"))))
-		      inverse dir dbuf)))
+		      inverse dir dbuf nil)))
 
 (defun file-list-by-name (&optional arg file-list dir)
-  "Returns sublist of filenames (in file-list) whose path is matched by regexp.
+  "Return sublist of filenames (in displayed file-list) whose path is matched by regexp."
+  (interactive "P")
+  (file-list-select file-list nil nil arg dir (current-buffer) nil))
+
+(defun file-list-by-path (&optional arg file-list dir)
+ "Returns sublist of filenames (in file-list) whose path-name is matched by regexp.
 This changes the value of file-list-current-file-list."
   (interactive "P")
-  (file-list-select file-list nil nil arg dir))
+    (file-list-select file-list nil "path" arg dir (current-buffer) nil))
+
+(defun file-list-by-time (&optional arg file-list dir)
+  "Returns sublist of filenames (in file-list) whose size is lower than a given value.
+This changes the value of file-list-current-file-list."
+  (interactive "P")
+  (file-list-select file-list nil "time" arg  dir (current-buffer) nil))
+
+(defun file-list-by-size (&optional arg file-list dir)
+ "Returns sublist of filenames (in file-list) whose size is lower than a given value.
+This changes the value of file-list-current-file-list."
+  (interactive "P")
+  (file-list-select file-list nil "size" arg  dir (current-buffer) nil))
 
 (defun file-list-by-ext (&optional arg file-list dir)
   "Returns sublist of filenames (in file-list) whose path is matched by regexp.
 This changes the value of file-list-current-file-list."
   (interactive "P")
-  (file-list-select file-list nil "ext" arg dir))
+  (file-list-select file-list nil "ext" arg dir (current-buffer) nil))
+
+(defun file-list-fresh-buffer (dir)
+  "Create a fresh buffer for listing files below directory DIR. 
+If such a buffer exists already, kill it first and return a fresh one."
+  (let* ((fl-buf-name (concat "File-list: " (expand-file-name dir)))
+	 (fl-buf (get-buffer fl-buf-name)))
+    (when fl-buf (kill-buffer fl-buf))
+    (get-buffer-create fl-buf-name)))
 
 (defun file-list-by-name-below-directory (&optional arg file-list)
-  "Reads directory name and returns sublist of filenames below directory whose
-raw file-name match a regexp.
-This changes the value of file-list-current-file-list."
+  "Read a directory name and return sublist of filenames below the  directory whose
+file-name (without directory) matches a regexp."
   (interactive "P")
   (let ((dir (read-directory-name (format
 				   "%s of files by name below directory: "
 				   (if arg "Inverse selection" "Selection")))))
-  (file-list-select file-list nil nil arg dir)))
+    (file-list-select file-list nil nil arg dir (file-list-fresh-buffer dir) nil)))
 
 (defun file-list-by-ext-below-directory (&optional arg file-list)
-  "Reads directory name and returns sublist of filenames below directory whose
-raw file-name match a regexp.
-This changes the value of file-list-current-file-list."
+  "Read directory name and return sublist of filenames below directory whose
+file-name extension matches a regexp."
   (interactive "P")
   (let ((dir (read-directory-name (format
 				   "%s of files by name below directory: "
 				   (if arg "Inverse selection" "Selection")))))
-    (file-list-select file-list nil "ext" arg dir)))
+    (file-list-select file-list nil "ext" arg dir (file-list-fresh-buffer dir) nil)))
 
-
-(defun file-list-by-path (&optional arg file-list)
- "Returns sublist of filenames (in file-list) whose path-name is matched by regexp.
-This changes the value of file-list-current-file-list."
-  (interactive "P")
-    (file-list-select file-list nil "path" arg))
 
 (defun file-list-by-path-below-directory (&optional arg file-list)
- "Reads directory name and returns sublist of filenames (in file-list) whose path
-is matched by a regexp. This changes the value of file-list-current-file-list."
+ "Read a directory name and return sublist of filenames (in file-list) whose path
+is matched by a regexp."
   (interactive "P")
   (let ((dir (read-directory-name (format
 				   "%s of files by pathname below directory: "
 				   (if arg "Inverse selection" "Selection")))))
-    (file-list-select file-list nil "path" arg dir)))
-
-
-(defun file-list-by-time (&optional arg file-list)
-  "Returns sublist of filenames (in file-list) whose size is lower than a given value.
-This changes the value of file-list-current-file-list."
-  (interactive "P")
-  (file-list-select file-list nil "time" arg))
+    (file-list-select file-list nil "path" arg dir (file-list-fresh-buffer dir) nil)))
 
 
 (defun file-list-by-time-below-directory (&optional arg file-list)
-  "Reads directory name and returns sublist of filenames (in file-list) whose age
-is less or greater than a number of days which also has to be specified.
-This changes the value of file-list-current-file-list."
+  "Read a directory name and return sublist of filenames (in file-list) whose age
+is less or greater than a number of days which also has to be specified."
   (interactive "P")
   (let ((dir (read-directory-name (format
 				   "%s of files by age below directory: "
 				   (if arg "Inverse selection" "Selection")))))
-  (file-list-select file-list nil "time" arg dir)))
-
-
-(defun file-list-by-size (&optional arg file-list)
- "Returns sublist of filenames (in file-list) whose size is lower than a given value.
-This changes the value of file-list-current-file-list."
-  (interactive "P")
-  (file-list-select file-list nil "size" arg))
-
+  (file-list-select file-list nil "time" arg dir (file-list-fresh-buffer dir) nil)))
 
 (defun file-list-by-size-below-directory (&optional arg file-list)
-  "Reads directory name and returns sublist of filenames (in file-list) whose size
-is less or greater than a number in bytes which also has to be specified.
-This changes the value of file-list-current-file-list."
+  "Read a directory name and return sublist of filenames (in file-list) whose size
+is less or greater than a number in bytes which also has to be specified."
   (interactive "P")
   (let ((dir (read-directory-name (format
 				   "%s of files by size below directory: "
 				   (if arg "Inverse selection" "Selection")))))
-    (file-list-select file-list nil "size" arg dir)))
+    (file-list-select file-list nil "size" arg dir (file-list-fresh-buffer dir) nil)))
 
 
 (defun file-list-add (&optional file-list dir regexp)
@@ -943,21 +946,47 @@ Return the difference in the format of a time value."
 	  (- (+ (if borrow 65536 0) (cadr t1)) (cadr t2)))))
 
 (defun file-list-sort-by-size (&optional reverse file-list)
+  "Sort file-list by file size"
   (interactive "P")
   (let ((file-list (or file-list file-list-current-file-list)))
     (file-list-sort-internal file-list "size" reverse)))
 
 (defun file-list-sort-by-time (&optional reverse file-list)
+  "Sort file-list by last save time"
   (interactive "P")
   (let ((file-list (or file-list file-list-current-file-list)))
      (file-list-sort-internal file-list "time" reverse)))
 
+(defun file-list-sort-descending ()
+  "Sort file-list in descending order by current sort-key (stored as text-property at point-min) 
+or by file-name if there is no sort-key yet"
+  (interactive)
+  (let ((sort (get-text-property (point-min) 'sort-key)))
+    (file-list-sort-internal file-list-current-file-list
+			     (or (nth 0 sort) "name") 't nil)))
+
+(defun file-list-sort-ascending ()
+  "Sort file-list in ascending order by current sort-key (stored as text-property at point-min) 
+or by file-name if there is no sort-key yet"
+  (interactive)
+  (let ((sort (get-text-property (point-min) 'sort-key)))
+    (file-list-sort-internal file-list-current-file-list
+			     (or (nth 0 sort) "name") nil nil)))
+
 (defun file-list-sort-by-name (&optional reverse file-list)
+  "Sort file-list by file-name"
   (interactive "P")
   (let ((file-list (or file-list file-list-current-file-list)))
-     (file-list-sort-internal file-list "name" reverse)))
+    (file-list-sort-internal file-list "name" reverse)))
+
+(defun file-list-sort-by-ext (&optional reverse file-list)
+  "Sort file-list by extension"
+  (interactive "P")
+  (let ((file-list (or file-list file-list-current-file-list)))
+     (file-list-sort-internal file-list "ext" reverse)))
 
 (defun file-list-sort-by-path (&optional reverse file-list)
+  "Sort file-list by directory-name"
   (interactive "P")
   (let ((file-list (or file-list file-list-current-file-list)))
      (file-list-sort-internal file-list "path" reverse)))
@@ -985,6 +1014,9 @@ Return the difference in the format of a time value."
 		  ((string= by "name")
 		   (lambda (a b)
 		     (string-lessp (car a) (car b))))
+		  ((string= by "ext")
+		   (lambda (a b)
+		     (string-lessp (file-name-extension (car a)) (file-name-extension (car b)))))
 		  ((string= by "path")
 		   (lambda (a b)
 		     (string-lessp (cadr a) (cadr b))))
@@ -1104,9 +1136,9 @@ If ARG keep only filename at point."
 	(setq hf `((:name "manual-filter" 
 			  :test nil :by "user-omit" :regexp nil :inverse nil :filtered-files ,filtered-files))))
       (if is-manual (setcar ff hf) (setq ff (append hf ff)))
-      ;; set filter
+      ;; set filter and adapt number of files
       (put-text-property (point-min) (1+ (point-min)) 'filter-list ff)
-      (file-list-update-filter-line ff)
+      (file-list-update-filter-line ff (length file-list-current-file-list))
       ;; modifiy file-list
       (if arg
 	  (superman-display-file-list
@@ -1117,11 +1149,16 @@ If ARG keep only filename at point."
 	   (get-text-property (point-min) 'balls)
 	   (current-buffer)
 	   (not (get-text-property (point-min) 'project-buffer)))
-	(beginning-of-line)
-	(kill-line))
+	;; manual removal of the file at point
+	(delete-region (point-at-bol) (1+ (point-at-eol)))
+	(while (get-text-property (point-at-bol) 'appendix)
+	  (delete-region (point-at-bol) (1+ (point-at-eol)))))
       ;; move 
       (unless arg
-	(forward-line -1)
+	(unless (next-single-property-change (point) 'filename)
+	  (forward-line -1))
+	;; (previous-single-property-change (point-max) 'point-file-list-start))
+	;; (goto-char (1+ (previous-single-property-change (point-max) 'point-file-list-start))))
 	(when (< (point) 
 		 (previous-single-property-change (point-max) 'point-file-list-start))
 	  (goto-char (1+ (previous-single-property-change (point-max) 'point-file-list-start))))))))
@@ -1311,8 +1348,7 @@ Switches to the corresponding directory of each file."
 
 (defun file-list-ls (&optional file-list nodisplay)
   (interactive)
-  (let* ((file-list-display-level 2)
-	 (file-list (or file-list file-list-current-file-list))
+  (let* ((file-list (or file-list file-list-current-file-list))
 	 (attr-list
 	  (mapcar
 	   (lambda (attr)
@@ -1387,7 +1423,6 @@ Switches to the corresponding directory of each file."
 				 (file-list-convert-bytes (nth 7 add)))))))
 	   file-list))
     (unless nodisplay
-      (setq file-list-display-level 2)
       (superman-file-list-refresh-display
        file-list-current-file-list)))
   file-list-current-file-list)
@@ -1447,8 +1482,7 @@ Switches to the corresponding directory of each file."
        (concat "grep -n " grep-regexp " "  files " " "/dev/null")
        hits-buf)
       (if (not (buffer-live-p hits-buf))
-	  (error "No grep hits for '%s'." grep-regexp)
-	(setq file-list-display-level 2))
+	  (error "No grep hits for '%s'." grep-regexp))
       (save-excursion 
 	(set-buffer hits-buf)
 	(goto-char (point-min))
@@ -1522,13 +1556,14 @@ Switches to the corresponding directory of each file."
 	    (save-excursion
 	      (set-buffer display-buffer)
 	      (end-of-line)
-	      (insert "\n  " line-no " : " this-line))))
+	      (insert "\n  " line-no " : " this-line)
+	      (put-text-property (point-at-bol) (point-at-eol) 'file-info t))))
 	(file-list-next-file 1)))))
 
 (defun file-list-query-replace (&optional file-list)
   (interactive)
   (let* ((file-list (or file-list file-list-current-file-list))
-	 (args (query-replace-read-args "Query-replace" nil)))
+	 (args (query-replace-read-args "Query-replace" nil t)))
     (dolist (file file-list)
       (save-window-excursion
 	(find-file (file-list-make-file-name file))
@@ -1696,11 +1731,14 @@ Switches to the corresponding directory of each file."
 (define-key file-list-mode-map "X" 'file-list-shell-command)
 (define-key file-list-mode-map "y" 'file-list-add)
 (define-key file-list-mode-map "\C-c" 'file-list-clear-display)
+(define-key file-list-mode-map [(delete)] 'file-list-clear-display)
+(define-key file-list-mode-map "\C-l" 'file-list-clear-display)
 (define-key file-list-mode-map "\C-t" 'file-list-toggle-display-mode)
 (define-key file-list-mode-map "Ss" 'file-list-sort-by-size)
 (define-key file-list-mode-map "St" 'file-list-sort-by-time)
 (define-key file-list-mode-map "Sf" 'file-list-sort-by-name)
 (define-key file-list-mode-map "Sp" 'file-list-sort-by-path)
+(define-key file-list-mode-map "Se" 'file-list-sort-by-ext)
 (define-key file-list-mode-map "Uu" 'file-list-update)
 (define-key file-list-mode-map "Ud" 'file-list-update-below-dir)
 (define-key file-list-mode-map "/s" 'file-list-by-size)
@@ -1897,82 +1935,74 @@ Switches to the corresponding directory of each file."
       (setcar entry (downcase (car entry)))))
   (superman-file-list-refresh-display file-list-current-file-list))
 
-(defun file-list-choose-dir (arg &optional event extent buffer)
-  (interactive "P")
-  (let ((dirname
-	 (progn (set-list-mode-extent)
-		(extent-string (extent-at (point))))))
-    (file-list-select nil nil nil nil dirname)))
 
-
-
-(defun file-list-diagnosis (&optional dir)
-  (interactive)
-  (get-buffer-create "*file-list-diagnosis*")
-  (switch-to-buffer "*file-list-diagnosis*")
-  (erase-buffer)
-  (let* (
-	 ;; (gc-cons-threshold file-list-gc-cons-threshold)
-	 (dir (or dir file-list-home-directory))
-	 (dirlist (file-list-list dir t t t))
-	 (overall 0) 
-	 (diaglist (sort (let ((tail dirlist) dlist entry size)
-			   (while tail 
-			     (if (setq entry (assoc (cadr (car tail)) dlist))
-				 (progn (setq size (nth 7 (file-attributes (file-list-make-file-name (car tail)))))
-					;; size can be out of range ...
-					(if (= size -1) nil
-					  (setcdr entry (+ size (cdr entry)))
-					  (setq overall (+ size overall))))
-			       (setq dlist (cons (cons (cadar tail) 0) dlist)))
-			     (setq tail (cdr tail)))
-			   dlist)
-			 (lambda (a b) (> (cdr a) (cdr b)))))
-	 ;;1 KByte=2^10 Bytes
-	 ;;1 Mbyte=2^20 Bytes
-	 ;;1 GByte=2^30 Bytes
-	 ;;1 Tbyte=2^40 Bytes
-	 (breaks `(,(cons 1048576 "1 Gigabyte")
-		   ,(cons 512000 "500 Megabyte")
-		   ,(cons 204800 "200 Megabyte")
-		   ,(cons 102400 "100 Megabyte")
-		   ,(cons 1024 "1 Megabyte")
-		   ,(cons 0 "0 Byte")
-		   ,(cons -1 nil)))
-	 (break (car breaks))
-	 (first t)
-	 lastbreak)
-    (insert (make-string (window-width (selected-window)) (string-to-char "#")) 
-	    "\n\nSize of all assessable files below " dir "\n"
-	    "Gigabyte: " (int-to-string (/ overall (* 1024 1024 1024))) "\n"
-	    "Megabyte: " (int-to-string (/ overall (* 1024 1024))) "\n"
-	    "Kilobyte: " (int-to-string (/ overall 1024)) "\n\n"
-	    (make-string (window-width (selected-window)) (string-to-char "#")) "\n")
-    (while diaglist
-      (let* ((y (car diaglist))
-	     (name (car y))
-	     (size-in-kbytes (/ (cdr y) 1024)))
-	(cond ((and first (>= size-in-kbytes (car break)))
-	       (insert "\n"
-		       (make-string (window-width (selected-window)) (string-to-char "~"))
-		       "\n"
-		       (cond ((= (car lastbreak) 0)
-			      "0 Bytes")
-			     (lastbreak
-			      (concat "Cumulative size (Kilobytes) between " (cdr break) " and " (cdr lastbreak)))
-			     (t (concat "Cumulative size (Kilobytes) >= " (cdr break))))
-		       "\n"
-		       (make-string (window-width (selected-window)) (string-to-char "~"))
-		       "\n\n")
-	       (insert name " : " (int-to-string size-in-kbytes) "\n")
-	       (setq first nil))
-	      ((>= size-in-kbytes (car break)) (insert name " : " (int-to-string size-in-kbytes) "\n"))
-	      (t (setq lastbreak break)
-		 (setq breaks (cdr breaks))
-		 (setq break (car breaks))
-		 (setq first t)))
-	(if (not first) (setq diaglist (cdr diaglist))))))
-  (goto-char (point-min)))
+;; (defun file-list-diagnosis (&optional dir)
+  ;; (interactive)
+  ;; (get-buffer-create "*file-list-diagnosis*")
+  ;; (switch-to-buffer "*file-list-diagnosis*")
+  ;; (erase-buffer)
+  ;; (let* (
+	 ;; ;; (gc-cons-threshold file-list-gc-cons-threshold)
+	 ;; (dir (or dir file-list-home-directory))
+	 ;; (dirlist (file-list-list dir t t t))
+	 ;; (overall 0) 
+	 ;; (diaglist (sort (let ((tail dirlist) dlist entry size)
+			   ;; (while tail 
+			     ;; (if (setq entry (assoc (cadr (car tail)) dlist))
+				 ;; (progn (setq size (nth 7 (file-attributes (file-list-make-file-name (car tail)))))
+					;; ;; size can be out of range ...
+					;; (if (= size -1) nil
+					  ;; (setcdr entry (+ size (cdr entry)))
+					  ;; (setq overall (+ size overall))))
+			       ;; (setq dlist (cons (cons (cadar tail) 0) dlist)))
+			     ;; (setq tail (cdr tail)))
+			   ;; dlist)
+			 ;; (lambda (a b) (> (cdr a) (cdr b)))))
+	 ;; ;;1 KByte=2^10 Bytes
+	 ;; ;;1 Mbyte=2^20 Bytes
+	 ;; ;;1 GByte=2^30 Bytes
+	 ;; ;;1 Tbyte=2^40 Bytes
+	 ;; (breaks `(,(cons 1048576 "1 Gigabyte")
+		   ;; ,(cons 512000 "500 Megabyte")
+		   ;; ,(cons 204800 "200 Megabyte")
+		   ;; ,(cons 102400 "100 Megabyte")
+		   ;; ,(cons 1024 "1 Megabyte")
+		   ;; ,(cons 0 "0 Byte")
+		   ;; ,(cons -1 nil)))
+	 ;; (break (car breaks))
+	 ;; (first t)
+	 ;; lastbreak)
+    ;; (insert (make-string (window-width (selected-window)) (string-to-char "#")) 
+	    ;; "\n\nSize of all assessable files below " dir "\n"
+	    ;; "Gigabyte: " (int-to-string (/ overall (* 1024 1024 1024))) "\n"
+	    ;; "Megabyte: " (int-to-string (/ overall (* 1024 1024))) "\n"
+	    ;; "Kilobyte: " (int-to-string (/ overall 1024)) "\n\n"
+	    ;; (make-string (window-width (selected-window)) (string-to-char "#")) "\n")
+    ;; (while diaglist
+      ;; (let* ((y (car diaglist))
+	     ;; (name (car y))
+	     ;; (size-in-kbytes (/ (cdr y) 1024)))
+	;; (cond ((and first (>= size-in-kbytes (car break)))
+	       ;; (insert "\n"
+		       ;; (make-string (window-width (selected-window)) (string-to-char "~"))
+		       ;; "\n"
+		       ;; (cond ((= (car lastbreak) 0)
+			      ;; "0 Bytes")
+			     ;; (lastbreak
+			      ;; (concat "Cumulative size (Kilobytes) between " (cdr break) " and " (cdr lastbreak)))
+			     ;; (t (concat "Cumulative size (Kilobytes) >= " (cdr break))))
+		       ;; "\n"
+		       ;; (make-string (window-width (selected-window)) (string-to-char "~"))
+		       ;; "\n\n")
+	       ;; (insert name " : " (int-to-string size-in-kbytes) "\n")
+	       ;; (setq first nil))
+	      ;; ((>= size-in-kbytes (car break)) (insert name " : " (int-to-string size-in-kbytes) "\n"))
+	      ;; (t (setq lastbreak break)
+		 ;; (setq breaks (cdr breaks))
+		 ;; (setq break (car breaks))
+		 ;; (setq first t)))
+	;; (if (not first) (setq diaglist (cdr diaglist))))))
+  ;; (goto-char (point-min)))
 ;;}}}
 
 (provide 'superman-file-list)

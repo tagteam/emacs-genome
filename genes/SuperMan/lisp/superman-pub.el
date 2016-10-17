@@ -201,7 +201,6 @@ write the result to buffer INDEX-BUF."
   ;; (goto-char (next-single-property-change (point-min) 'header-end))
   ;; (re-search-forward "@" nil t)
   ;; (while (re-search-forward "={}" nil t)
-    ;; (kill-whole-line)))
 ;; FIXME: this is a rather crude and time-consuming hack:
 ;; (set-buffer
 ;; (marker-buffer

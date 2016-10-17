@@ -158,7 +158,7 @@ passed to `superman-run-cmd'."
   (let* ((dir (get-text-property (point-min) 'git-dir))
 	 (message
 	  (read-string 
-	   (concat "Commit message"  ": ")))
+	   (concat "Commit message" ": ")))
 	 (action (concat " commit -m \"" message "\" ")))
     (when dir
       (superman-git-action action dir)
@@ -470,17 +470,15 @@ given by the filename property of the item at point."
 	  (append-to-file (concat  (replace-regexp-in-string (concat dir "/") "" (expand-file-name filename)) "\n") nil gitignore)
 	  (let ((buffer-read-only nil))
 	    (beginning-of-line)
-	    (kill-whole-line)))
-      (find-file gitignore)
-      )))
+	    (delete-region (point-at-bol) (1+ (point-at-eol)))))
+      (find-file gitignore))))
 
 (defun superman-git-delete-file ()
   "Delete the file at point by calling `git rm'."
   (interactive)
   (when (superman-view-delete-entry 'dont 'dont)
-  (let ((buffer-read-only nil))
-    (beginning-of-line)
-    (kill-line))))
+    (let ((buffer-read-only nil))
+      (delete-region (point-at-bol) (1+ (point-at-eol))))))
 
 ;;}}}
 ;;{{{ actions add/commit/delete on all marked files
@@ -541,7 +539,7 @@ commit the file to the git repository."
 			(list (read-file-name "Git add file: " dir nil t))))
 	 (file-list-string
 	  (apply 'concat
-		 (mapcar `(lambda (f) (concat (superman-relative-name f ,dir) " ")) file-list)))
+		 (mapcar `(lambda (f) (concat " " (superman-relative-name f ,dir))) file-list)))
 	 (cmd (concat "cd " dir ";" superman-cmd-git " add -f " file-list-string))
 	 (message (if commit (or message (read-string (concat "Commit message for " file-list-string ": "))))))
     (if message (setq cmd (concat cmd  ";" superman-cmd-git " commit -m \"" message "\" " file-list-string)))
@@ -887,10 +885,10 @@ This function should be bound to a key or button."
 	  (goto-char (point-min))
 	  (forward-line 2))
       (goto-char branch-start)
-      (kill-whole-line))
+      (delete-region (point-at-bol) (1+ (point-at-eol))))
     (when remote-start
       (goto-char remote-start)
-      (kill-whole-line))
+      (delete-region (point-at-bol) (1+ (point-at-eol))))
     (when git-dir
       (superman-view-insert-git-branches git-dir)
       (if buttons
@@ -1421,7 +1419,7 @@ and remove the whole line in case of no-match."
 	(setq catch (append catch
 			    (list
 			     (buffer-substring (point) (point-at-eol)))))
-	(kill-line)
+	(delete-region (point-at-bol) (1+ (point-at-eol)))
 	(forward-line -1)))
     ;; in case we remove the last line
     (unless (next-single-property-change (point-min) 'tail)
@@ -1444,8 +1442,8 @@ and remove the whole line in case of no-match."
 	(insert "\n\n" (superman-make-button
 			"Filter:"
 			'(:fun superman-git-set-filter
-			:face superman-header-button-face
-			:help "Set filter")))
+			       :face superman-header-button-face
+			       :help "Set filter")))
 	(put-text-property (point-at-bol) (+ (point-at-bol) 1) 'git-filter t)
 	(end-of-line))
       (insert "\t" (superman-make-button

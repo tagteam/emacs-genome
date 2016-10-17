@@ -625,16 +625,6 @@ Enabling superman mode electrifies the superman buffer for project management."
       (S))
     (superman-redo)))
 
-
-(defun superman-clean-up ()
-  (save-excursion
-    (goto-char (point-min))
-    (while (re-search-forward "^Project category:" nil t)
-      (when (progn (forward-line 1) (looking-at "^[ \t]*$"))
-	(let ((kill-whole-line t))
-	(kill-line 2)
-	(kill-line -1))))))
-
 (setq superman-agenda-balls
       '((index ("width" 23) ("face" font-lock-keyword-face) ("name" "File"))
 	(todo ("width" 7) ("face" superman-get-todo-face))
@@ -819,8 +809,7 @@ Enabling superman mode electrifies the superman buffer for project management."
       (font-lock-mode -1)
       (font-lock-default-function nil)
       (goto-char (point-min))
-      (kill-line)
-      (beginning-of-line)
+      (delete-region (point-at-bol) (1+ (point-at-eol)))
       (insert "\n")
       (goto-char (point-min))
       (insert (or title "* SupermanAgenda"))
@@ -874,13 +863,11 @@ Enabling superman mode electrifies the superman buffer for project management."
 	(setq count (+ count 1))
 	(let* ((buffer-read-only nil)
 	       (pom (get-text-property (point-at-bol) 'org-hd-marker))
-	       (kill-whole-line t)
 	       ;; (buffer-live-p (marker-buffer pom))
 	       (line
 		(org-with-point-at pom
 		  (superman-format-thing pom balls))))
-	  (beginning-of-line)
-	  (kill-line)
+	  (delete-region (point-at-bol) (1+ (point-at-eol)))
 	  (insert line)
 	  (put-text-property
 	   (point-at-bol) (1+ (point-at-bol))

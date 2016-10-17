@@ -139,17 +139,33 @@
   :group 'superman)
 
 
-
-(defface file-list-action-button-face
+(defface file-list-clear-button-face
   '((((class color) (background dark))
      :inherit superman-default-button-face
-     :background "CornflowerBlue"
+     :background "red"
      :inverse-video nil
      :background "gray99"
      :height 1.0)
     (t
      :inherit superman-default-button-face
-     :foreground "CornflowerBlue"
+     :foreground "red"
+     :background "gray99"
+     :box (:line-width 1 :color "black" :style released-button)
+     :inverse-video nil
+     :height 1.0))
+  "Face for next file-list-filter-buttons."
+  :group 'superman)
+
+(defface file-list-action-button-face
+  '((((class color) (background dark))
+     :inherit superman-default-button-face
+     :background "darkblue"
+     :inverse-video nil
+     :background "gray99"
+     :height 1.0)
+    (t
+     :inherit superman-default-button-face
+     :foreground "darkblue"
      :background "gray99"
      :box (:line-width 1 :color "black" :style released-button)
      :inverse-video nil
@@ -175,20 +191,18 @@
   "Face for next file-list-filter-buttons."
   :group 'superman)
 
-
-
 (defface file-list-active-filter-button-face
   '((((class color) (background dark))
      :inherit superman-default-button-face
      :foreground "gray99"
-     :background "black"
+     :background "darkblue"
      :inverse-video nil
      :box (:line-width 1 :color "black" :style pressed-button)
      :background "black"
      :height 1.0)
     (t
      :inherit superman-default-button-face
-     :foreground "black"
+     :foreground "darkblue"
      :background "gray99"
      :box (:line-width 1 :color "black" :style pressed-button)
      :inverse-video nil
