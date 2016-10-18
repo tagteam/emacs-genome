@@ -20,9 +20,9 @@
 ;;----------------------------------------------------------------------
 ;; created: Apr 12 2015 (09:51) 
 ;; Version: 
-;; last-updated: Dec 31 2015 (10:00) 
+;; last-updated: Oct 18 2016 (08:29) 
 ;;           By: Thomas Alexander Gerds
-;;     Update #: 40
+;;     Update #: 46
 ;;----------------------------------------------------------------------
 ;; 
 ;;; Commentary: Show important features {genes}. 
@@ -137,6 +137,48 @@ yet non-functional emacs-genes."
 		     `(:fun ,fun
 			    :face eg-default-genes-button-face :width ,button-width)) "\n\n") 
 	    (setq emacs-genes (cdr emacs-genes))))
+	;; cheat sheet
+	(insert "\nCheat sheet (\\C = control, \\M = Alt, SPC = space, (eg)=emacs genome modified)
+
+\\C-g quit minibuffer/stop a command 
+\\M-x evaluate commands: e.g., \\M-x iedit-mode RET
+
+F2 switch to project (eg)
+\\C-x b switch buffer
+\\M-p previous buffer same mode
+\\M-n next buffer same mode
+
+\\C-s search-forward 
+\\C-b search-backward
+\\M-x occur RET
+
+\\M-l mark line (eg)
+\\M-h mark paragraph
+\\C-x h mark whole buffer
+\\C-\\M SPC start marking a region (expand with arrow keys)
+\\C-x \\C-x exchange point and mark 
+\\M-w copy region to kill-ring
+\\C-w kill region to kill-ring
+\\M-y paste (eg: press repeatedly to get older elements from kill ring)
+
+\\C-x 0 delete this window
+\\C-x 1 delete other windows
+\\C-x 2 split window horizontally
+\\C-x 3 split window vertically
+F8 restore previous window-configuration (eg)
+
+org-mode
+
+\\M-x visible mode
+\\M-j export buffer
+
+R 
+\\M-k switch to R (start R if not running) 
+\\M-j eval region
+
+")
+(goto-char (point-min))
+(re-search-forward "Projects")
 	(setq buffer-read-only t)))
     (superman-set-config eg-buf-name)))
 
