@@ -549,7 +549,7 @@ by listings all the entries of file-list-default-directories."
 
 (defun file-list-exclude-p (subdir dir &optional regexp include)
   "Decide if the directory SUBDIR below DIR should be excluded
-from listing. If REGEXP is given then the SUBDIR is excluded if 
+when listing files. If REGEXP is given then the SUBDIR is excluded if 
 REGEXP matches the part of the path between DIR and SUBDIR.
 
 For example, SUBDIR = /home/aUser/research/oldStuff/ below DIR

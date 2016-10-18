@@ -51,12 +51,12 @@
 
 ;; locate emacs packages to emacs-genome
 (require 'package)
-(setq eg-elpa-sources '(("marmalade" . "http://marmalade-repo.org/packages/")
-			("elpa" . "http://tromey.com/elpa/")
+(setq eg-elpa-sources '(("elpa" . "http://tromey.com/elpa/")
 			("gnu" . "http://elpa.gnu.org/packages/")
 			("org" . "http://orgmode.org/elpa/")
 			("melpa" . "http://melpa.org/packages/")
-			("melpa-stable" . "http://stable.melpa.org/packages/")))
+			("melpa-stable" . "http://stable.melpa.org/packages/")
+			("marmalade" . "http://marmalade-repo.org/packages/")))
 (dolist (source eg-elpa-sources) (add-to-list 'package-archives source t))
 (setq orig-package-user-dir package-user-dir)
 (setq package-user-dir (expand-file-name "genes/" emacs-genome))
@@ -75,14 +75,9 @@
 (add-to-list 'load-path (expand-file-name "genes/SuperMan/lisp" emacs-genome))
 ;; (add-to-list 'load-path (expand-file-name "genes/org-mode/lisp/" emacs-genome))
 
-;; get appropriate version of orgmode
-(let ((org-version (package-desc-version (car-safe (cdr (assq 'org package-alist))))))
-  (when (or (not org-version)
-	    (version-list-< org-version '(20160509)))
-    (package-install (car-safe (cdr (assq 'org package-archive-contents))))))
 
 (use-package org
-  :ensure t
+  :ensure org-plus-contrib ;; ensure org's devel
   :pin org
   :config
   ;; (setq org-odt-data-dir (expand-file-name "genes/org-mode/etc/" emacs-genome))
@@ -234,6 +229,12 @@
   (add-hook 'org-mode-hook #'(lambda ()
 			       (when (buffer-file-name)
 				 (superman-org-headline-mode)))))
+
+
+(global-set-key [(f2)] 'superman-switch-to-project)
+;; (global-set-key [(meta f2)] 'superman-switch-config)
+(add-to-list 'file-list-exclude-dirs (cons "." "^\\\.git"))
+
 ;; start-up behaviour
 (setq inhibit-startup-screen 'yes-please)
 
