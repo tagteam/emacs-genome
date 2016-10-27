@@ -1128,7 +1128,7 @@ Translate the branch names into buttons."
 	    (insert
 	     " "
 	     (superman-make-button
-	      "  pull  "
+	      "  pull (F)  "
 	      `(:fun (lambda () (interactive)
 		       (superman-run-cmd
 			(concat "cd " ,loc  ";" ,superman-cmd-git " pull\n")
@@ -1141,7 +1141,7 @@ Translate the branch names into buttons."
 	    (insert
 	     " "
 	     (superman-make-button
-	      "  push  "
+	      "  push (P)  "
 	      `(:fun (lambda () (interactive)
 		       (superman-run-cmd (concat "cd " ,loc  ";" ,superman-cmd-git " push\n")
 					 "*Superman-returns*"

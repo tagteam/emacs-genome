@@ -1502,6 +1502,8 @@ Enabling superman-git mode enables the git keyboard to control single files."
 (define-key superman-git-mode-map "t" 'superman-git-tag)
 (define-key superman-git-mode-map "c" 'superman-git-commit-file)
 (define-key superman-git-mode-map "a" 'superman-git-add-file)
+(define-key superman-git-mode-map "F" 'superman-git-pull)
+(define-key superman-git-mode-map "P" 'superman-git-push)
 (define-key superman-git-mode-map "s" 'superman-git-status-file)
 (define-key superman-git-mode-map "x" 'superman-git-delete-file)
 (define-key superman-git-mode-map "d" 'superman-git-diff-file)

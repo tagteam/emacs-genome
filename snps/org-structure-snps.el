@@ -46,10 +46,10 @@
  `("La" ,(concat
 	  "* HEADER :noexport:\n"
 	  "\n#+TITLE: "
-	  "\n#+Author: " user-full-name 
+	  "\n#+Author: " user-full-name "\n"
 "#+LANGUAGE:  en
 #+OPTIONS:   H:3 num:t toc:nil \\n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
-#+OPTIONS:   TeX:t LaTeX:t skip:nil d:t todo:t pri:nil tags:not-in-toc author:nil
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:t todo:t pri:nil tags:not-in-toc author:t
 #+LaTeX_CLASS: org-article
 #+LaTeX_HEADER:\\usepackage{authblk}
 #+LaTeX_HEADER:\\author{"

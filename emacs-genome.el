@@ -187,6 +187,9 @@
   (use-package helm-config)
   ;; (use-package helm-recoll-snps)
   )
+(use-package helm-dictionary
+  :ensure t)
+
 ;; shell and ssh within emacs
 (use-package shell-snps)
 (use-package ssh

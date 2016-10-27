@@ -65,7 +65,7 @@
 
 (defun superman-google-export-appointment ()
   (interactive)
-  (save-window-excursion
+   (save-window-excursion
     (org-back-to-heading t)
     (org-narrow-to-subtree)
     (let* ((g-cal (org-entry-get nil "GoogleCalendar"))
@@ -118,7 +118,8 @@
 	(when (> (length g-command) 0)
 	  (superman-run-cmd g-command
 			    "*Superman-google-calendar*"
-			    (concat "Running\n" g-command " returned:\n\n")))))))
+			    (concat "Running\n" g-command " returned:\n\n"))))))
+   (widen))
 ;; gcalcli add --calendar "Tag Team" --title "bla" --where '' --when '2015/01/19 1:00pm' --duration 60 --description '' --remind '0'
 ;; gcalcli add --calendar "Tag Team" --title "bla" --where '' --when '2015/08/19' --allday --duration 3 --description '' --remind '0'
 

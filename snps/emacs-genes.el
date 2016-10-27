@@ -20,9 +20,9 @@
 ;;----------------------------------------------------------------------
 ;; created: Apr 12 2015 (09:51) 
 ;; Version: 
-;; last-updated: Oct 18 2016 (08:29) 
+;; last-updated: Oct 20 2016 (09:16) 
 ;;           By: Thomas Alexander Gerds
-;;     Update #: 46
+;;     Update #: 49
 ;;----------------------------------------------------------------------
 ;; 
 ;;; Commentary: Show important features {genes}. 
@@ -141,31 +141,30 @@ yet non-functional emacs-genes."
 	(insert "\nCheat sheet (\\C = control, \\M = Alt, SPC = space, (eg)=emacs genome modified)
 
 \\C-g quit minibuffer/stop a command 
-\\M-x evaluate commands: e.g., \\M-x iedit-mode RET
+\\M-x evaluate commands: e.g., \\M-x eg RET (show the current buffer)
+F10 undo/redo (eg)
 
-F2 switch to project (eg)
-\\C-x b switch buffer
-\\M-p previous buffer same mode
-\\M-n next buffer same mode
+Project: F2 switch to project
+Buffer: \\C-x b (switch), \\M-p (previous same mode), \\M-n (next same mode)
 
-\\C-s search-forward 
-\\C-b search-backward
-\\M-x occur RET
+Move forward: \\C-f (one char), \\M-f (one word), \\M-\\C-f (one expression, e.g. parenthesis)
+Move backward: \\C-b (one char), \\M-b (one word), \\M-\\C-b (one expression, e.g. parenthesis)
+Line: \\C-a (beginning), \\C-e (end), \\C-p (previous), \\C-n (next)
+Paragraph: \\M-up (beginning/previous), \\M-down (end/next)
+Buffer: \\C-HOME (beginning), \\C-END (end) 
 
-\\M-l mark line (eg)
-\\M-h mark paragraph
-\\C-x h mark whole buffer
-\\C-\\M SPC start marking a region (expand with arrow keys)
-\\C-x \\C-x exchange point and mark 
+Search: \\C-s (forward), \\C-b (backward), \\M-x occur RET
+Search & replace: \\M-% (literal), \\C-\\M-% (regexp), \\M-x iedit-mode RET
+
+Mark: \\M-l (line), \\M-h (paragraph), \\C-x h (whole buffer)
+       \\C-\\M SPC start marking a region (expand with arrow keys, \\C-x \\C-x change direction)
+
 \\M-w copy region to kill-ring
 \\C-w kill region to kill-ring
 \\M-y paste (eg: press repeatedly to get older elements from kill ring)
 
-\\C-x 0 delete this window
-\\C-x 1 delete other windows
-\\C-x 2 split window horizontally
-\\C-x 3 split window vertically
-F8 restore previous window-configuration (eg)
+Windows: \\C-x 0 (delete this), \\C-x 1 delete other, \\C-x 2 split horizontally, \\C-x 3 split vertically
+         F8 restore previous window-configuration 
 
 org-mode
 
