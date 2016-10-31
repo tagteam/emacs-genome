@@ -557,6 +557,7 @@
 	      (define-key org-mode-map [(meta control k)] #'(lambda () (interactive)
 							      (if (string= (car (org-babel-get-src-block-info)) "R")
 								  (eg-switch-to-R 't))))
+	      (define-key org-mode-map [(meta J)] 'superman-org-export-change-target)
 	      (define-key org-mode-map [(meta j)] 'superman-run-R-or-export-as-latex)
 	      (define-key org-mode-map [(control shift e)] 'eg/org-lazy-load)
 	      (define-key org-mode-map [(control xx)] 'eg/org-lazy-load)

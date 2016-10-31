@@ -49,22 +49,21 @@
     (and found (= begin (match-end 0)))))
 
 
-(defun fit-frame ()
-  "Fit the emacs frame to the current display"
-  (interactive)
-  (when (window-system)
-    (set-frame-position (selected-frame) 10 30)
-    (set-frame-height (selected-frame)
-		      (/ (* (/ (x-display-pixel-height) (frame-char-height)) 8) 9))
-    (set-frame-width (selected-frame)
-		     (/ (* (/ (x-display-pixel-width)
-			      ;; (if (> (length (terminal-list)) 1)
-			      ;; (* (frame-char-width) (length (terminal-list)))
-			      (if  (string-match "27909\\|29377\\|siam" (system-name))
-				  (* (frame-char-width) 3)
-				(frame-char-width)))
-			   12) 13))))
-
+;; (defun fit-frame ()
+  ;; "Fit the emacs frame to the current display"
+  ;; (interactive)
+  ;; (when (window-system)
+    ;; (set-frame-position (selected-frame) 10 30)
+    ;; (set-frame-height (selected-frame)
+		      ;; (/ (* (/ (x-display-pixel-height) (frame-char-height)) 8) 9))
+    ;; (set-frame-width (selected-frame)
+		     ;; (/ (* (/ (x-display-pixel-width)
+			      ;; ;; (if (> (length (terminal-list)) 1)
+			      ;; ;; (* (frame-char-width) (length (terminal-list)))
+			      ;; (if  (string-match "27909\\|29377\\|siam" (system-name))
+				  ;; (* (frame-char-width) 3)
+				;; (frame-char-width)))
+			   ;; 12) 13))))
 
 (defun mark-line (arg)
   "Push the mark in line.

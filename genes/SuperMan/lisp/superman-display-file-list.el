@@ -151,7 +151,7 @@ file-list display buffers unless DIR matches the directories associated with
 	(goto-char (previous-single-property-change (point-max) 'point-file-list-start))
 	(delete-region (point-at-bol) (1+ (point-at-eol))))
       ;; set file list section header
-      (insert  (superman-make-button  "File list"
+      (insert  (superman-make-button  "Update list"
 				      '(:fun file-list-reload
 					     :face superman-capture-button-face
 					     :width 13
@@ -185,6 +185,13 @@ file-list display buffers unless DIR matches the directories associated with
 					   :face file-list-action-button-face
 					   :width 13
 					   :help "Toggle display mode")))
+      (insert " ")      
+      ;; display attributes button      
+      (insert (superman-make-button "Attributes"
+				    '(:fun file-list-attributes
+					   :face file-list-action-button-face
+					   :width 13
+					   :help "Toggle attributes mode")))
       (put-text-property (point-at-bol) (point-at-eol) 'point-file-list-start t)
       (end-of-line)
       (insert "\n")
@@ -194,7 +201,7 @@ file-list display buffers unless DIR matches the directories associated with
 	  (setcdr (assoc "width" (assoc "FileName" balls)) `(,maxfile))))
       ;; insert the file-list 
       ;; (when (= level 5)
-	;; (setq list (file-list-attributes list t)))
+      ;; (setq list (file-list-attributes list t)))
       (dolist (el list)
 	(let* ((file (car el))
 	       (path (cadr el))
@@ -433,7 +440,7 @@ file-list display buffers unless DIR matches the directories associated with
 (defun superman-file-list-refresh-display (&optional file-list)
   (interactive)
   (if (not file-list-mode)
-      (error "Works only in buffers with file-list-mode")
+      (error "Works only in file-list-mode")
     (superman-display-file-list
      (get-text-property (point-min) 'dir)
      (or file-list file-list-current-file-list)
@@ -459,7 +466,7 @@ file-list display buffers unless DIR matches the directories associated with
 	     (by (plist-get filter :by))
 	     (inverse (plist-get filter :inverse)))
 	(setq flist
-	      (file-list-select flist regexp by inverse dir (current-buffer) t)))
+	      (file-list-select flist regexp by inverse dir (current-buffer) t 'force)))
       (setq active-filter-list (cdr active-filter-list)))
     (when sort
       (setq flist (file-list-sort-internal flist (nth 0 sort) (nth 1 sort) t)))
