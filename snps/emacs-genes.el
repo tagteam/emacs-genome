@@ -20,9 +20,9 @@
 ;;----------------------------------------------------------------------
 ;; created: Apr 12 2015 (09:51) 
 ;; Version: 
-;; last-updated: Nov  2 2016 (16:29) 
+;; last-updated: Nov  2 2016 (16:55) 
 ;;           By: Thomas Alexander Gerds
-;;     Update #: 58
+;;     Update #: 59
 ;;----------------------------------------------------------------------
 ;; 
 ;;; Commentary: Show important features {genes}. 
@@ -285,9 +285,8 @@ Previous buffer same mode :  \\M-p
 \\M-x ess-edit-insert-file-name
 ")
       (goto-char (point-min)))
-    )
   (pop-to-buffer egcs-buf-name)
-  )
+  ))
 
 
 (defvar emacs-genome-mode-map (make-sparse-keymap)

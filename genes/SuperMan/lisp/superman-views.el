@@ -826,7 +826,8 @@ Enabling superman-unison mode enables the unison keyboard to control single file
 			 `(lambda () (interactive) 
 			    (superman-goto-project ,nick "Configuration" nil )))
       (put-text-property (point-at-bol) (point-at-eol) 'display "★ Unison" )
-      (insert "\tPress digit to run corresponding command\n")
+      (insert "\tPress digit to run corresponding command. Press 0 to create new. 
+               Syntax for remote root ssh://user@machine//home/user/ \n")
       (insert "\n\n" (int-to-string i) ": "
 	      (superman-make-button "Capture directories for synchronisation"
 				    '(:fun superman-capture-unison :face superman-capture-button-face
