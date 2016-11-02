@@ -20,9 +20,9 @@
 ;;----------------------------------------------------------------------
 ;; created: Apr 12 2015 (09:51) 
 ;; Version: 
-;; last-updated: Nov  2 2016 (16:02) 
+;; last-updated: Nov  2 2016 (16:04) 
 ;;           By: Thomas Alexander Gerds
-;;     Update #: 56
+;;     Update #: 57
 ;;----------------------------------------------------------------------
 ;; 
 ;;; Commentary: Show important features {genes}. 
@@ -46,7 +46,7 @@
 		   ("Projects" :fun S)
 		   ("Calendar" :fun superman-calendar)
 		   ("Todo-list" :fun superman-todo)
-		   ("Keys" :fun eg-cheat-sheet)
+		   ("Cheat sheet" :fun eg-cheat-sheet)
 		   ;; ("org-mode" :test org)
 		   ;; ("superman"
 		   ;; :test (:genes superman-manager)
