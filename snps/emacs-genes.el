@@ -20,9 +20,9 @@
 ;;----------------------------------------------------------------------
 ;; created: Apr 12 2015 (09:51) 
 ;; Version: 
-;; last-updated: Nov  2 2016 (16:04) 
+;; last-updated: Nov  2 2016 (16:29) 
 ;;           By: Thomas Alexander Gerds
-;;     Update #: 57
+;;     Update #: 58
 ;;----------------------------------------------------------------------
 ;; 
 ;;; Commentary: Show important features {genes}. 
@@ -261,6 +261,12 @@ Previous buffer same mode :  \\M-p
  \\M-x : Project overview
     F2 : switch to project
     F3 : switch to project window configuration
+
+** In the project view
+     u : show/create/apply unison file synchronisation rules
+     f : list files
+     g : show git repository
+     N : associate document, link, task or meeting with project
 
 * org-mode
 
