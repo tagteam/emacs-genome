@@ -53,12 +53,14 @@
 ;;}}}
 ;;{{{ key bindings
 
+(require 'ess-edit)
 (add-hook 'ess-mode-hook 'eg/R-keybindings)
 (defun eg/R-keybindings ()
   (interactive)
   (define-key ess-mode-map "\M-j" 'eg/ess-eval-and-go)
   (define-key ess-mode-map "\M-r" 'copy-region-as-kill)
   (define-key ess-mode-map "\M-q" 'eg/indent-paragraph)
+  (define-key ess-mode-map "\M-\C-i" 'ess-edit-indent-call-sophisticatedly)
   (define-key ess-mode-map "\M-l" 'mark-line)
   (define-key ess-mode-map "\M-k" 'eg-switch-to-R)
   (define-key ess-mode-map "\C-\M-k" #'(lambda () (interactive)(eg-switch-to-R 't)))

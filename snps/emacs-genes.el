@@ -20,9 +20,9 @@
 ;;----------------------------------------------------------------------
 ;; created: Apr 12 2015 (09:51) 
 ;; Version: 
-;; last-updated: Oct 20 2016 (09:16) 
+;; last-updated: Nov  2 2016 (16:02) 
 ;;           By: Thomas Alexander Gerds
-;;     Update #: 49
+;;     Update #: 56
 ;;----------------------------------------------------------------------
 ;; 
 ;;; Commentary: Show important features {genes}. 
@@ -46,6 +46,7 @@
 		   ("Projects" :fun S)
 		   ("Calendar" :fun superman-calendar)
 		   ("Todo-list" :fun superman-todo)
+		   ("Keys" :fun eg-cheat-sheet)
 		   ;; ("org-mode" :test org)
 		   ;; ("superman"
 		   ;; :test (:genes superman-manager)
@@ -137,45 +138,7 @@ yet non-functional emacs-genes."
 		     `(:fun ,fun
 			    :face eg-default-genes-button-face :width ,button-width)) "\n\n") 
 	    (setq emacs-genes (cdr emacs-genes))))
-	;; cheat sheet
-	(insert "\nCheat sheet (\\C = control, \\M = Alt, SPC = space, (eg)=emacs genome modified)
-
-\\C-g quit minibuffer/stop a command 
-\\M-x evaluate commands: e.g., \\M-x eg RET (show the current buffer)
-F10 undo/redo (eg)
-
-Project: F2 switch to project
-Buffer: \\C-x b (switch), \\M-p (previous same mode), \\M-n (next same mode)
-
-Move forward: \\C-f (one char), \\M-f (one word), \\M-\\C-f (one expression, e.g. parenthesis)
-Move backward: \\C-b (one char), \\M-b (one word), \\M-\\C-b (one expression, e.g. parenthesis)
-Line: \\C-a (beginning), \\C-e (end), \\C-p (previous), \\C-n (next)
-Paragraph: \\M-up (beginning/previous), \\M-down (end/next)
-Buffer: \\C-HOME (beginning), \\C-END (end) 
-
-Search: \\C-s (forward), \\C-b (backward), \\M-x occur RET
-Search & replace: \\M-% (literal), \\C-\\M-% (regexp), \\M-x iedit-mode RET
-
-Mark: \\M-l (line), \\M-h (paragraph), \\C-x h (whole buffer)
-       \\C-\\M SPC start marking a region (expand with arrow keys, \\C-x \\C-x change direction)
-
-\\M-w copy region to kill-ring
-\\C-w kill region to kill-ring
-\\M-y paste (eg: press repeatedly to get older elements from kill ring)
-
-Windows: \\C-x 0 (delete this), \\C-x 1 delete other, \\C-x 2 split horizontally, \\C-x 3 split vertically
-         F8 restore previous window-configuration 
-
-org-mode
-
-\\M-x visible mode
-\\M-j export buffer
-
-R 
-\\M-k switch to R (start R if not running) 
-\\M-j eval region
-
-")
+	
 (goto-char (point-min))
 (re-search-forward "Projects")
 	(setq buffer-read-only t)))
@@ -196,7 +159,129 @@ R
 	   (result (eval-region sexp-start sexp-end t)))
       (kill-region sexp-start sexp-end)
       (insert result)))))
-	  
+
+
+(defun eg-cheat-sheet ()
+  "Show some keybindings."
+  (interactive)
+  (let* ((egcs-buf-name "*Emacs Genome Cheat Sheet*")
+	 (egcs-buf (get-buffer egcs-buf-name)))
+    (unless (and egcs-buf)
+      (set-buffer
+       (setq egcs-buf (get-buffer-create egcs-buf-name)))
+      (erase-buffer)
+      (emacs-lisp-mode)
+      ;; cheat sheet
+      (insert "\n
+* Cheat sheet
+
+** Notation
+
+  \\C = control
+  \\M = Alt
+  SPC = space
+  RET = Return
+  TAB = Tab-key
+ BACK = Back button
+  DEl = Delete button
+  up  = arrow up
+ down = arrow down
+ left = arrow left
+right = arrow right
+   eg = emacs genome modified
+
+* Important bindings
+
+ \\C-g : quit minibuffer/stop a command 
+ \\M-x : evaluate commands: e.g., \\M-x eg RET (show the current buffer)
+   F10 : undo/redo (eg)
+
+* Walking the cursor 
+
+       Beginning of line: \\C-a
+            End of line : \\C-a
+          Previous line : \\C-p
+              Next line : \\C-n
+     Previous paragraph : \\M-up
+         Next paragraph : \\M-down
+    Beginning of buffer : \\C-HOME
+          End of buffer : \\C-END
+
+           Word forward : \\M-f
+          Word backward : \\M-b
+  Expression({[ forward : \\M-f
+ Expression({[ backward : \\M-b
+
+* Highlighting text
+
+             Mark line : \\M-l 
+        Mark paragraph :  \\M-h
+           Mark buffer : \\C-x h 
+Start marking a region : \\C-\\M SPC (expand with arrow keys, \\C-x \\C-x change direction)
+
+* Copying or killing and pasting text
+
+ copy region to kill-ring : \\M-w
+ kill region to kill-ring : \\C-w
+                    paste : \\M-y (press again and again to get older elements from kill ring)
+
+   kill rest of line : \\C-k
+delete word backward : \\M-BACK
+
+* Completing text and other things
+
+       \\M-i : dabbrev-expand (expand text)
+       \\M-e : hippie-expand (expand many things)
+
+* Search & replace
+
+                  Search forward : \\C-s
+                 Search backward : \\C-b
+  find all occurrences in buffer : \\M-x occur RET
+       Search & replace (literal): \\M-% (literal)
+       Search & replace (regexp) : \\C-\\M-% (regexp)
+edit all occurences simultaneous : \\M-x iedit-mode RET
+
+* Walking buffers 
+
+            Switch buffer : \\C-x b
+Previous buffer same mode :  \\M-p
+    Next buffer same mode : \\M-n
+
+* Walking Windows
+
+                 F8 : restore previous window-configuration 
+ delete this window : \\C-x 0
+       delete other : \\C-x 1
+ split horizontally : \\C-x 2
+   split vertically : \\C-x 3 
+
+* Projects
+
+ \\M-x : Project overview
+    F2 : switch to project
+    F3 : switch to project window configuration
+
+* org-mode
+
+     \\M-x : visible mode
+       TAB : cycle through folding levels
+     \\M-J : change export target (pdf, html, docx)
+     \\M-j : export buffer to target
+\\C-c\\C-e : export to other formats
+     \\M-k : export buffer to pdf, show tex and R buffers for debugging
+
+* R 
+
+    \\M-k : switch to R (start R if not running) 
+    \\M-j : eval region
+\\M-\\C-i : indent call sophisticatedly
+\\M-x ess-edit-insert-file-name
+")
+      (goto-char (point-min)))
+    )
+  (pop-to-buffer egcs-buf-name)
+  )
 
 
 (defvar emacs-genome-mode-map (make-sparse-keymap)
