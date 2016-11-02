@@ -237,7 +237,8 @@
 
 (global-set-key [(f2)] 'superman-switch-to-project)
 ;; (global-set-key [(meta f2)] 'superman-switch-config)
-(add-to-list 'file-list-exclude-dirs (cons "." "^\\\.git"))
+(add-to-list 'file-list-directory-filter "^\\\.[a-zA-Z]+/")
+(add-to-list 'file-list-file-name-filter "~$")
 
 ;; start-up behaviour
 (setq inhibit-startup-screen 'yes-please)

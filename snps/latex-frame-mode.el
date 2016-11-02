@@ -284,6 +284,23 @@ Goto previous frame:  \C-c b
     (goto-char begin)
     (and found (= begin (match-end 0)))))
 
+(defun exercises-to-solutions ()
+  (interactive)
+  (let* ((case-fold-search t)
+	 (html-file (concat
+		     (file-name-sans-extension
+		      (buffer-file-name (current-buffer))) ".html"))
+	 (solution-file (replace-regexp-in-string "Exercises" "Solutions" html-file)))
+    (goto-char (point-min))
+    (while (re-search-forward "COMMENT Solutions" nil t)
+      (replace-match "Solutions"))
+    (org-html-export-to-html)
+    (copy-file html-file solution-file t)
+    (goto-char (point-min))
+    (while (re-search-forward "*[ ]+Solutions" nil t)
+      (replace-match "* COMMENT Solutions"))
+    (org-html-export-to-html)))
+
 (defun beamer-handout ()
   (interactive)
   (let* ((pdf-file (concat

@@ -243,6 +243,18 @@
 	       ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
 
 (add-to-list 'org-latex-classes
+	     `("tas-article"
+	       ,(concat "\\documentclass[12pt]{article}
+               [PACKAGES]
+               [EXTRA]"
+			eg/org-latex-common-header-string)
+	       ("\\section{%s}" . "\\section*{%s}")
+	       ("\\subsection{%s}" . "\\subsection*{%s}")
+	       ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+	       ("\\paragraph{%s}" . "\\paragraph*{%s}")
+	       ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
+
+(add-to-list 'org-latex-classes
 	     `("ims-article"
 	       ,(concat "\\documentclass[sts]{imsart}
                 %% \\documentclass[useAMS,usenatbib]{biom}

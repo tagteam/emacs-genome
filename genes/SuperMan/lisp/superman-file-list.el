@@ -103,24 +103,33 @@
   :type '(repeat regexp)
   :group 'file-list)
 
-(defcustom file-list-exclude-dirs (list (cons (expand-file-name "~") "\\\.[a-zA-Z]"))
-  "String matching directories that should be excluded below file-list-home-directory"
-  :type 'alist
+(defcustom file-list-directory-filter (list "^[[:punct:]]")
+  "List of regular expressions to match sub-directories
+ which should be filtered by default in file listings."
+  :type 'list
   :group 'file-list)
 
-(defcustom file-list-exclude-dir-regexp nil
-  "Alist where each car is a regexp to be matched against directory-names
- and the cdr a regexp that is matched against the names of all subdirectories
- which should be omitted when listing files. For example
- (setq file-list-exclude-dir-regexp
-      (list
-       (cons file-list-home-directory
-	     \"\\(^\\\.[a-w]\\|^auto$\\)\")))
- excludes all directories below file-list-home-directory that start with `.' and
- also those that are called `auto'. 
-"
- :type 'alist
- :group 'file-list)
+(defvar file-list-list-files-regexp "^.*[^\.]+$" 
+  "Regular expression used to match file names for file listings.")
+
+(defcustom file-list-file-name-filter (list "~$")
+  "Regexp matching file-names that should be filtered by default."
+  :type 'list
+  :group 'file-list)
+
+;; (defcustom file-list-exclude-dir-regexp nil
+  ;; "Alist where each car is a regexp to be matched against directory-names
+ ;; and the cdr a regexp that is matched against the names of all subdirectories
+ ;; which should be omitted when listing files. For example
+ ;; (setq file-list-exclude-dir-regexp
+      ;; (list
+       ;; (cons file-list-home-directory
+	     ;; \"\\(^\\\.[a-w]\\|^auto$\\)\")))
+ ;; excludes all directories below file-list-home-directory that start with `.' and
+ ;; also those that are called `auto'. 
+;; "
+ ;; :type 'alist
+ ;; :group 'file-list)
 
 (defcustom file-list-iswitchf-prompt "iswitchf "
   "Prompt-string for file-list-iswitchf."
@@ -168,14 +177,12 @@ cdr is the corresponding file-(a)list for that directory.")
 
 (make-variable-buffer-local 'file-list-current-file-list)
 
-(defvar file-list-excluded-dir-list nil
+(defvar file-list-excluded-directories nil
   "List of directories for which files are excluded.")
 
 (defvar file-list-dir-list nil
   "Alist of directories for which files are listed.
 The cdr of each entry is the modification time.")
-
-(defvar file-list-gc-cons-threshold 50000)
 
 (defvar file-list-display-buffer "*File-list*"
   "Buffer for displaying matching files.")
@@ -243,8 +250,6 @@ list in completion buffer.")
 ;;}}}
 ;;{{{ functions that create and modify the file-list-alist 
 
-(defvar file-list-list-files-regexp "^.*[^\.]+$")
-
 (defun file-list-replace-in-string (str regexp newtext &optional literal fixedcase)
   (if (featurep 'xemacs)
       (replace-in-string str regexp newtext)
@@ -262,25 +267,26 @@ if the directory should be listed. If EXCLUDE-HANDLER is nil
 then the build-in function file-list-exclude-p is used. If RECURSIVE is nil, then
 subdirectories of DIR are not listed. If MATCH is non-nil, then only those subdirectories
 of DIR are listed that match the regular expression MATCH."
-  (let ((dir-list (directory-files dir t file-list-list-files-regexp nil))
+  (let ((dir-list (directory-files dir t  "^.*[^\.]+$" t)) ;; don't match ../ and ./
 	file-list
 	(exclude-handler (or exclude-handler 'file-list-exclude-p)) 
 	(oldentry (assoc dir file-list-dir-list)))
     ;; update the file-list-dir-list
     (if oldentry
-	(setcdr oldentry (nth 5 (file-attributes dir)))
+	(plist-put (cdr oldentry) :time (nth 5 (file-attributes dir)))
       (add-to-list 'file-list-dir-list
 		   (cons (file-name-as-directory dir)
-			 (nth 5 (file-attributes dir)))))
+			 (list :time (nth 5 (file-attributes dir))))))
     ;;
     (while dir-list
       (let ((entry (car dir-list)))
 	(if (file-directory-p entry)
 	    (if (and (not dont-exclude)
-		     (funcall exclude-handler entry dir))
-		(add-to-list
-		 'file-list-excluded-dir-list
-		 (cons entry "matched file-list-exclude-dirs"))
+		     (funcall exclude-handler (file-name-nondirectory entry) dir))
+		(plist-put (cdr (assoc entry file-list-dir-list)) :filtered entry)
+	      ;; (add-to-list
+	      ;; 'file-list-excluded-directories
+	      ;; (cons entry "matched file-list-directory-filter"))
 	      (let ((exists
 		     (assoc
 		      (setq
@@ -293,19 +299,19 @@ of DIR are listed that match the regular expression MATCH."
 		 ;; directory not accessible
 		 ((not (file-accessible-directory-p entry))
 		  (add-to-list
-		   'file-list-excluded-dir-list
+		   'file-list-excluded-directories
 		   (cons entry "not accessible"))
 		  nil)
 		 ;; directory not readable
 		 ((not (file-readable-p entry))
 		  (add-to-list
-		   'file-list-excluded-dir-list
+		   'file-list-excluded-directories
 		   (cons entry "not readable"))
 		  nil)
 		 ;; directory name is a link
 		 ((and (file-symlink-p entry)
 		       (not file-list-follow-links))
-		  (add-to-list 'file-list-excluded-dir-list
+		  (add-to-list 'file-list-excluded-directories
 			       (cons entry
 				     (format "symlink to %s"
 					     (file-symlink-p entry))))
@@ -317,37 +323,24 @@ of DIR are listed that match the regular expression MATCH."
 		  (setq file-list
 			(append
 			 file-list (file-list-list-internal
-				    entry dont-exclude recursive exclude-handler)))
-; 		    (message "length dir %i" (length file-list))
-; 		    (sit-for 1)
+				    entry dont-exclude recursive)))
+					; 		    (message "length dir %i" (length file-list))
+					; 		    (sit-for 1)
 		  (when (> (length file-list) file-list-max-length)
 		    (error (format "file-list below %s reached maximum length %i (user-option file-list-max-length) " dir file-list-max-length)))
 		  ))))
 	  ;; 
-;	  (when (not (string-match file-list-exclude-files fname))
+					;	  (when (not (string-match file-list-exclude-files fname))
 	  (setq file-list
 		(append file-list
 			(list
 			 (list (file-name-nondirectory entry)
 			       (file-name-directory entry))))))
 	(setq dir-list (cdr dir-list))))
-;    (message "%s files listed below '%s'" (length file-list) dir)
+					;    (message "%s files listed below '%s'" (length file-list) dir)
     file-list))
 
-(defun file-list-remove-dir (entry)
-  "Argument ENTRY is an element of file-list-dir-list.
-Remove all filenames below dir (car entry) from file-list-alist and ENTRY from file-list-dir-list."
-  (let* ((dir (car entry))
-	 (dir-list (file-list-assoc-dir dir file-list-alist)))
-    ;; remove dir from file-list-dir-list
-    (setq file-list-dir-list (delq entry file-list-dir-list))
-    ;; remove files from file-list-alist
-    (setcdr dir-list (delq nil
-			   (mapcar
-			    (lambda (entry)
-			      (if (not (string= dir (cadr entry)))
-				  entry nil))
-			    (cdr dir-list))))))
+
 
 
 (defun file-list-list (dir &optional update dont-exclude recursive remove exclude-handler)
@@ -371,7 +364,6 @@ subdirectories below DIR are excluded depending on what file-list-exclude-p retu
     ;; (file-list-initialize))
     )
   (let* (
-	 ;; (gc-cons-threshold file-list-gc-cons-threshold)
 	 (dir (file-name-as-directory (expand-file-name dir)))
 	 (dir-list (file-list-assoc-dir dir file-list-alist))
 	 (dir-headp (if dir-list
@@ -443,35 +435,48 @@ subdirectories below DIR are excluded depending on what file-list-exclude-p retu
     file-list))
 
 
-(defun file-list-initialize ()
-  "Initialize the file-list-home-directory entry to file-list-alist,
-by listings all the entries of file-list-default-directories."
-  (interactive)
-  ;; idea: first initialize an empty file-list-alist, then
-  ;; list the subdirs specified by file-list-default-directories.
-  (setq file-list-alist (list (cons file-list-home-directory nil)))
-  ;; initialize all files sitting in the home directory
-  (file-list-list file-list-home-directory 'yes nil nil nil nil)
-  ;; adding the home directory to the dir-list
-  (add-to-list 'file-list-dir-list
-	       (cons (file-name-as-directory file-list-home-directory)
-		     (nth 5 (file-attributes file-list-home-directory))))
-  (let ((initDirs file-list-default-directories)
-	subDir)
-    (while initDirs
-      (setq subDir (car initDirs))
-      (file-list-update-below-dir subDir)
-;       (file-list-list subDir 'update nil 'recursive nil)
-      (setq initDirs (cdr initDirs)))))
+;; (defun file-list-initialize ()
+  ;; "Initialize the file-list-home-directory entry to file-list-alist,
+;; by listings all the entries of file-list-default-directories."
+  ;; (interactive)
+  ;; ;; first initialize an empty file-list-alist, then
+  ;; ;; list the subdirs specified by file-list-default-directories.
+  ;; (setq file-list-alist (list (cons file-list-home-directory nil)))
+  ;; ;; initialize all files sitting in the home directory
+  ;; (file-list-list file-list-home-directory 'yes nil nil nil nil)
+  ;; ;; adding the home directory to the dir-list
+  ;; (add-to-list 'file-list-dir-list
+	       ;; (cons (file-name-as-directory file-list-home-directory)
+		     ;; (nth 5 (file-attributes file-list-home-directory))))
+  ;; (let ((initDirs file-list-default-directories)
+	;; subDir)
+    ;; (while initDirs
+      ;; (setq subDir (car initDirs))
+      ;; (file-list-update-below-dir subDir)
+;; ;       (file-list-list subDir 'update nil 'recursive nil)
+      ;; (setq initDirs (cdr initDirs)))))
 
+(defun file-list-remove-dir (entry)
+  "Argument ENTRY is an element of file-list-dir-list.
+Remove all filenames below dir (car entry) from file-list-alist and ENTRY from file-list-dir-list."
+  (let* ((dir (car entry))
+	 (dir-list (file-list-assoc-dir dir file-list-alist)))
+    ;; remove dir from file-list-dir-list
+    (setq file-list-dir-list (delq entry file-list-dir-list))
+    ;; remove files from file-list-alist
+    (setcdr dir-list (delq nil
+			   (mapcar
+			    (lambda (entry)
+			      (if (not (string= dir (cadr entry)))
+				  entry nil))
+ 			    (cdr dir-list))))))
 
 (defun file-list-update (&optional dir force dont-exclude recursive)
   "Re-read filenames below dir from disk if changed on disk."
   (interactive "i\nP")
-  (let* (
-	 ;; (gc-cons-threshold file-list-gc-cons-threshold)
-	 (dir (if dir (file-name-as-directory
-		       (expand-file-name dir)) file-list-home-directory))
+  (let* ((dir (if dir (file-name-as-directory
+		       (expand-file-name dir))
+		file-list-home-directory))
 	 (dirinlist (assoc dir file-list-dir-list))
 	 (dlist (delq nil (mapcar
 			   (lambda (x)
@@ -484,12 +489,12 @@ by listings all the entries of file-list-default-directories."
 	(let* ((dircons (car dlist))
 	       (fis (file-exists-p (car dircons))))
 	  (if (not fis)
-	      ;; remove
+	      ;; remove directory from list
 	      (progn
 		(file-list-remove-dir dircons)
 		(setq update-info (append (list (concat (car dircons) " *removed* ")))))
 	    ;; check modification time of dir 
-	    (when (file-list-time-less-p (cdr dircons) (nth 5 (file-attributes (car dircons))))
+	    (when (file-list-time-less-p (plist-get (cdr dircons) :time) (nth 5 (file-attributes (car dircons))))
 	      ;; update
 	      (file-list-list (car dircons) t nil nil)
 	      (setq update-info (append (list (car dircons)) update-info))))
@@ -527,7 +532,10 @@ by listings all the entries of file-list-default-directories."
 ;;(add-hook 'after-save-hook 'file-list-update)	
 
 (defun file-list-update-current-file-list (oldname newname)
-  (let ((oldentry (find-if (lambda (item) (string= oldname (file-list-make-file-name item))) file-list-current-file-list))
+  (let ((oldentry (cl-find-if
+		   (lambda (item) 
+		     (string= oldname (file-list-make-file-name item))) 
+		   file-list-current-file-list))
 	(newentry (file-list-make-entry newname)))
     (setcar oldentry (car newentry))
     (setcdr oldentry (cdr newentry))))
@@ -537,38 +545,36 @@ by listings all the entries of file-list-default-directories."
 ;;{{{ internal functions that alter the file-list-alist
 
 (defun file-list-assoc-dir (dir list)
-  (assoc-if '(lambda (entry)
+  (cl-assoc-if '(lambda (entry)
 	       (or (string-match entry dir)
 		   (string-match (file-list-replace-in-string
 				  (file-list-replace-in-string entry "\\[" "\\[")
 				  "\\]" "\\]") dir)))
 	    list))
 
-(defun file-list-include-p (subdir dir regexp)
-  (file-list-exclude-p subdir dir regexp t))
-
-(defun file-list-exclude-p (subdir dir &optional regexp include)
+(defun file-list-exclude-p (subdir dir &optional regexp)
   "Decide if the directory SUBDIR below DIR should be excluded
-when listing files. If REGEXP is given then the SUBDIR is excluded if 
-REGEXP matches the part of the path between DIR and SUBDIR.
+ when listing files. If REGEXP is given then the SUBDIR is excluded if 
+ REGEXP matches the part of the path between DIR and SUBDIR."
+  (let ((filter file-list-directory-filter)
+	hit)
+    (while (and filter (not hit))
+      (if (string-match (car filter) subdir) 
+	  (setq hit (car filter))
+	(setq filter (cdr filter))))
+    hit))
 
-For example, SUBDIR = /home/aUser/research/oldStuff/ below DIR
-/home/aUser/ would match the REGEXP \"^old\".
-If REGEXP is nil, then use the first matching entry of DIR in the
-alist file-list-exclude-dirs.
-
-If INCLUDE is non-nil, then SUBDIR is excluded if it does not match REGEXP."
-  (let* ((regexp
-	  (or regexp
-	      (cdr (assoc-if (lambda (entry)
-			       (string-match entry dir))
-			     file-list-exclude-dirs))))
-	 (subDir (file-name-as-directory
-		  (expand-file-name subdir)))
-	 decision)
-    (when regexp
-      (setq decision (string-match regexp subDir)))
-    (if include (not decision) decision)))
+ ;; (let* ((regexp
+ ;; (or regexp
+;; (cdr (assoc-if (lambda (entry)
+  ;; (string-match entry dir))
+  ;; file-list-exclude-dirs))))
+  ;; (subDir (file-name-as-directory
+  ;; (expand-file-name subdir)))
+  ;; decision)
+  ;; (when regexp
+  ;; (setq decision (string-match regexp subDir)))
+  ;; (if include (not decision) decision)))
     
 
 (defun file-list-extract-sublist (file-list regexp-or-test &optional dont-match)
@@ -618,7 +624,8 @@ If DONT-MATCH is non-nil do the inverse operation, i.e., split into non-matching
 	   (setq fl-result yin)
 	   (plist-put filter :filtered-files yang)))
     (unless fl-result 
-      (message "No files are matched by filter:" (plist-get filter :name)))
+      (message
+       (concat "No files are matched by filter:" (plist-get filter :name))))
     (list :yin fl-result :yang filter)))
 
 ;;mapcar this function on a file-list ...
@@ -661,7 +668,6 @@ and the cdr is the directory of filename."
 Return  the sublist of the existing files. Does not re-display selected list."
   (interactive)
   (let (
-	;; (gc-cons-threshold file-list-gc-cons-threshold)
 	(file-list (or file-list file-list-current-file-list)))
     (setq file-list-current-file-list
 	  (delete nil (mapcar (lambda (entry)
@@ -688,6 +694,10 @@ See also `file-list-add'.
 "
   (setq file-list-reference-buffer (current-buffer))
   (let* ((fl-buffer-p (superman-file-list-display-buffer-p dir))
+	 (update (or force-update
+		     (file-list-time-less-p 
+		      (plist-get (cdr (assoc dir file-list-dir-list)) :time)
+		      (nth 5 (file-attributes dir)))))
 	 (display-buffer (or display-buffer
 			     (if fl-buffer-p
 				 (current-buffer)
@@ -917,7 +927,7 @@ See also file-list-select."
 	   regexp))
 	 new-list)
     (if (= (length add-file-list) 0)
-	(message (format "No files added." dir regexp))
+	(message (format "No files added below %s according to match against %s." dir regexp))
       ;; update current file-list
       (let ((name-list (mapcar 'file-list-make-file-name file-list)))
 	(dolist (entry add-file-list)
@@ -1092,10 +1102,10 @@ or by file-name if there is no sort-key yet"
 		(if arg
 		    (setq fun (read-shell-command (format "icommand on %s " file-name)
 						  nil nil nil))
-		  (setq fun (cdr (assoc-ignore-case
+		  (setq fun (cdr (assoc-string
 				  (concat "\." (file-name-extension
 						file-name))
-				  file-list-magic-alist)))))
+				  file-list-magic-alist 'case-fold)))))
 	   (async-shell-command
 	    (concat "PATH=~/bin:\"${PATH}\";" fun " "
 		    (file-list-quote-filename file-name))))
@@ -1113,7 +1123,8 @@ or by file-name if there is no sort-key yet"
 	       (org-open-file file-name)
 	     (find-file file-name))
 	   (when grep-line
-	     (goto-line (string-to-int grep-line)))))))
+	     (goto-char (point-min))
+	     (forward-line (1- (string-to-number grep-line))))))))
 
 (defun file-list-choose-file-other-window (&optional event extent buffer magic)
   (interactive)
@@ -1494,8 +1505,7 @@ Switches to the corresponding directory of each file."
        hits-buf)
       (if (not (buffer-live-p hits-buf))
 	  (error "No grep hits for '%s'." grep-regexp))
-      (save-excursion 
-	(set-buffer hits-buf)
+      (with-current-buffer hits-buf
 	(goto-char (point-min))
 	(let (grep-hits grep-hit-list file-name)
 	  (while (re-search-forward "\\(^/.*\\)\\(:[0-9]+:\\)\\(.*$\\)" nil t)
@@ -1545,7 +1555,6 @@ Switches to the corresponding directory of each file."
 (defun file-list-search ()
   (interactive)
   (when file-list-mode
-    (interactive)
     (let* ((buffer-read-only nil)
 	   (string (read-string "Search string in file-list: "))
 	   (display-buffer (current-buffer))
@@ -1564,8 +1573,7 @@ Switches to the corresponding directory of each file."
 	     line-no (int-to-string (line-number-at-pos))
 	     this-line (buffer-substring-no-properties (point-at-bol) (point-at-eol)))
 	    (put-text-property 0 (length line-no) 'face font-lock-warning-face line-no)
-	    (save-excursion
-	      (set-buffer display-buffer)
+	    (with-current-buffer display-buffer
 	      (end-of-line)
 	      (insert "\n  " line-no " : " this-line)
 	      (put-text-property (point-at-bol) (point-at-eol) 'file-info t))))
@@ -1590,7 +1598,6 @@ Switches to the corresponding directory of each file."
  
 (defun file-list-iswitchf-internal (&optional dir file-list fun prompt)
   (let* (
-	 ;; (gc-cons-threshold file-list-gc-cons-threshold)
 	 (prompt (or prompt file-list-iswitchf-prompt))
 	 (minibuffer-completion-table file-list)
 	 (fun (or fun 'find-file))
@@ -1637,33 +1644,33 @@ Switches to the corresponding directory of each file."
   (file-list-iswitchf-internal))
 ;   (file-list-iswitchf-internal file-list-home-directory))
 
-(defun file-list-find-magic (file-name &optional ask-for-prog)
-  "Open a file with the application found in file-list-magic-alist."
-  (let ((prog (if ask-for-prog
-		  (read-shell-command (format "icommand on %s " file-name)
-				      nil nil nil)
-		(cdr (assoc-ignore-case
-		      (concat "\."
-			      (file-name-extension file-name))
-		      file-list-magic-alist)))))
-    (if prog (start-process-shell-command
-	      "file-list-find-magic"
-	      nil
-	      prog
-	      (file-list-quote-filename file-name))
-      (find-file file-name))))
+;; (defun file-list-find-magic (file-name &optional ask-for-prog)
+  ;; "Open a file with the application found in file-list-magic-alist."
+  ;; (let ((prog (if ask-for-prog
+		  ;; (read-shell-command (format "icommand on %s " file-name)
+				      ;; nil nil nil)
+		;; (cdr (assoc-string
+		      ;; (concat "\."
+			      ;; (file-name-extension file-name))
+		      ;; file-list-magic-alist 'case-fold)))))
+    ;; (if prog (start-process-shell-command
+	      ;; "file-list-find-magic"
+	      ;; nil
+	      ;; prog
+	      ;; (file-list-quote-filename file-name))
+      ;; (find-file file-name))))
 
-(defun file-list-iswitchf-magic (arg)
-  "Switch to file in file-list of file-list-home-directory."
-  (interactive "P")
-  (file-list-iswitchf-internal
-   file-list-home-directory
-   nil
-   '(lambda (file)
-      (file-list-find-magic
-       file
-       arg))
-       "Find file magic "))
+;; (defun file-list-iswitchf-magic (arg)
+  ;; "Switch to file in file-list of file-list-home-directory."
+  ;; (interactive "P")
+  ;; (file-list-iswitchf-internal
+   ;; file-list-home-directory
+   ;; nil
+   ;; '(lambda (file)
+      ;; (file-list-find-magic
+       ;; file
+       ;; arg))
+       ;; "Find file magic "))
 
 (defun file-list-iswitchf-file-other-window ()
   "See file-list-iswitchf-file."
@@ -1689,23 +1696,23 @@ Switches to the corresponding directory of each file."
   (file-list-iswitchf-internal (file-name-as-directory
 		       (expand-file-name dir))))
 
-(defun file-list-iswitchf-below-directory-other-window (dir)
-  "See file-list-iswitchf-below-directory."
-  (interactive "D iswitchf below directory ")
-  (file-list-iswitchf-internal (file-name-as-directory
-		       (expand-file-name dir)
-		       nil
-		      'find-file-other-window
-		      (concat file-list-iswitchf-prompt "(other window) "))))
+;; (defun file-list-iswitchf-below-directory-other-window (dir)
+  ;; "See file-list-iswitchf-below-directory."
+  ;; (interactive "D iswitchf below directory ")
+  ;; (file-list-iswitchf-internal (file-name-as-directory
+				;; (expand-file-name dir)
+				;; nil
+				;; 'find-file-other-window
+				;; (concat file-list-iswitchf-prompt "(other window) "))))
 
-(defun file-list-iswitchf-below-directory-other-frame (dir)
-  "See file-list-iswitchf-below-directory."
-  (interactive "D iswitchf below directory ")
-  (file-list-iswitchf-internal (file-name-as-directory
-		       (expand-file-name dir)
-		       nil
-		      'find-file-other-frame
-		      (concat file-list-iswitchf-prompt "(other frame) "))))
+;; (defun file-list-iswitchf-below-directory-other-frame (dir)
+  ;; "See file-list-iswitchf-below-directory."
+  ;; (interactive "D iswitchf below directory ")
+  ;; (file-list-iswitchf-internal (file-name-as-directory
+		       ;; (expand-file-name dir)
+		       ;; nil
+		      ;; 'find-file-other-frame
+		      ;; (concat file-list-iswitchf-prompt "(other frame) "))))
 ;;}}}
 ;;{{{ keybindings for the file-list-display-buffer
 (define-key file-list-mode-map [(return)] 'file-list-choose-file)
@@ -1846,14 +1853,15 @@ Switches to the corresponding directory of each file."
   (let* ((fatpoint (file-list-file-at-point))
 	 (type (mm-default-file-encoding fatpoint))
 	 (description nil)
-	 (buf (if (save-excursion (set-buffer file-list-reference-buffer)
-				  (string-match "message" (symbol-name
-							   major-mode)))
+	 (buf (if (with-current-buffer file-list-reference-buffer
+		    (string-match "message" (symbol-name
+					     major-mode)))
 		  file-list-reference-buffer
 		(read-buffer "attach to buffer "
-			     (find-if (lambda (b)
-					(save-excursion (set-buffer b)
-							(string= "message-mode" (buffer-name b))))
+			     (cl-find-if (lambda (b)
+					(with-current-buffer 
+					    b
+					  (string= "message-mode" (buffer-name b))))
 				      (buffer-list))
 			     t))))
     (switch-to-buffer buf)
@@ -1869,32 +1877,32 @@ Switches to the corresponding directory of each file."
 (defun file-list-mml-attach (&optional file-list)
   "Attach files in file-list to the outgoing MIME message."
   (interactive)
-;  (save-window-excursion
-    (let* ((file-list (or file-list file-list-current-file-list))
-	   (flist (mapcar 'file-list-make-file-name file-list))
-	   (active (string= (buffer-name (current-buffer))
-			    file-list-display-buffer))
-	   (buf (cond ((not active) (current-buffer))
-		      ((string-match "mail" (buffer-name file-list-reference-buffer))
-		       file-list-reference-buffer)
-		      (t (read-buffer "Attach all these files to buffer " 
-				      (find-if (lambda (b)
-					(save-excursion (set-buffer b)
-							(string= "message-mode" (buffer-name b))))
-				      (buffer-list)) t))))
+					;  (save-window-excursion
+  (let* ((file-list (or file-list file-list-current-file-list))
+	 (flist (mapcar 'file-list-make-file-name file-list))
+	 (active (string= (buffer-name (current-buffer))
+			  file-list-display-buffer))
+	 (buf (cond ((not active) (current-buffer))
+		    ((string-match "mail" (buffer-name file-list-reference-buffer))
+		     file-list-reference-buffer)
+		    (t (read-buffer "Attach all these files to buffer " 
+				    (cl-find-if (lambda (b)
+						  (with-current-buffer b
+						    (string= "message-mode" (buffer-name b))))
+						(buffer-list)) t))))
 	 file type description)
-      (switch-to-buffer buf)
-      (while flist
-	(setq file (car flist)
-	      type (mm-default-file-encoding file)
+    (switch-to-buffer buf)
+    (while flist
+      (setq file (car flist)
+	    type (mm-default-file-encoding file)
 	    description nil)
-	(mml-insert-empty-tag 'part
-			      'type type
-			      'filename file
-			      'disposition "attachment"
+      (mml-insert-empty-tag 'part
+			    'type type
+			    'filename file
+			    'disposition "attachment"
 			    'description description)
-	(setq flist (cdr flist)))
-      (file-list-quit t)))
+      (setq flist (cdr flist)))
+    (file-list-quit t)))
 
 
 
@@ -1953,7 +1961,6 @@ Switches to the corresponding directory of each file."
   ;; (switch-to-buffer "*file-list-diagnosis*")
   ;; (erase-buffer)
   ;; (let* (
-	 ;; ;; (gc-cons-threshold file-list-gc-cons-threshold)
 	 ;; (dir (or dir file-list-home-directory))
 	 ;; (dirlist (file-list-list dir t t t))
 	 ;; (overall 0) 

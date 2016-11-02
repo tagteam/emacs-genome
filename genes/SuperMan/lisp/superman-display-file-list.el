@@ -37,9 +37,9 @@
 				 nil nil dir (concat "*FileList[" (car project) "]*") nil))
 	      (t
 	       (switch-to-buffer (concat "*FileList[" (car project) "]*"))
-	       (toggle-read-only -1)
-	       (erase-buffer)
-	       (insert "FILE-LIST: No files in project"))))
+	       (let ((read-only nil))
+		 (erase-buffer)
+		 (insert "FILE-LIST: No files in project")))))
     (error "superman-file-list.el not loaded")))
 
 (defun superman-file-capture-button (c &rest args)
