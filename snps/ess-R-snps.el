@@ -63,9 +63,17 @@
   (define-key ess-mode-map "\M-\C-i" 'ess-edit-indent-call-sophisticatedly)
   (define-key ess-mode-map "\M-l" 'mark-line)
   (define-key ess-mode-map "\M-k" 'eg-switch-to-R)
+  (define-key ess-mode-map "\C-cf" 'ess-edit-insert-call)
+  (define-key ess-mode-map "\C-cv" 'ess-edit-insert-vector)
+  (define-key ess-mode-map "\C-cp" 'ess-edit-insert-path)
+  (define-key ess-mode-map "\C-ch" 'ess-edit-mark-call)
+  (define-key ess-mode-map "\C-cF" 'ess-edit-insert-file-name)
   (define-key ess-mode-map "\C-\M-k" #'(lambda () (interactive)(eg-switch-to-R 't)))
   (define-key ess-mode-map [(backspace)] 'delete-backward-char)
   (define-key ess-mode-map [(meta backspace)] 'backward-kill-word))
+
+(add-hook 'ess-mode-hook 'R-keybindings-tag)
+
 ;;}}}
 ;;{{{ expanding objects
 

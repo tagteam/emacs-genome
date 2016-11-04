@@ -20,9 +20,9 @@
 ;;----------------------------------------------------------------------
 ;; created: Apr 12 2015 (09:51) 
 ;; Version: 
-;; last-updated: Nov  2 2016 (16:55) 
+;; last-updated: Nov  4 2016 (11:47) 
 ;;           By: Thomas Alexander Gerds
-;;     Update #: 59
+;;     Update #: 63
 ;;----------------------------------------------------------------------
 ;; 
 ;;; Commentary: Show important features {genes}. 
@@ -232,6 +232,13 @@ delete word backward : \\M-BACK
 
        \\M-i : dabbrev-expand (expand text)
        \\M-e : hippie-expand (expand many things)
+  
+  Completing text dynamically
+
+   Expands to the most recent, preceding word for which this is a prefix.
+   Press SPACE after expansion and then \\M-i again to get expansion the following 
+   expression from the source of the first expansion.
+  
 
 * Search & replace
 
@@ -281,8 +288,15 @@ Previous buffer same mode :  \\M-p
 
     \\M-k : switch to R (start R if not running) 
     \\M-j : eval region
+    \\M-r : copy region 
 \\M-\\C-i : indent call sophisticatedly
-\\M-x ess-edit-insert-file-name
+    \\M-q : indent paragraph
+     \M-k : switch to R buffer (console)
+    \C-cf : insert call to a function
+    \C-cv : insert vector (any R vector, e.g. names(mydata))
+    \C-cp : insert path to current directory
+    \C-ch : mark function call
+  \C-cF : insert path to file name
 ")
       (goto-char (point-min)))
   (pop-to-buffer egcs-buf-name)
