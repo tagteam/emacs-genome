@@ -20,9 +20,9 @@
 ;;----------------------------------------------------------------------
 ;; created: Apr 12 2015 (09:51) 
 ;; Version: 
-;; last-updated: Nov  4 2016 (11:47) 
+;; last-updated: Nov  4 2016 (17:19) 
 ;;           By: Thomas Alexander Gerds
-;;     Update #: 63
+;;     Update #: 64
 ;;----------------------------------------------------------------------
 ;; 
 ;;; Commentary: Show important features {genes}. 
@@ -292,11 +292,11 @@ Previous buffer same mode :  \\M-p
 \\M-\\C-i : indent call sophisticatedly
     \\M-q : indent paragraph
      \M-k : switch to R buffer (console)
-    \C-cf : insert call to a function
-    \C-cv : insert vector (any R vector, e.g. names(mydata))
-    \C-cp : insert path to current directory
-    \C-ch : mark function call
-  \C-cF : insert path to file name
+    \\C-cf : insert call to a function
+    \\C-cv : insert vector (any R vector, e.g. names(mydata))
+    \\C-cp : insert path to current directory
+    \\C-ch : mark function call
+  \\C-cF : insert path to file name
 ")
       (goto-char (point-min)))
   (pop-to-buffer egcs-buf-name)
