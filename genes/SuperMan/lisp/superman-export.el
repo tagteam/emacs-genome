@@ -40,10 +40,13 @@
 (defun superman-control-latex-export (&optional arg)
   (interactive "p")
   (if (string= (car (org-babel-get-src-block-info)) "R")
-      (progn
-      (ess-switch-to-end-of-ESS)
-      (when arg (erase-buffer) (inferior-ess-send-input)))
-  (superman-export-as-latex 'debug)))
+      (superman-ess-eval-and-go)
+    ;; (progn
+    ;; (ess-switch-to-end-of-ESS)
+    ;; (when arg (erase-buffer) (inferior-ess-send-input)))
+    (if (string= superman-org-export-target "pdf")
+	(superman-export-as-latex 'debug)
+      (superman-org-export-as nil))))
 
 ;; See library tex-buf for help on TeX-process.
 (defun superman-export-as-latex (&optional debug)

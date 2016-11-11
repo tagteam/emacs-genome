@@ -72,7 +72,7 @@
   (define-key ess-mode-map [(backspace)] 'delete-backward-char)
   (define-key ess-mode-map [(meta backspace)] 'backward-kill-word))
 
-(add-hook 'ess-mode-hook 'R-keybindings-tag)
+(add-hook 'ess-mode-hook 'eg/R-keybindings)
 
 ;;}}}
 ;;{{{ expanding objects

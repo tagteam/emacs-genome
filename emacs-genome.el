@@ -240,6 +240,7 @@
 (add-to-list 'file-list-directory-filter "^\\\.[a-zA-Z]+/")
 (add-to-list 'file-list-file-name-filter "~$")
 
+
 ;; start-up behaviour
 (setq inhibit-startup-screen 'yes-please)
 
@@ -251,5 +252,6 @@
 
 ;; backtransform to original package location
 (setq package-user-dir orig-package-user-dir)
+
 (provide 'emacs-genome)
 ;;; emacs-genome.el ends here
