@@ -20,9 +20,9 @@
 ;;----------------------------------------------------------------------
 ;; created: Apr 12 2015 (09:51) 
 ;; Version: 
-;; last-updated: Nov  4 2016 (17:19) 
+;; last-updated: Nov 14 2016 (17:22) 
 ;;           By: Thomas Alexander Gerds
-;;     Update #: 64
+;;     Update #: 66
 ;;----------------------------------------------------------------------
 ;; 
 ;;; Commentary: Show important features {genes}. 
@@ -199,7 +199,7 @@ right = arrow right
 * Walking the cursor 
 
        Beginning of line: \\C-a
-            End of line : \\C-a
+            End of line : \\C-e
           Previous line : \\C-p
               Next line : \\C-n
      Previous paragraph : \\M-up
@@ -286,12 +286,12 @@ Previous buffer same mode :  \\M-p
 
 * R 
 
-    \\M-k : switch to R (start R if not running) 
-    \\M-j : eval region
-    \\M-r : copy region 
-\\M-\\C-i : indent call sophisticatedly
-    \\M-q : indent paragraph
-     \M-k : switch to R buffer (console)
+     \\M-k : switch to R (start R if not running) 
+     \\M-j : eval region
+     \\M-r : copy region 
+ \\M-\\C-i : indent call sophisticatedly
+     \\M-q : indent paragraph
+     \\M-k : switch to R buffer (console)
     \\C-cf : insert call to a function
     \\C-cv : insert vector (any R vector, e.g. names(mydata))
     \\C-cp : insert path to current directory
