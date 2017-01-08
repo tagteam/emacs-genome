@@ -39,8 +39,11 @@
 
 (defun superman-control-latex-export (&optional arg)
   (interactive "p")
-  (if (string= (car (org-babel-get-src-block-info)) "R")
-      (superman-ess-eval-and-go)
+  (if (and (string= (car (org-babel-get-src-block-info)) "R")
+	   ;; since org-element-at-point finds the nearest element,
+	   ;; need to test if really sitting inside the block:
+	   (org-babel-where-is-src-block-head))
+      (superman-ess-eval-and-go arg)
     ;; (progn
     ;; (ess-switch-to-end-of-ESS)
     ;; (when arg (erase-buffer) (inferior-ess-send-input)))
@@ -391,17 +394,21 @@ Use this map to set additional keybindings for when superman-export-header-mode 
 ;;}}}
 
 
-(defun superman-ess-eval-and-go ()
+(defun superman-ess-eval-and-go (arg)
   (interactive)
+  (when arg 
+    (save-excursion
+      (ess-switch-to-end-of-ESS)
+      (erase-buffer) (comint-send-input)))
   (if (region-active-p)
       (let* ((start (region-beginning))
 	     (end (region-end)))
-	     ;; (code (buffer-substring start end))
-	     ;; (cur-buf-name (buffer-name (current-buffer))))
+	;; (code (buffer-substring start end))
+	;; (cur-buf-name (buffer-name (current-buffer))))
 	(ess-eval-region-and-go start end  'nowait))
-	;; (visibly (< (length (buffer-substring-no-properties start end)) 300)))
-	;; (with-temp-buffer (R-mode) (insert code)
-			  ;; (ess-eval-buffer-and-go 'nowait)))
+    ;; (visibly (< (length (buffer-substring-no-properties start end)) 300)))
+    ;; (with-temp-buffer (R-mode) (insert code)
+    ;; (ess-eval-buffer-and-go 'nowait)))
     ;; (ess-eval-region-and-go start end  'nowait))
     (save-excursion
       (ess-eval-line-and-step nil nil t))))

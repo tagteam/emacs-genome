@@ -549,7 +549,7 @@
 (defun superman-run-R-or-export-as (&optional debug)
   (interactive "P")
   (if (string= (car (org-babel-get-src-block-info)) "R")
-      (superman-ess-eval-and-go)
+      (superman-ess-eval-and-go nil)
     (superman-org-export-as nil)))
 
 ;; never want tab to do a tab 

@@ -155,6 +155,7 @@
 (unless (featurep 'xemacs) ;; for xemacs version see custom.el
   (setq default-mode-line-format
 	'(
+	  (" " display-time-string)
 	  ;; "%e"
 	  ;; #("-" 0 1
 	  ;; (help-echo "mouse-1: Select (drag to resize)\nmouse-2: Make current window occupy the whole frame\nmouse-3: Remove current window from display")
@@ -177,7 +178,6 @@
 	    #("--" 0 2
 	      (help-echo "mouse-1: Select (drag to resize)\nmouse-2: Make current window occupy the whole frame\nmouse-3: Remove current window from display"))))
 	  ;; ("" win:mode-string display-time-string)
-	  (" " display-time-string)
 	  ;; (global-mode-string
 	  ;; (#("--" 0 2
 	  ;; (help-echo "mouse-1: Select (drag to resize)\nmouse-2: Make current window occupy the whole frame\nmouse-3: Remove current window from display"))

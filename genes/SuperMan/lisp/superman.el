@@ -853,9 +853,10 @@ Enabling superman mode electrifies the superman buffer for project management."
 	 ("[#B]" :fun superman-todo-show-priority-B  :help "Limit to priority B tasks")
 	 ("[#C]" :fun superman-todo-show-priority-C   :help "Limit to priority B tasks")
 	 ("All(a)" :fun superman-todo-show-priority-all  :help "Show all priorities")))
-      (goto-char (next-single-property-change (point) 'org-hd-marker))
-      (beginning-of-line)
-      (insert "\n" (superman-column-names balls) "\n") 
+      (when (next-single-property-change (point) 'org-hd-marker)
+	(goto-char (next-single-property-change (point) 'org-hd-marker))
+	(beginning-of-line)
+	(insert "\n" (superman-column-names balls) "\n") )
       ;; (superman-view-mode-on) ;; minor modes
       ;; (setq org-agenda-this-buffer-name org-agenda-buffer-name)
       (while (ignore-errors

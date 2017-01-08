@@ -129,6 +129,15 @@
 (use-package popup-complete
   :ensure t)
 
+(use-package yasnippet
+  :ensure t
+  :config
+  (add-to-list 'yas-snippet-dirs (concat emacs-genome "/snps/yasnippets"))
+  (yas-global-mode 1))
+
+(use-package auto-yasnippet
+  :ensure t)
+
 ;; header buttons
 (use-package header-button)
   ;; emacs-epackage--lib-header-button
