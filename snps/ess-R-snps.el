@@ -71,6 +71,8 @@
   (define-key ess-mode-map "\M-\C-i" 'ess-edit-indent-call-sophisticatedly)
   (define-key ess-mode-map "\M-l" 'mark-line)
   (define-key ess-mode-map "\M-k" 'eg-switch-to-R)
+  (define-key ess-mode-map "\M-h" 'eg/ess-get-help-R-object)
+  (define-key ess-mode-map "\C-\M-y" 'eg/ess-duplicate-line)  
   (define-key ess-mode-map "\C-cf" 'ess-edit-insert-call)
   (define-key ess-mode-map "\C-cv" 'ess-edit-insert-vector)
   (define-key ess-mode-map "\C-cp" 'ess-edit-insert-path)
@@ -111,6 +113,50 @@
 	(t (split-window-vertically)))
   (other-window 1)
   (R))
+
+;; allow to open the help from a script in an external window (not the consol or the script) 
+(defun eg/ess-help-R-object ()
+  (interactive)
+  (let ((fun (ess-symbol-at-point)))
+    (ess-switch-to-end-of-ESS)
+    (insert (concat "help(" (symbol-name fun) ")"))
+    (inferior-ess-send-input)))
+
+;; allow to duplicate a line - from http://stackoverflow.com/questions/88399/how-do-i-duplicate-a-whole-line-in-emacs
+(defun eg/ess-duplicate-line (arg)
+  "Duplicate current line, leaving point in lower line."
+  (interactive "*p")
+
+  ;; save the point for undo
+  (setq buffer-undo-list (cons (point) buffer-undo-list))
+
+  ;; local variables for start and end of line
+  (let ((bol (save-excursion (beginning-of-line) (point)))
+        eol)
+    (save-excursion
+
+      ;; don't use forward-line for this, because you would have
+      ;; to check whether you are at the end of the buffer
+      (end-of-line)
+      (setq eol (point))
+
+      ;; store the line and disable the recording of undo information
+      (let ((line (buffer-substring bol eol))
+            (buffer-undo-list t)
+            (count arg))
+        ;; insert the line arg times
+        (while (> count 0)
+          (newline)         ;; because there is no newline in 'line'
+          (insert line)
+          (setq count (1- count)))
+        )
+
+      ;; create the undo information
+      (setq buffer-undo-list (cons (cons eol (point)) buffer-undo-list)))
+    ) ; end-of-let
+
+  ;; put the point in the lowest line and return
+  (next-line arg))
 
 (add-hook 'ess-mode-hook 'eg/R-mode)
 (defun eg/R-mode ()
