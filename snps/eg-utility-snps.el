@@ -92,19 +92,26 @@ move to with the same argument."
   (interactive)
   (winner-cycle t))
 
-(defun comment-or-uncomment-line ()
-  (interactive)
-  (let ((beg (point (beginning-of-line)))
-	(end (point (end-of-line))))
-    (comment-or-uncomment-region beg end)))
+(defun comment-or-uncomment-line-or-region (&optional arg)
+  "If region is active comment or uncomment region, see `comment-or-uncomment-region' 
+else comment or uncomment current line. If ARG is non-nil uncomment region or current line."
+  (interactive "P")
+  (if arg
+      (if (region-active-p)
+	  (uncomment-region (region-beginning) (region-end))
+	(uncomment-region (point-at-bol) (point-at-eol))
+	(forward-line))
+    (if (region-active-p)
+	(comment-or-uncomment-region (region-beginning) (region-end))
+      (while (looking-at "^[ \t\n]*$") (forward-line))
+      (comment-or-uncomment-region (point-at-bol) (point-at-eol))
+      (forward-line))))
 
-
-(defun comment-line ()
+(defun uncomment-line-or-region ()
+  "If region is active uncomment the region, else uncomment 
+the current line."
   (interactive)
-  (let ((beg (progn (beginning-of-line) (point)))
-	(end (progn (end-of-line) (point))))
-  (comment-region beg end))
-  (forward-line))
+  (comment-or-uncomment-line-or-region 1))
 
 
 (defun eg/sort-region (&optional separator)

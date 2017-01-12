@@ -149,43 +149,39 @@
  display-time-24hr-format t
  display-time-day-and-date t)
 (display-time)
-					; (line-number-mode 1)
-					; (column-number-mode 1)
-;; (setq default-mode-line-format
-(unless (featurep 'xemacs) ;; for xemacs version see custom.el
-  (setq default-mode-line-format
-	'(
-	  (" " display-time-string)
-	  ;; "%e"
-	  ;; #("-" 0 1
-	  ;; (help-echo "mouse-1: Select (drag to resize)\nmouse-2: Make current window occupy the whole frame\nmouse-3: Remove current window from display")
-	  ;; )
-	  ;; mode-line-mule-info mode-line-client mode-line-modified mode-line-remote mode-line-frame-identification mode-line-buffer-identification
-	  #(" " 0 1
-	    (help-echo "mouse-1: Select (drag to resize)\nmouse-2: Make current window occupy the whole frame\nmouse-3: Remove current window from display"))
-	  (list
-	   'line-number-mode "L%l ")
-	  (list
-	   'column-number-mode "C%c ")
-	  ;; mode-line-position
-	  (vc-mode vc-mode)
-	  ;; #("  " 0 2
-	  ;; (help-echo "mouse-1: Select (drag to resize)\nmouse-2: Make current window occupy the whole frame\nmouse-3: Remove current window from display"))
-	  mode-line-modes
-	  ;; default-directory
-	  (which-func-mode
-	   ("" which-func-format
-	    #("--" 0 2
-	      (help-echo "mouse-1: Select (drag to resize)\nmouse-2: Make current window occupy the whole frame\nmouse-3: Remove current window from display"))))
-	  ;; ("" win:mode-string display-time-string)
-	  ;; (global-mode-string
-	  ;; (#("--" 0 2
-	  ;; (help-echo "mouse-1: Select (drag to resize)\nmouse-2: Make current window occupy the whole frame\nmouse-3: Remove current window from display"))
-	  ;; global-mode-string))
-	  (concat " buffer: %b" " %f")
-	  #("-%-" 0 3
+
+(setq default-mode-line-format
+      '(
+	(" " display-time-string)
+	;; "%e"
+	;; #("-" 0 1
+	;; (help-echo "mouse-1: Select (drag to resize)\nmouse-2: Make current window occupy the whole frame\nmouse-3: Remove current window from display")
+	;; )
+	;; mode-line-mule-info mode-line-client mode-line-modified mode-line-remote mode-line-frame-identification mode-line-buffer-identification
+	#(" " 0 1
+	  (help-echo "mouse-1: Select (drag to resize)\nmouse-2: Make current window occupy the whole frame\nmouse-3: Remove current window from display"))
+	(list
+	 'line-number-mode "L%l ")
+	(list
+	 'column-number-mode "C%c ")
+	;; mode-line-position
+	(vc-mode vc-mode)
+	;; #("  " 0 2
+	;; (help-echo "mouse-1: Select (drag to resize)\nmouse-2: Make current window occupy the whole frame\nmouse-3: Remove current window from display"))
+	mode-line-modes
+	;; default-directory
+	(which-func-mode
+	 ("" which-func-format
+	  #("--" 0 2
 	    (help-echo "mouse-1: Select (drag to resize)\nmouse-2: Make current window occupy the whole frame\nmouse-3: Remove current window from display"))))
-  )
+	;; ("" win:mode-string display-time-string)
+	;; (global-mode-string
+	;; (#("--" 0 2
+	;; (help-echo "mouse-1: Select (drag to resize)\nmouse-2: Make current window occupy the whole frame\nmouse-3: Remove current window from display"))
+	;; global-mode-string))
+	(concat " buffer: %b" " %f")
+	#("-%-" 0 3
+	  (help-echo "mouse-1: Select (drag to resize)\nmouse-2: Make current window occupy the whole frame\nmouse-3: Remove current window from display"))))
 
 ;;}}}
 

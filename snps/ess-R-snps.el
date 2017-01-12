@@ -53,6 +53,14 @@
 ;;}}}
 ;;{{{ key bindings
 
+(defun eg-ess-get-help-object ()
+  (interactive)
+  (let ((fun (ess-symbol-at-point)))
+    (ess-switch-to-end-of-ESS)
+    (insert (concat "help(" (symbol-name fun) ")"))
+    (inferior-ess-send-input)))
+
+
 (require 'ess-edit)
 (add-hook 'ess-mode-hook 'eg/R-keybindings)
 (defun eg/R-keybindings ()
@@ -67,6 +75,7 @@
   (define-key ess-mode-map "\C-cv" 'ess-edit-insert-vector)
   (define-key ess-mode-map "\C-cp" 'ess-edit-insert-path)
   (define-key ess-mode-map "\C-ch" 'ess-edit-mark-call)
+  (define-key ess-mode-map "\M-H" 'eg-ess-get-help-object)
   (define-key ess-mode-map "\C-cF" 'ess-edit-insert-file-name)
   (define-key ess-mode-map "\C-\M-k" #'(lambda () (interactive)(eg-switch-to-R 't)))
   (define-key ess-mode-map [(backspace)] 'delete-backward-char)

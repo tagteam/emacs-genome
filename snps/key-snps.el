@@ -33,8 +33,7 @@
 ;; (global-set-key "\C-xb" 'iswitchb-buffer)
 ;; (global-set-key "\C-xb" '-buffer)
 ;; commentary
-(global-set-key "\C-c;" 'comment-or-uncomment-line)
-(global-set-key "\M-;" 'comment-line)
+(global-set-key "\M-;" 'comment-or-uncomment-line-or-region)
 ;; major-mode specific indentation
 (global-set-key "\M-q" 'eg/indent-paragraph) 
 (global-set-key "\M-Q" '(lambda () (interactive) (mark-paragraph) (fill-region-as-paragraph (region-beginning) (region-end))))
