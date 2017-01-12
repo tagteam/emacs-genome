@@ -53,12 +53,6 @@
 ;;}}}
 ;;{{{ key bindings
 
-(defun eg-ess-get-help-object ()
-  (interactive)
-  (let ((fun (ess-symbol-at-point)))
-    (ess-switch-to-end-of-ESS)
-    (insert (concat "help(" (symbol-name fun) ")"))
-    (inferior-ess-send-input)))
 
 
 (require 'ess-edit)
@@ -71,7 +65,7 @@
   (define-key ess-mode-map "\M-\C-i" 'ess-edit-indent-call-sophisticatedly)
   (define-key ess-mode-map "\M-l" 'mark-line)
   (define-key ess-mode-map "\M-k" 'eg-switch-to-R)
-  (define-key ess-mode-map "\M-h" 'eg/ess-get-help-R-object)
+  ;; (define-key ess-mode-map "\M-h" 'eg/ess-get-help-R-object)
   (define-key ess-mode-map "\C-\M-y" 'eg/ess-duplicate-line)  
   (define-key ess-mode-map "\C-cf" 'ess-edit-insert-call)
   (define-key ess-mode-map "\C-cv" 'ess-edit-insert-vector)
@@ -114,8 +108,8 @@
   (other-window 1)
   (R))
 
-;; allow to open the help from a script in an external window (not the consol or the script) 
 (defun eg/ess-help-R-object ()
+ "Open the help file of the R object at the cursor point."
   (interactive)
   (let ((fun (ess-symbol-at-point)))
     (ess-switch-to-end-of-ESS)
