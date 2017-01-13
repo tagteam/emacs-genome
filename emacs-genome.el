@@ -217,7 +217,7 @@
 ;; (setq ess-use-auto-complete 'script-only)
 
 ;; completion in R 
-(use-package ac-R :ensure t)
+;; (use-package ac-R :ensure t)
 
 (use-package google-translate
   :ensure t)

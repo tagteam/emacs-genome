@@ -71,7 +71,7 @@
   (define-key ess-mode-map "\C-cv" 'ess-edit-insert-vector)
   (define-key ess-mode-map "\C-cp" 'ess-edit-insert-path)
   (define-key ess-mode-map "\C-ch" 'ess-edit-mark-call)
-  (define-key ess-mode-map "\M-H" 'eg-ess-get-help-object)
+  (define-key ess-mode-map "\M-H" 'eg/ess-get-help-R-object)
   (define-key ess-mode-map "\C-cF" 'ess-edit-insert-file-name)
   (define-key ess-mode-map "\C-\M-k" #'(lambda () (interactive)(eg-switch-to-R 't)))
   (define-key ess-mode-map [(backspace)] 'delete-backward-char)
@@ -108,8 +108,8 @@
   (other-window 1)
   (R))
 
-(defun eg/ess-help-R-object ()
- "Open the help file of the R object at the cursor point."
+(defun eg/ess-get-help-R-object ()
+  "Open the help file of the R object at the cursor point from a script in an external buffer."
   (interactive)
   (let ((fun (ess-symbol-at-point)))
     (ess-switch-to-end-of-ESS)
