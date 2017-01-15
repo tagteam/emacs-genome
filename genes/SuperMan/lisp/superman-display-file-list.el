@@ -180,7 +180,7 @@ file-list display buffers unless DIR matches the directories associated with
 						 :help (concat "Change to ascending file name order.\n" file-list-sort-keys-help-string)))))
       (insert " ")
       ;; display mode button
-      (insert (superman-make-button (concat "[mode " (int-to-string level) "]")
+      (insert (superman-make-button (concat "[mode " (number-to-string level) "]")
 				    '(:fun file-list-toggle-display-mode
 					   :face file-list-action-button-face
 					   :width 13
@@ -349,13 +349,13 @@ file-list display buffers unless DIR matches the directories associated with
                         by .ext: /-e
                
          Inverse filter: Crtl-u followed by /-* key stroke")))
-      (insert " Listed: (n=" (int-to-string n) ") ")
+      (insert " Listed: (n=" (number-to-string n) ") ")
       (when filter
 	(let ((count 0))
 	  (dolist (x filter nil)
 	    (insert " " (superman-make-button
 			 (concat (plist-get x :name) " (n="
-				 (int-to-string 
+				 (number-to-string 
 				  (length (plist-get x :filtered-files))) ")")
 			 `(:fun (lambda () (interactive)
 				  (file-list-remove-filter ,(plist-get x :name)))

@@ -2916,7 +2916,7 @@ taken."
                folding-inside-string "1" folding-inside-mode-name)
             (concat
              folding-inside-string
-             (int-to-string (length folding-stack))
+             (number-to-string (length folding-stack))
              folding-inside-mode-name)))))
 
 (defun folding-clear-stack ()
@@ -4240,7 +4240,7 @@ the title."
                                         (- secondary-mark-length))))
             (setq section-prefix-list
                   (cons (setq prefix (concat (car section-prefix-list)
-                                             (int-to-string (car section-list))
+                                             (number-to-string (car section-list))
                                              "."))
                         section-prefix-list))
             (or (cdr section-list)
@@ -5319,7 +5319,7 @@ The result will be:
             (unless (looking-at (regexp-quote left))
               (goto-char (marker-position marker))
               (beginning-of-line)
-              (insert  left " " (int-to-string count) "\n\n")
+              (insert  left " " (number-to-string count) "\n\n")
               (incf count)
               (setq done t)))
           (goto-char (marker-position marker))

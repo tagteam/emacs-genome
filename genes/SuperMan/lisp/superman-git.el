@@ -990,9 +990,9 @@ NAME is used to make the section heading.
       (unless superman-git-display-cycles (setq superman-git-display-cycles cycles))
       ;; limit on number of revisions
       (when limit
-	(setq cmd (replace-regexp-in-string "-n [0-9]+ " (concat "-n " (int-to-string limit) " ") cmd)))
+	(setq cmd (replace-regexp-in-string "-n [0-9]+ " (concat "-n " (number-to-string limit) " ") cmd)))
       (when skip
-	(setq cmd (replace-regexp-in-string "--skip [0-9]+ " (concat "--skip " (int-to-string skip) " ") cmd)))
+	(setq cmd (replace-regexp-in-string "--skip [0-9]+ " (concat "--skip " (number-to-string skip) " ") cmd)))
       ;; insert the result of git command
       (insert (shell-command-to-string cmd))
       (goto-char (point-min))
@@ -1042,7 +1042,7 @@ NAME is used to make the section heading.
       (beginning-of-line)
       (when (re-search-forward "\[[0-9]*\]" nil t)
 	(replace-match
-	 (superman-make-button (concat "[Set limit: " (int-to-string limit) "]")
+	 (superman-make-button (concat "[Set limit: " (number-to-string limit) "]")
 			       '(:fun superman-git-set-limit :face superman-default-button-face :help "Set limit of logs"))))
       (when post-hook 
 	(goto-char (point-max))
@@ -1054,9 +1054,9 @@ NAME is used to make the section heading.
   (if (not (or superman-git-mode superman-git-log-mode))
       (error "Currently this works only in `superman-git-log-mode' and `superman-git-mode'")
     (let ((buffer-read-only nil)
-	  (new-limit (string-to-int
+	  (new-limit (string-to-number
 		      (read-string "Limit on number of revisions (leave empty to cancel): ")))
-	  (new-skip (string-to-int
+	  (new-skip (string-to-number
 		      (read-string "Skip this many revisions (default 0): " nil nil "0"))))
       (when (integerp new-limit)
 	(put-text-property (point-min) (+ (point-min) 1) 'limit new-limit))
@@ -1712,7 +1712,7 @@ the git directory."
 	 (nick (get-text-property (point-min) 'nickname))
 	 (git-switches (concat " --no-pager log --full-history --pretty=\"%h:#:%s:#:%ad:#:%an:#:%d\" --date=short "
 			       gitsearch  " "
-			       (if limit (concat "-n " (int-to-string limit)))))
+			       (if limit (concat "-n " (number-to-string limit)))))
 	 (dir (or (get-text-property (point-min) 'git-dir) (superman-git-root file)))
 	 (rel-file (superman-relative-name file dir))
 	 (index (or (get-text-property (point-min) 'index) rel-file))

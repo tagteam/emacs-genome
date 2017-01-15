@@ -361,7 +361,7 @@ See also `superman-capture-whatever' for the other arguments."
     (when replace (delete-region (point) (point-at-eol)))
     (insert "The captured text will be saved in " 
 	    (buffer-name (marker-buffer marker))
-	    " (line " (int-to-string (org-with-point-at marker (count-lines 1 (point))))
+	    " (line " (number-to-string (org-with-point-at marker (count-lines 1 (point))))
 	    (if (stringp heading) (concat " just below " heading) "")
 	    ")")))
 
@@ -507,7 +507,7 @@ at the requested destination and then reset the window configuration."
 		    (setq n-error (1+ n-error)))
 		   (t (goto-char (point-at-eol))))))))
       (if (> n-error 0)
-	  (progn (message (concat (int-to-string n-error) " fields are not filled correctly."))
+	  (progn (message (concat (number-to-string n-error) " fields are not filled correctly."))
 		 (goto-char (next-single-property-change (point-min) 'superman-error))
 		 (forward-line 1)
 		 (end-of-line))

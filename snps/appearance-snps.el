@@ -150,7 +150,7 @@
  display-time-day-and-date t)
 (display-time)
 
-(setq default-mode-line-format
+(setq-default mode-line-format
       '(
 	(" " display-time-string)
 	;; "%e"
@@ -179,7 +179,9 @@
 	;; (#("--" 0 2
 	;; (help-echo "mouse-1: Select (drag to resize)\nmouse-2: Make current window occupy the whole frame\nmouse-3: Remove current window from display"))
 	;; global-mode-string))
-	(concat " buffer: %b" " %f")
+	mode-line-buffer-identification
+	mode-line-remote
+	;; (concat " buffer: %b" " %f")
 	#("-%-" 0 3
 	  (help-echo "mouse-1: Select (drag to resize)\nmouse-2: Make current window occupy the whole frame\nmouse-3: Remove current window from display"))))
 

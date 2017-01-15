@@ -243,8 +243,8 @@ to an integer then do not trim the string STR."
 		((= days 1)
 		 (setq date "yesterday"))
 		((> days 0)
-		 (setq date (concat "in " (int-to-string days) " days")))
-		(t (setq date (concat (int-to-string (abs days)) " days ago"))))
+		 (setq date (concat "in " (number-to-string days) " days")))
+		(t (setq date (concat (number-to-string (abs days)) " days ago"))))
 	  (setq date-string (superman-trim-string date len))
 	  (put-text-property 0 (length date-string) 'sort-key (abs days) date-string))
       (setq date-string (superman-trim-string date len))
@@ -578,7 +578,7 @@ Enabling superman-configuration mode enables the configuration keyboard to contr
 	       (name (plist-get config :HEADING))
 	       (marker (plist-get config :POINT-MARKER))
 	       (cmd (plist-get config :config)))
-	  (insert (int-to-string i) ": "
+	  (insert (number-to-string i) ": "
 		  (superman-make-button
 		   name
 		   '(:fun superman-choose-entry
@@ -592,9 +592,9 @@ Enabling superman-configuration mode enables the configuration keyboard to contr
 				(superman-switch-config nil nil ,cmd)))
 	  (insert "\n\n" "Windows: " cmd "\n\n")
 	  (define-key superman-configuration-mode-map
-	    (int-to-string i)
+	    (number-to-string i)
 	    `(lambda () (interactive) (goto-char (point-min)) 
-	       (re-search-forward ,(concat "^" (int-to-string i) ": ") nil t)
+	       (re-search-forward ,(concat "^" (number-to-string i) ": ") nil t)
 	       (superman-choose-entry)))
 	  (setq  i (+ i 1) config-list (cdr config-list))))))
   (setq buffer-read-only t))
@@ -687,7 +687,7 @@ Enabling superman-make mode enables the make keyboard to control single files."
 	      (insert "\n\nTargets (press target digit to run corresponding make command):\n\n")
 	      (while targets 
 		(setq cmd (concat "make -k " (car targets)))
-		(insert (int-to-string i) ": "
+		(insert (number-to-string i) ": "
 			(superman-make-button
 			 cmd
 			 '(:fun superman-choose-entry
@@ -701,9 +701,9 @@ Enabling superman-make mode enables the make keyboard to control single files."
 				       ,cmd "*Superman-Make-Output*" "*Superman-Make-Error*")))
 		(insert "\n")
 		(define-key superman-make-mode-map
-		  (int-to-string i)
+		  (number-to-string i)
 		  `(lambda () (interactive) (goto-char (point-min)) 
-		     (re-search-forward ,(concat "^" (int-to-string i) ": ") nil t)
+		     (re-search-forward ,(concat "^" (number-to-string i) ": ") nil t)
 		     (superman-choose-entry)))
 		(setq i (+ i 1) targets (cdr targets)))
 	      (setq make-list (cdr make-list)))))
@@ -828,7 +828,7 @@ Enabling superman-unison mode enables the unison keyboard to control single file
       (put-text-property (point-at-bol) (point-at-eol) 'display "★ Unison" )
       (insert "\tPress digit to run corresponding command. Press 0 to create new. 
                Syntax for remote root ssh://user@machine//home/user/ \n")
-      (insert "\n\n" (int-to-string i) ": "
+      (insert "\n\n" (number-to-string i) ": "
 	      (superman-make-button "Capture directories for synchronisation"
 				    '(:fun superman-capture-unison :face superman-capture-button-face
 					   :help "Set directories for unison synchronisation.")))
@@ -837,9 +837,9 @@ Enabling superman-unison mode enables the unison keyboard to control single file
       (put-text-property (point-at-bol) (point-at-eol) 
 			 'superman-choice 'superman-capture-unison)
       (define-key superman-unison-mode-map
-	(int-to-string i)
+	(number-to-string i)
 	`(lambda () (interactive) (goto-char (point-min)) 
-	   (re-search-forward ,(concat "^" (int-to-string i) ": ") nil t)
+	   (re-search-forward ,(concat "^" (number-to-string i) ": ") nil t)
 	   (superman-choose-entry)))
       (setq  i (+ i 1))
       (insert "\n\n")
@@ -868,7 +868,7 @@ Enabling superman-unison mode enables the unison keyboard to control single file
 			    (if (string= (plist-get unison :switches) "default")
 				superman-unison-switches
 			      (plist-get unison :switches)))))
-	  (insert (int-to-string i) ": "
+	  (insert (number-to-string i) ": "
 		  (superman-make-button
 		   name
 		   '(:fun superman-choose-entry
@@ -885,9 +885,9 @@ Enabling superman-unison mode enables the unison keyboard to control single file
 				(async-shell-command ,cmd)))
 	  (insert "\n\n" "Command: " cmd "\n\n")
 	  (define-key superman-unison-mode-map
-	    (int-to-string i)
+	    (number-to-string i)
 	    `(lambda () (interactive) (goto-char (point-min)) 
-	       (re-search-forward ,(concat "^" (int-to-string i) ": ") nil t)
+	       (re-search-forward ,(concat "^" (number-to-string i) ": ") nil t)
 	       (superman-choose-entry))))
 	(setq  i (+ i 1) unison-list (cdr unison-list)))
       (setq buffer-read-only t))))
@@ -943,7 +943,7 @@ Example:
 	       (with-current-buffer (window-buffer (posn-window posn))
 		 (goto-char (posn-point posn))
 		 ;; to see where we are:
-		 ;; (message (concat (buffer-name) (int-to-string (point))))
+		 ;; (message (concat (buffer-name) (number-to-string (point))))
 		 (funcall ',fun-3)))))
       (define-key map [mouse-3]
 	`(lambda ()
@@ -962,7 +962,7 @@ Example:
 	   (with-current-buffer (window-buffer (posn-window posn))
 	     (goto-char (posn-point posn))
 	     ;; to see where we are:
-	     ;; (message (concat (buffer-name) (int-to-string (point))))
+	     ;; (message (concat (buffer-name) (number-to-string (point))))
 	     (funcall ',fun)))))
     ;; add properties
     (setq props (list
@@ -1470,7 +1470,7 @@ in a special way by `superman-play-ball'")
 	  (while balls
 	    (org-entry-put
 	     pom
-	     (concat "Ball" (int-to-string i))
+	     (concat "Ball" (number-to-string i))
 	     (superman-ball-to-string (car balls)))
 	    (setq balls (cdr balls)
 		  i (+ i 1))))
@@ -1479,7 +1479,7 @@ in a special way by `superman-play-ball'")
 
 (defun superman-thing-to-string (thing)
   (cond ((stringp thing) thing)
-	((integerp thing) (int-to-string thing))
+	((integerp thing) (number-to-string thing))
 	((symbolp thing) (symbol-name thing))))
 
 (defun superman-ball-to-string (ball)
@@ -1585,16 +1585,16 @@ in a special way by `superman-play-ball'")
 					       (get-text-property (+ (point) col-start) 'sort-key)) '(nil)))))
 		  (goto-char (point-min))
 		  (setq key (get-text-property (+ (point) col-start) 'sort-key))
-		  (insert (int-to-string (+ (- maxkey key) 1)))
+		  (insert (number-to-string (+ (- maxkey key) 1)))
 		  (while (re-search-forward "^" nil t)
 		    (setq key (get-text-property (+ (point) col-start) 'sort-key))
-		    (insert (int-to-string (+ (- maxkey key) 1)))))
+		    (insert (number-to-string (+ (- maxkey key) 1)))))
 	      (goto-char (point-min))
 	      (setq key (get-text-property (+ (point) col-start) 'sort-key))
-	      (insert (int-to-string key))
+	      (insert (number-to-string key))
 	      (while (re-search-forward "^" nil t)
 		(setq key (get-text-property (+ (point) col-start) 'sort-key))
-		(insert (int-to-string key))))
+		(insert (number-to-string key))))
 	    (sort-numeric-fields 0 (point-min) (point-max))
 	    (goto-char (point-min))
 	    (while (re-search-forward "^" nil t)
@@ -1855,7 +1855,7 @@ in buffer VIEW-BUF."
 	 ;; prefer columns/balls specified in index buffer
 	 (cat-balls (unless git
 		      (let (out bb (i 1))
-			(while (setq bb (plist-get cat (intern (concat ":ball" (int-to-string i)))))
+			(while (setq bb (plist-get cat (intern (concat ":ball" (number-to-string i)))))
 			  (setq out (append out (list (superman-distangle-ball bb))))
 			  (setq i (1+ i)))
 			out)))
@@ -1959,7 +1959,7 @@ in buffer VIEW-BUF."
 	  (goto-char (nth 1 tempsub))
 	  (put-text-property
 	   (- (point-at-eol) 1) (point-at-eol) 'display
-	   (concat " [" (int-to-string (car tempsub)) "]")))
+	   (concat " [" (number-to-string (car tempsub)) "]")))
 	(setq countsub (cdr countsub))))
     ;; (widen)
     ;; empty cats are not shown unless explicitly wanted
@@ -2097,7 +2097,7 @@ in buffer VIEW-BUF."
   (put-text-property (point-at-bol) (point-at-eol) 'org-hd-marker index-marker)
   (put-text-property (point-at-bol) (point-at-eol) 'display (concat "★ " name))
   (end-of-line)
-  (when (> count 0) (insert " [" (int-to-string count) "]")))
+  (when (> count 0) (insert " [" (number-to-string count) "]")))
 ;; (unless (or (not superman-view-mode) superman-git-mode)
 ;; (insert (superman-make-button
 ;; "column+"
@@ -2339,7 +2339,7 @@ current line."
 	       balls (if left (- curcol 1) curcol)))
 	     (beg (previous-single-property-change (point-at-bol) 'cat))
 	     (end (or (next-single-property-change (point-at-eol) 'cat) (point-max))))
-	;; (message (concat "Len!: " (int-to-string (length superman-document-balls))))
+	;; (message (concat "Len!: " (number-to-string (length superman-document-balls))))
 	(save-excursion
 	  (superman-change-balls new-balls)
 	  (superman-refresh-cat new-balls))

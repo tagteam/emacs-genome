@@ -152,7 +152,7 @@ STRING is an org-date-range such as
       (if havetime
 	  (if negative
 	      (error "Negative time range")
-	    (int-to-string (floor (/ diff 60)))))))
+	    (number-to-string (floor (/ diff 60)))))))
    ((string-match org-ts-regexp string) "60")))
 
   ;; (progn (string-match "\\( +\\)\\(\\([0-9]\\{1,2\\}:[0-9]\\{2\\}\\)\\(-+\\)\\([0-9]\\{1,2\\}:[0-9]\\{2\\}\\)\\)" "<2015-03-24 Tue 13:00--14:20>")

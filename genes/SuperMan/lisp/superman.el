@@ -113,7 +113,7 @@ the contents of the file `superman-profile'."
 	(put-text-property (point-at-bol) (point-at-eol) 'cat 'cat-name)
 	(put-text-property (point-at-bol) (point-at-eol) 'balls superman-balls)
 	(put-text-property (point-at-bol) (point-at-eol) 'display (concat "★ " cat-name))
-	(insert " [" (int-to-string (length tail)) "]")
+	(insert " [" (number-to-string (length tail)) "]")
 	;; loop over projects (tail) in category
 	(insert "\n")
 	(superman-format-loop tail superman-balls)
@@ -217,10 +217,10 @@ the existing properties."
 					    (cond
 					     ((ignore-errors (setq value (symbol-value (intern thing))))
 					      (cond ((symbolp value) (symbol-name value))
-						    ((integerp value) (int-to-string value))
+						    ((integerp value) (number-to-string value))
 						    ((stringp value) value)))
 					     ((symbolp thing) (symbol-name thing))
-					     ((integerp thing) (int-to-string thing))
+					     ((integerp thing) (number-to-string thing))
 					     ((stringp thing) thing))
 					    "\n")))
 			      (superman-defaults)))))
@@ -788,8 +788,8 @@ Enabling superman mode electrifies the superman buffer for project management."
 	       (minutes (nth 1 time))
 	       (msg (plist-get props :HEADING)))
 	  (when (and hour minutes)
-	    (setq minutes (int-to-string minutes))
-	    (setq hour (int-to-string hour))
+	    (setq minutes (number-to-string minutes))
+	    (setq hour (number-to-string hour))
 	    (when (= (length hour) 1) (setq hour (concat "0" hour)))
 	    (when (= (length minutes) 1) (setq minutes (concat "0" minutes)))
 	    (appt-add (concat hour ":" minutes) msg 900)))
@@ -881,7 +881,7 @@ Enabling superman mode electrifies the superman buffer for project management."
 	  (insert "\n")))
       (put-text-property (- (point-at-eol) 1) (point-at-eol) 'tail 'todo-end)
       (goto-char (next-single-property-change (point-min) 'face))
-      (insert " [" (int-to-string count) "]"))))
+      (insert " [" (number-to-string count) "]"))))
 
 (defun superman-visit-project ()
   "Goto the definition of the project in `superman-profile'"

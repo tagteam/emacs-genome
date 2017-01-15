@@ -755,7 +755,7 @@ See also `file-list-add'.
 				  (or (file-name-extension (car entry)) ""))))
 		((string= by "size")
 		 '(lambda (entry)
-		    (< (string-to-int regexp)
+		    (< (string-to-number regexp)
 		       (or (nth 7 (file-attributes
 				   (file-list-make-file-name entry)))
 			   0))))
@@ -763,7 +763,7 @@ See also `file-list-add'.
 		 '(lambda (entry)
 		    (file-list-time-less-p
 		     (file-list-time-subtract (current-time) (file-list-days-to-time
-							      (string-to-int regexp)))
+							      (string-to-number regexp)))
 		     (nth 5 (file-attributes (file-list-make-file-name entry))))))
 		(t nil)))
 	 (new-filter (list :name filter-name
@@ -1013,7 +1013,7 @@ or by file-name if there is no sort-key yet"
      (file-list-sort-internal file-list "path" reverse)))
 
 (defun file-list-parse-size (string)
-  (let ((lst (mapcar 'string-to-int (delq "" (split-string string "G[ ]*\\|M[ ]*\\|K[ ]*\\|B[ ]*"))))
+  (let ((lst (mapcar 'string-to-number (delq "" (split-string string "G[ ]*\\|M[ ]*\\|K[ ]*\\|B[ ]*"))))
 	terra giga mega kilo byte)
     ;; terra
     (if (nth 4 lst)
@@ -1060,8 +1060,8 @@ or by file-name if there is no sort-key yet"
 			   (setq stop t)
 			   (setq res (> (nth 0 size-a) (nth 0 size-b)))))
 		       res)))
-		  ;; (> (string-to-int (cdr (assoc "size" (caddr a))))
-		  ;; (string-to-int (cdr (assoc "size" (caddr b)))))))
+		  ;; (> (string-to-number (cdr (assoc "size" (caddr a))))
+		  ;; (string-to-number (cdr (assoc "size" (caddr b)))))))
 		  (t nil)))
 	sorted-list)
     (message "Sorting file list by %s" by)
@@ -1441,7 +1441,7 @@ Switches to the corresponding directory of each file."
 ;   zettabyte Z = 2**70 B = 1024 * 1024 * 1024 * 1024 * 1024 * 1024 * 1024 B
 ;   yottabyte Y = 2**80 B = 1024 * 1024 * 1024 * 1024 * 1024 * 1024 * 1024 * 1024 B
 			   (cons "size"
-; 				 (int-to-string (nth 7 add))
+; 				 (number-to-string (nth 7 add))
 				 (file-list-convert-bytes (nth 7 add)))))))
 	   file-list))
     (unless nodisplay
@@ -1450,7 +1450,7 @@ Switches to the corresponding directory of each file."
   file-list-current-file-list)
 
 (defun file-list-convert-bytes (int)
-  (let* ((string (int-to-string int))
+  (let* ((string (number-to-string int))
 	 (len (length string))
  	 mega kilo byte)
     (if (> len 10)
@@ -1458,9 +1458,9 @@ Switches to the corresponding directory of each file."
       (setq mega (/ int 1048576)
 	    kilo (/ (mod int 1048576) 1024)
 	    byte (if (> kilo 0) (mod int kilo) int))
-      (concat (when (> mega 0) (concat (int-to-string mega) "M "))
-	      (when (or (> mega 0) (> kilo 0)) (concat (int-to-string kilo) "K "))
-	      (int-to-string byte) "B "))))
+      (concat (when (> mega 0) (concat (number-to-string mega) "M "))
+	      (when (or (> mega 0) (> kilo 0)) (concat (number-to-string kilo) "K "))
+	      (number-to-string byte) "B "))))
       
 (defun file-list-remove-file-at-point ()
   (interactive)
@@ -1570,7 +1570,7 @@ Switches to the corresponding directory of each file."
 	  (goto-char (point-min))
 	  (while (search-forward string nil t)
 	    (setq 
-	     line-no (int-to-string (line-number-at-pos))
+	     line-no (number-to-string (line-number-at-pos))
 	     this-line (buffer-substring-no-properties (point-at-bol) (point-at-eol)))
 	    (put-text-property 0 (length line-no) 'face font-lock-warning-face line-no)
 	    (with-current-buffer display-buffer
@@ -1992,9 +1992,9 @@ Switches to the corresponding directory of each file."
 	 ;; lastbreak)
     ;; (insert (make-string (window-width (selected-window)) (string-to-char "#")) 
 	    ;; "\n\nSize of all assessable files below " dir "\n"
-	    ;; "Gigabyte: " (int-to-string (/ overall (* 1024 1024 1024))) "\n"
-	    ;; "Megabyte: " (int-to-string (/ overall (* 1024 1024))) "\n"
-	    ;; "Kilobyte: " (int-to-string (/ overall 1024)) "\n\n"
+	    ;; "Gigabyte: " (number-to-string (/ overall (* 1024 1024 1024))) "\n"
+	    ;; "Megabyte: " (number-to-string (/ overall (* 1024 1024))) "\n"
+	    ;; "Kilobyte: " (number-to-string (/ overall 1024)) "\n\n"
 	    ;; (make-string (window-width (selected-window)) (string-to-char "#")) "\n")
     ;; (while diaglist
       ;; (let* ((y (car diaglist))
@@ -2012,9 +2012,9 @@ Switches to the corresponding directory of each file."
 		       ;; "\n"
 		       ;; (make-string (window-width (selected-window)) (string-to-char "~"))
 		       ;; "\n\n")
-	       ;; (insert name " : " (int-to-string size-in-kbytes) "\n")
+	       ;; (insert name " : " (number-to-string size-in-kbytes) "\n")
 	       ;; (setq first nil))
-	      ;; ((>= size-in-kbytes (car break)) (insert name " : " (int-to-string size-in-kbytes) "\n"))
+	      ;; ((>= size-in-kbytes (car break)) (insert name " : " (number-to-string size-in-kbytes) "\n"))
 	      ;; (t (setq lastbreak break)
 		 ;; (setq breaks (cdr breaks))
 		 ;; (setq break (car breaks))
