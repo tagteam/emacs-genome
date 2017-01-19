@@ -1122,7 +1122,7 @@ Translate the branch names into buttons."
 		       (superman-run-cmd (concat "cd " ,loc  ";" ,superman-cmd-git " merge origin/master\n")
 					 "*Superman-returns*"
 					 (concat "`" ,superman-cmd-git " merge origin/master' run below \n" ,loc "' returns:\n\n")))
-		     :face file-list-inverse-filter-button-face
+		     :face file-list-action-button-face
 		     :help "Merge origin/master and master repository"))))
 	  ;; pull
 	  (when git-p
@@ -1135,7 +1135,7 @@ Translate the branch names into buttons."
 			(concat "cd " ,loc  ";" ,superman-cmd-git " pull\n")
 			"*Superman-returns*"
 			(concat "`" ,superman-cmd-git " pull' run below \n" ,loc "' returns:\n\n")))
-		     :face file-list-filter-button-face
+		     :face file-list-action-button-face
 		     :help "Pull changes from remote git repository"))))
 	  ;; push
 	  (when git-p

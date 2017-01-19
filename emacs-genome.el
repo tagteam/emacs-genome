@@ -58,6 +58,8 @@
 			("melpa-stable" . "http://stable.melpa.org/packages/")
 			("marmalade" . "http://marmalade-repo.org/packages/")))
 (dolist (source eg-elpa-sources) (add-to-list 'package-archives source t))
+(add-to-list 'package-directory-list (expand-file-name "genes/" emacs-genome))
+(add-to-list 'package-directory-list package-user-dir)
 (setq orig-package-user-dir package-user-dir)
 (setq package-user-dir (expand-file-name "genes/" emacs-genome))
 (setq package-enable-at-startup nil)   ; To prevent initialising twice
@@ -96,7 +98,9 @@
 ;; general purpose look feel behaviour snps
 (use-package eg-utility-snps)
 ;; look, feel and behaviour
+
 (use-package appearance-snps)
+(use-package doremi)
 ;; (use-package rainbow-mode
   ;; :ensure t)
 ;; keybindings
