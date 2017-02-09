@@ -215,7 +215,8 @@
 (use-package  markdown-mode :ensure t)
 ;; Emacs speaks statistics
 ;; (setq ess-etc-directory-list nil)
-(use-package ess-site :ensure ess)
+(use-package ess-site
+ :ensure ess)
 (use-package ess-R-snps)
 (use-package ess-edit)
 ;; (setq ess-use-auto-complete 'script-only)

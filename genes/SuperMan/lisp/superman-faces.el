@@ -149,7 +149,7 @@
     (t
      :inherit superman-default-button-face
      :foreground "red"
-     :background "black"
+     :background "gray90"
      :box (:line-width 1 :color "black" :style released-button)
      :inverse-video nil
      :height 1.0))
@@ -161,12 +161,12 @@
      :inherit superman-default-button-face
      :background "darkblue"
      :inverse-video nil
-     :forground "black"
+     :forground "gray90"
      :height 1.0)
     (t
      :inherit superman-default-button-face
      :foreground "darkblue"
-     :background "black"
+     :background "gray90"
      :box (:line-width 1 :color "black" :style released-button)
      :inverse-video nil
      :height 1.0))
@@ -178,13 +178,13 @@
      :inherit superman-default-button-face
      :box (:line-width 1 :color "black" :style released-button)
      :foreground "DarkOrchid"
-     :background "black"
+     :background "gray90"
      :inverse-video t
      :height 1.0)
     (t
      :inherit superman-default-button-face
      :foreground "DarkOrchid"
-     :background "black"
+     :background "gray90"
      :box (:line-width 1 :color "black" :style released-button)
      :inverse-video nil
      :height 1.0))
@@ -202,7 +202,7 @@
     (t
      :inherit superman-default-button-face
      :foreground "darkblue"
-     :background "black"
+     :background "gray90"
      :box (:line-width 1 :color "black" :style pressed-button)
      :inverse-video nil
      :height 1.0))
@@ -231,14 +231,14 @@
   '((((class color) (background dark))
      :inherit superman-default-button-face
      :background "OrangeRed1"
-     :foreground "black"
+     :foreground "gray90"
      :box (:line-width 1 :color "black" :style pressed-button)
      :inverse-video nil
      :height 1.0)
     (t
      :inherit superman-default-button-face
      :foreground "OrangeRed1"
-     :background "black"
+     :background "gray90"
      :box (:line-width 1 :color "black" :style pressed-button)
      :inverse-video nil
      :height 1.0))

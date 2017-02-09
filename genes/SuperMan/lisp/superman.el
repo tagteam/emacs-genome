@@ -250,7 +250,7 @@ the existing properties."
 	    " SuperMan "
 	    '(:fun superman-redo :face superman-face)))
   ;; (insert "SuperMan(ager)")
-  (put-text-property (point-at-bol) (point-at-eol) 'redo-cmd '(S))
+  (put-text-property (point-at-bol) (point-at-eol) 'redo-cmd '(superman))
   ;; (put-text-property (point-at-bol) (point-at-eol) 'face 'org-level-1)
   (put-text-property (point-at-bol) (point-at-eol) 'index superman-profile)
   (put-text-property (point-at-bol) (point-at-eol) 'nickname "Kal-El")
@@ -622,7 +622,7 @@ Enabling superman mode electrifies the superman buffer for project management."
   (save-excursion
     (if (get-buffer "*S*")
 	(switch-to-buffer (get-buffer "*S*"))
-      (S))
+      (superman))
     (superman-redo)))
 
 (setq superman-agenda-balls

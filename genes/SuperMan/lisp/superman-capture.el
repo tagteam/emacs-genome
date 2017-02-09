@@ -40,10 +40,11 @@ just before the capture buffer is given to the user.")
 (define-key superman-capture-mode-map  "\C-x\C-s" 'superman-clean-scene)
 (define-key superman-capture-mode-map  "\C-c\C-q" 'superman-quit-scene)
 
-(defvar superman-unison-switches "-ignore 'Regex .*(~|te?mp|rda)$' -ignore 'Regex ^(\\.|#).*'")
+(defvar superman-unison-switches "-ignore \"Regex .*(~|te?mp|rda)$\" -ignore \"Regex ^(\\.|#).*\"")
       ;; "-ignore 'Regex .*' -ignorenot 'Regexp *.(org|R|tex|Rd)$'")
 
-(defvar superman-unison-cmd "unison-gtk")
+(defvar superman-unison-cmd "unison")
+(setq superman-unison-cmd "unison")
 
 ;;}}}
 
@@ -1054,15 +1055,16 @@ is non-nil prompt for project."
      nil
      `(("UNISON" :value ,superman-unison-cmd)
        (hdr :value "Synchonise")
-       ("SWITCHES" :value "-ignore 'Path .git' -ignore 'Regex ^(\\.|#).*' -ignore 'Regex .*~$' -perms 0")
+       ("SWITCHES" :value ,superman-unison-switches)
+       ;; "-ignore 'Path .git' -ignore 'Regex ^(\\.|#).*' -ignore 'Regex .*~$' -perms 0")
        ;; :SWITCHES: -ignore 'Regex .*(~|te?mp|rda)$' -ignore 'Regex ^(\\.|#).*' -perms 0
-       ("ROOT-1" :value ,root-1 :complete superman-read-directory-name)
-       ("ROOT-2" :value ,root-2 :complete superman-read-directory-name)
+       ("ROOT-1" :value ,(shell-quote-argument (expand-file-name root-1)) :complete superman-read-directory-name)
+       ("ROOT-2" :value ,(shell-quote-argument (expand-file-name root-2)) :complete superman-read-directory-name)
        ("CaptureDate" :hidden yes :value ,(format-time-string "[%Y-%m-%d %a]"))))))
 
 (defun superman-unison-insert-switches ()
   (interactive)
-  (insert ":SWITCHES: -ignore 'Path .git' -ignore 'Regex ^(\\.|#).*' -ignore 'Regex .*~$' -perms 0"))
+  (insert superman-unison-switches))
 
 (defun superman-run-unison (&optional project)
   (interactive)

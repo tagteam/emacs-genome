@@ -81,7 +81,9 @@ file-list display buffers unless DIR matches the directories associated with
 		    (expand-file-name (superman-project-home project)))
 		  (error "Missing location")))
 	 (view-buf (or view-buffer (get-buffer-create (concat "*FileList[ " nick "]*"))))
-	 (list (or list file-list-current-file-list))
+	 (list (cond (list)
+		     ((eq list 'empty) 'empty)
+		     (file-list-current-file-list)))
 	 ;; when balls are specified force level 0
 	 ;; and provide file-name and directory name
 	 (level (if balls 0 file-list-display-level))
@@ -93,7 +95,9 @@ file-list display buffers unless DIR matches the directories associated with
     (switch-to-buffer view-buf)
     (setq buffer-read-only t)
     (let ((buffer-read-only nil))
-      (setq file-list-current-file-list list)
+      (if (eq list 'empty)
+	  (setq file-list-current-file-list nil)
+	(setq file-list-current-file-list list))
       (run-hooks 'superman-file-list-pre-display-hook)
       (if new-buffer
 	  (progn
@@ -103,7 +107,9 @@ file-list display buffers unless DIR matches the directories associated with
 	    (file-list-mode)
 	    ;; FIXME: since modes kill local variables
 	    ;; we set again
-	    (setq file-list-current-file-list list)
+	    (if (eq list 'empty)
+		(setq file-list-current-file-list nil)
+	      (setq file-list-current-file-list list))
 	    (goto-char (point-min))
 	    ;; create header (but only in new buffers)
 	    ;; prepare buffer if necessary
@@ -127,7 +133,7 @@ file-list display buffers unless DIR matches the directories associated with
 	    (insert "\n\n"))
 	;; end of header (new buffers)
 	;; 
-	;; empty file-list section in existing buffer
+	;; clear file-list section in existing buffer
 	(delete-region 
 	 (previous-single-property-change (point-max) 'point-file-list-start)
 	 (point-max))
@@ -143,7 +149,9 @@ file-list display buffers unless DIR matches the directories associated with
       ;; set filter at point-min
       (put-text-property (point-min) (1+ (point-min)) 'filter-list filter)
       ;; insert or update filter 
-      (file-list-update-filter-line filter (length list))
+      (if (eq list 'empty)
+	  (file-list-update-filter-line filter 0)
+	(file-list-update-filter-line filter (length list)))
       (if new-buffer
 	  (progn
 	    (forward-line 1)
@@ -196,69 +204,71 @@ file-list display buffers unless DIR matches the directories associated with
       (end-of-line)
       (insert "\n")
       ;; find maximal length of file-name
-      (when (= level 0)
-	(let ((maxfile (apply 'max (mapcar #'(lambda (x) (length (car x))) list))))
-	  (setcdr (assoc "width" (assoc "FileName" balls)) `(,maxfile))))
-      ;; insert the file-list 
-      ;; (when (= level 5)
-      ;; (setq list (file-list-attributes list t)))
-      (dolist (el list)
-	(let* ((file (car el))
-	       (path (cadr el))
-	       (rest (caddr el))
-	       file-path
-	       line
-	       appendix)
-	  (put-text-property 0 (length file) 'face 'superman-file-name-face file)
-	  (put-text-property 0 (length path) 'face 'superman-directory-name-face path)
-	  (setq file-path (cond ((= level 0)
-				 `(list (("FileName" . ,file) ("Path" . ,path))))
-				((= level 1)
-				 `(list (("FileName" . ,(concat path file)))))
-				((= level 2)
-				 `(list (("FileName" . ,(file-list-make-file-name~ el)))))
-				((= level 3)
-				 `(list (("FileName" . ,(concat "[[" path file "]]")))))
-				((= level 4)
-				 `(list (("FileName" . ,(concat "[[" (file-list-make-file-name~ el) "]]")))))))
-	  (setq line (superman-format-thing file-path balls 'no-face))
-	  (insert line)
-	  ;; results of grep and ls 
-	  (while rest
-	    (let ((key (caar rest))
-		  (val (cdar rest)))
-	      (put-text-property 0 (length key) 'face 'font-lock-warning-face key)
-	      (setq appendix
-		    (concat appendix
-			    "\n"
-			    (let ((line
-				   (concat (format "%13s" (caar rest))
-					   " : " (cdar rest))))
-			      (put-text-property 0 (length line) 'appendix t line)
-			      line)))
-	      (setq rest (cdr rest))))
-	  ;; each beginning line has the filename saved as text-property
-	  (put-text-property (point-at-bol) (1+ (point-at-bol)) 'filename (file-list-make-file-name el))
-	  (put-text-property (point-at-bol) (1+ (point-at-bol)) 'superman-item-marker t)
-	  (when appendix
-	    (insert appendix))
-	  (insert "\n")))
-      ;; clear appendix button
-      (goto-char (next-single-property-change (point-min) 'point-file-list-start))
-      (if (next-single-property-change (point-min) 'appendix)
-	  (unless  (next-single-property-change (point-min) 'clear-appendix)
-	    (goto-char (point-at-eol))
-	    (insert " "(superman-make-button "Clear appendix" 
-					     '(:fun file-list-clear-display
-						    :face file-list-clear-button-face
-						    :props '(clear-appendix t)
-						    :help "Remove search results and file attributes from display.")))
-	    (put-text-property  (point-at-bol) (point-at-eol) 'point-file-list-start t))
-	(when (next-single-property-change (point-min) 'clear-appendix)	
-	  (delete-region (next-single-property-change (point-min) 'clear-appendix) (point-at-eol))
-	  (put-text-property  (point-at-bol) (point-at-eol) 'point-file-list-start t)))
-      (goto-char (1+ (or (previous-single-property-change (point-max) 'point-file-list-start) 0)))
-      (run-hooks 'superman-file-list-pre-display-hook))))
+      (if (eq list 'empty)
+	  (insert "\nNo files match")
+	(when (= level 0)
+	  (let ((maxfile (apply 'max (mapcar #'(lambda (x) (length (car x))) list))))
+	    (setcdr (assoc "width" (assoc "FileName" balls)) `(,maxfile))))
+	;; insert the file-list 
+	;; (when (= level 5)
+	;; (setq list (file-list-attributes list t)))
+	(dolist (el list)
+	  (let* ((file (car el))
+		 (path (cadr el))
+		 (rest (caddr el))
+		 file-path
+		 line
+		 appendix)
+	    (put-text-property 0 (length file) 'face 'superman-file-name-face file)
+	    (put-text-property 0 (length path) 'face 'superman-directory-name-face path)
+	    (setq file-path (cond ((= level 0)
+				   `(list (("FileName" . ,file) ("Path" . ,path))))
+				  ((= level 1)
+				   `(list (("FileName" . ,(concat path file)))))
+				  ((= level 2)
+				   `(list (("FileName" . ,(file-list-make-file-name~ el)))))
+				  ((= level 3)
+				   `(list (("FileName" . ,(concat "[[" path file "]]")))))
+				  ((= level 4)
+				   `(list (("FileName" . ,(concat "[[" (file-list-make-file-name~ el) "]]")))))))
+	    (setq line (superman-format-thing file-path balls 'no-face))
+	    (insert line)
+	    ;; results of grep and ls 
+	    (while rest
+	      (let ((key (caar rest))
+		    (val (cdar rest)))
+		(put-text-property 0 (length key) 'face 'font-lock-warning-face key)
+		(setq appendix
+		      (concat appendix
+			      "\n"
+			      (let ((line
+				     (concat (format "%13s" (caar rest))
+					     " : " (cdar rest))))
+				(put-text-property 0 (length line) 'appendix t line)
+				line)))
+		(setq rest (cdr rest))))
+	    ;; each beginning line has the filename saved as text-property
+	    (put-text-property (point-at-bol) (1+ (point-at-bol)) 'filename (file-list-make-file-name el))
+	    (put-text-property (point-at-bol) (1+ (point-at-bol)) 'superman-item-marker t)
+	    (when appendix
+	      (insert appendix))
+	    (insert "\n"))))
+	;; clear appendix button
+	(goto-char (next-single-property-change (point-min) 'point-file-list-start))
+	(if (next-single-property-change (point-min) 'appendix)
+	    (unless  (next-single-property-change (point-min) 'clear-appendix)
+	      (goto-char (point-at-eol))
+	      (insert " "(superman-make-button "Clear appendix" 
+					       '(:fun file-list-clear-display
+						      :face file-list-clear-button-face
+						      :props '(clear-appendix t)
+						      :help "Remove search results and file attributes from display.")))
+	      (put-text-property  (point-at-bol) (point-at-eol) 'point-file-list-start t))
+	  (when (next-single-property-change (point-min) 'clear-appendix)	
+	    (delete-region (next-single-property-change (point-min) 'clear-appendix) (point-at-eol))
+	    (put-text-property  (point-at-bol) (point-at-eol) 'point-file-list-start t)))
+	(goto-char (1+ (or (previous-single-property-change (point-max) 'point-file-list-start) 0)))
+	(run-hooks 'superman-file-list-pre-display-hook))))
 
 
 ;; tools

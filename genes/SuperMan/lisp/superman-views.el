@@ -726,7 +726,7 @@ Enabling superman-make mode enables the make keyboard to control single files."
 ;;}}}
 ;;{{{ unison
 
-(defvar superman-unison-mode-map (make-sparse-keymap)
+(defvar superman-unison-mode-map (copy-keymap superman-view-mode-map)
   "Keymap used for `superman-unison-mode' commands.")
    
 (define-minor-mode superman-unison-mode
@@ -744,6 +744,19 @@ Enabling superman-unison mode enables the unison keyboard to control single file
   (when superman-hl-line (hl-line-mode 1))
   (superman-unison-mode t))
 
+(defun superman-unison-edit-item ()
+  (interactive) 
+  (goto-char
+   (or (next-single-property-change (point) 'unison) 
+       (previous-single-property-change (point) 'unison)))
+  (superman-view-edit-item))
+
+(defun superman-unison-delete-item ()
+  (interactive) 
+  (goto-char (or (next-single-property-change (point) 'unison) 
+		 (previous-single-property-change (point) 'unison)))
+  (superman-view-delete-entry))
+
 (define-key superman-unison-mode-map "q" 'superman-view-back)
 
 (define-key superman-unison-mode-map "n" 
@@ -753,11 +766,8 @@ Enabling superman-unison mode enables the unison keyboard to control single file
   #'(lambda () (interactive)
       (ignore-errors (goto-char (previous-single-property-change (point-at-bol) 'unison)))
       (beginning-of-line)))
-(define-key superman-unison-mode-map "e" 
-  #'(lambda () (interactive) 
-      (goto-char (or (next-single-property-change (point) 'unison) 
-		     (previous-single-property-change (point) 'unison)))
-      (superman-view-edit-item)))
+(define-key superman-unison-mode-map "e" 'superman-unison-edit-item)
+(define-key superman-unison-mode-map "D" 'superman-unison-delete-item)
 (define-key superman-unison-mode-map "R" 'superman-redo)
 (define-key superman-unison-mode-map [(return)] 
   #'(lambda () (interactive) (superman-choose-entry)))
@@ -809,7 +819,7 @@ Enabling superman-unison mode enables the unison keyboard to control single file
       (org-mode)
       (font-lock-mode -1)
       ;; minor-mode
-      (superman-view-mode)
+      ;; (superman-view-mode)
       (superman-unison-mode)
       (insert (superman-make-button
 	       "Superman unison"
@@ -2696,7 +2706,8 @@ The value is non-nil unless the user regretted and the entry is not deleted.
 	 (message "cannot (not yet) delete sub-section in this way"))
 	;; inside header
 	((not (previous-single-property-change (point-at-bol) 'cat))
-	 (if (get-text-property (point-at-bol) 'superman-e-marker)
+	 (if (or (get-text-property (point-at-bol) 'org-hd-marker)
+		 (get-text-property (point-at-bol) 'superman-e-marker))
 	     (superman-view-edit-item)))
 	;; inside column names
 	((get-text-property (point-at-bol) 'column-names)
@@ -3192,12 +3203,12 @@ for git and other actions like commit, history search and pretty log-view."
 (define-key superman-view-mode-map "X" 'superman-view-delete-marked)
 (define-key superman-view-mode-map "N" 'superman-new-item)
 ;; (define-key superman-view-mode-map "N" 'superman-capture-thing)
-(define-key superman-view-mode-map "Q" 'superman-unison)
+;; (define-key superman-view-mode-map "Q" 'superman-unison)
 (define-key superman-view-mode-map "R" 'superman-redo)
 (define-key superman-view-mode-map "S" 'superman-sort-section)
 (define-key superman-view-mode-map "V" 'superman-change-view)
 (define-key superman-view-mode-map "!" 'superman-goto-shell)
-(define-key superman-view-mode-map "?" 'supermanual)
+(define-key superman-view-mode-map "?" 'superman-view-help)
 
 (define-key superman-view-mode-map "Bn" 'superman-new-ball)
 (define-key superman-view-mode-map "Bx" 'superman-delete-ball)

@@ -782,22 +782,31 @@ See also `file-list-add'.
      sub-file-list (plist-get filter-result :yin)
      filter-list (add-to-list 'filter-list (plist-get filter-result :yang)))
     (unless dont-display
-      (let ((sorted (get-text-property (point-min) 'sort-key)))
-	(when sorted
-	  (setq sub-file-list
-		(file-list-sort-internal
-		 sub-file-list
-		 (nth 0 sorted)
-		 (nth 1 sorted)
-		 'dont)))
-	(superman-display-file-list
-	 dir
-	 sub-file-list
-	 filter-list
-	 sorted
-	 nil
-	 display-buffer
-	 t)))
+      (if (not sub-file-list)
+	  (superman-display-file-list
+	   dir
+	   'empty
+	   filter-list
+	   nil
+	   nil
+	   display-buffer
+	   t)
+	(let ((sorted (get-text-property (point-min) 'sort-key)))
+	  (when sorted
+	    (setq sub-file-list
+		  (file-list-sort-internal
+		   sub-file-list
+		   (nth 0 sorted)
+		   (nth 1 sorted)
+		   'dont)))
+	  (superman-display-file-list
+	   dir
+	   sub-file-list
+	   filter-list
+	   sorted
+	   nil
+	   display-buffer
+	   t))))
     sub-file-list))
 
 (defun file-list-filter ()
@@ -1305,11 +1314,14 @@ Switches to the corresponding directory of each file."
 (defun file-list-move (&optional ask file-list target copy)
   (interactive "P")
   (let* ((file-list-intern (or file-list file-list-current-file-list))
+	 (nfiles (length file-list-intern))
 	 (target (or target
 		     (expand-file-name
 		      (file-name-as-directory
 		       (read-directory-name
-			"Copy all files to directory: "
+			(if (eq 1 nfiles)
+			    "Copy this file to directory: "
+			  (concat "Copy " (int-to-string nfiles) " files to directory: "))
 			nil nil nil)))))
 	 (use-path (if ask (yes-or-no-p "Use path as part of file-name? "))))
     (cond ((file-directory-p target) nil)
