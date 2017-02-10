@@ -1,6 +1,6 @@
 ;;; superman-git.el --- Summary of project contents and adding information to projects
 
-;; Copyright (C) 2012-2016  Klaus Kähler Holst, Thomas Alexander Gerds
+;; Copyright (C) 2012-2017  Klaus Kähler Holst, Thomas Alexander Gerds
 
 ;; Authors: Klaus Kähler Holst <kkho@biostat.ku.dk>
 ;;          Thomas Alexander Gerds <tag@biostat.ku.dk>
@@ -751,45 +751,45 @@ see M-x manual-entry RET git-diff RET.")
     ("tracked"
      "ls-files --full-name"
      (("filename" ("width" 14) ("fun" superman-make-git-keyboard) ("name" "git-keyboard") ("face" "no-face"))
-      (hdr ("width" 34) ("face" font-lock-function-name-face) ("name" "Filename"))
       ("Directory" ("width" 25) ("face" superman-subheader-face))
-      ("GitStatus" ("width" 20) ("face" superman-get-git-status-face)))
+      ("GitStatus" ("width" 20) ("face" superman-get-git-status-face))
+      (hdr ("fun" superman-dont-trim) ("face" font-lock-function-name-face) ("name" "Filename")))
      superman-git-files-pre-display-hook)
     ;; ("submodule"
-     ;; "submodule"
-     ;; (("filename" ("width" 14) ("fun" superman-make-git-keyboard) ("name" "git-keyboard") ("face" "no-face"))
-      ;; (hdr ("width" 34) ("face" font-lock-function-name-face) ("name" "Filename"))
-      ;; ("Directory" ("width" 25) ("face" superman-subheader-face))
-      ;; ("GitStatus" ("width" 20) ("face" superman-get-git-status-face)))
-     ;; superman-git-submodule-pre-display-hook)
+    ;; "submodule"
+    ;; (("filename" ("width" 14) ("fun" superman-make-git-keyboard) ("name" "git-keyboard") ("face" "no-face"))
+    ;; (hdr ("width" 34) ("face" font-lock-function-name-face) ("name" "Filename"))
+    ;; ("Directory" ("width" 25) ("face" superman-subheader-face))
+    ;; ("GitStatus" ("width" 20) ("face" superman-get-git-status-face)))
+    ;; superman-git-submodule-pre-display-hook)
     ("untracked"
      (concat "ls-files --full-name " (unless superman-git-show-ignored "--exclude-standard") " --others")
      (("filename" ("width" 14) ("fun" superman-make-git-keyboard) ("name" "git-keyboard") ("face" "no-face"))
-      (hdr ("width" 44) ("face" font-lock-function-name-face) ("name" "Filename"))
       ("Directory" ("width" 25) ("face" superman-subheader-face))
-      ("GitStatus" ("width" 20) ("face" superman-get-git-status-face)))
+      ("GitStatus" ("width" 20) ("face" superman-get-git-status-face))
+      (hdr  ("fun" superman-dont-trim) ("face" font-lock-function-name-face) ("name" "Filename")))
      superman-git-untracked-pre-display-hook
      superman-git-untracked-post-display-hook)
     ("modified"
      "ls-files --full-name -m"
      (("filename" ("width" 14) ("fun" superman-make-git-keyboard) ("name" "git-keyboard") ("face" "no-face"))
-      (hdr ("width" 34) ("face" font-lock-function-name-face) ("name" "Filename"))
       ("Directory" ("width" 25) ("face" superman-subheader-face))
-      ("GitStatus" ("width" 20) ("face" superman-get-git-status-face)))
+      ("GitStatus" ("width" 20) ("face" superman-get-git-status-face))
+      (hdr  ("fun" superman-dont-trim) ("face" font-lock-function-name-face) ("name" "Filename")))
      superman-git-files-pre-display-hook)
     ("diff"
      "diff --name-status"
      (("filename" ("width" 14) ("fun" superman-make-git-keyboard) ("name" "git-keyboard") ("face" "no-face"))
       ("GitStatus" ("width" 20) ("face" superman-get-git-status-face))
-      (hdr ("width" 34) ("face" font-lock-function-name-face) ("name" "Filename"))
-      ("Directory" ("width" 25) ("face" superman-subheader-face)))
+      ("Directory" ("width" 25) ("face" superman-subheader-face))
+      (hdr  ("fun" superman-dont-trim) ("face" font-lock-function-name-face) ("name" "Filename")))
      superman-git-diff-pre-display-hook)
     ("stash"
      "stash show --name-status"
      (("filename" ("width" 14) ("fun" superman-make-git-keyboard) ("name" "git-keyboard") ("face" "no-face"))
       ("GitStatus" ("width" 20) ("face" superman-get-git-status-face))
-      (hdr ("width" 34) ("face" font-lock-function-name-face) ("name" "Filename"))
-      ("Directory" ("width" 25) ("face" superman-subheader-face)))
+      ("Directory" ("width" 25) ("face" superman-subheader-face))
+      (hdr  ("fun" superman-dont-trim) ("face" font-lock-function-name-face) ("name" "Filename")))
      superman-git-diff-pre-display-hook))
   "List of git-views. Each entry has 5 elements: (key git-switches balls pre-hook post-hook):
 

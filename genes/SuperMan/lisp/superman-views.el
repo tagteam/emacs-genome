@@ -724,7 +724,142 @@ Enabling superman-make mode enables the make keyboard to control single files."
 		  (cons x targets))) mfiles))))
 
 ;;}}}
+;;{{{ view mode map
+
+(defvar superman-view-mode-map (make-sparse-keymap)
+  "Keymap used for `superman-view-mode' commands.")
+   
+(define-minor-mode superman-view-mode
+     "Toggle superman project view mode.
+With argument ARG turn superman-view-mode on if ARG is positive, otherwise
+turn it off.
+                   
+Enabling superman-view mode electrifies the column view for documents
+for git and other actions like commit, history search and pretty log-view."
+     :lighter " *S*-View"
+     :group 'org
+     :keymap 'superman-view-mode-map)
+
+(defun superman-view-mode-on ()
+  (interactive)
+  (when superman-hl-line (hl-line-mode 1))
+  (superman-view-mode t))
+
+
+(defun superman-view-second-link ()
+  (interactive)
+  (let* ((m (org-get-at-bol 'org-hd-marker))
+	 (b (superman-current-cat))
+	 f)
+    (if (not m)
+	(error "Nothing to do here")
+      (org-with-point-at m
+	(cond (superman-mode
+	       (superman-return))
+	      ((re-search-forward org-any-link-re nil t)
+	       (re-search-forward org-any-link-re nil t)
+	       (superman-open-at-point))
+	      (t
+	       (widen)
+	       (show-all)
+	       (org-narrow-to-subtree)
+	       (switch-to-buffer (marker-buffer m))))))))
+	      ;; ((superman-view-index)
+	       ;; (org-narrow-to-subtree)))))))
+
+
+(define-key superman-view-mode-map [return] 'superman-hot-return)
+(define-key superman-view-mode-map [(meta left)] 'superman-one-left)
+(define-key superman-view-mode-map [(meta right)] 'superman-one-right)
+(define-key superman-view-mode-map [(meta up)] 'superman-one-up)
+(define-key superman-view-mode-map [(meta down)] 'superman-one-down)
+(define-key superman-view-mode-map [(meta return)] 'superman-view-second-link)
+
+(define-key superman-view-mode-map [(right)] 'superman-next-ball)
+(define-key superman-view-mode-map [(left)] 'superman-previous-ball)
+(define-key superman-view-mode-map [(control down)] 'superman-next-cat)
+(define-key superman-view-mode-map [(control up)] 'superman-previous-cat)
+(define-key superman-view-mode-map [(control n)] 'superman-next-cat)
+(define-key superman-view-mode-map [(control p)] 'superman-previous-cat)
+(define-key superman-view-mode-map "n" 'superman-next-entry)
+(define-key superman-view-mode-map "p" 'superman-previous-entry)
+
+(define-key superman-view-mode-map [(tab)] 'superman-tab)
+(define-key superman-view-mode-map [(shift tab)] 'superman-shifttab)
+(define-key superman-view-mode-map [S-iso-lefttab] 'superman-shifttab)
+(define-key superman-view-mode-map [(up)] 'superman-previous-entry)
+(define-key superman-view-mode-map [(down)] 'superman-next-entry)
+(define-key superman-view-mode-map [(shift up)] 'superman-view-priority-up)
+(define-key superman-view-mode-map [(shift down)] 'superman-view-priority-down)
+(define-key superman-view-mode-map "i" 'superman-view-index)
+(define-key superman-view-mode-map "I" 'superman-view-invert-marks)
+(define-key superman-view-mode-map "e" 'superman-view-edit-item)
+(define-key superman-view-mode-map "D" 'superman-view-dired)
+(define-key superman-view-mode-map "/" 'superman-view-filter)
+(define-key superman-view-mode-map "f" 'superman-view-file-list)
+(define-key superman-view-mode-map "m" 'superman-toggle-mark)
+(define-key superman-view-mode-map "M" 'superman-view-mark-all)
+(define-key superman-view-mode-map "r" 'superman-view-redo-line)
+(define-key superman-view-mode-map "q" 'superman-view-quit-help)
+(define-key superman-view-mode-map "Q" 'superman-view-quit-project)
+(define-key superman-view-mode-map "h" 'superman-view-help)
+(define-key superman-view-mode-map "\C-m" 'superman-view-show-make)
+(define-key superman-view-mode-map "c" 'superman-view-show-configurations)
+(define-key superman-view-mode-map "u" 'superman-view-show-unison)
+(define-key superman-view-mode-map "H" 'superman-ual)
+(define-key superman-view-mode-map "t" 'superman-view-toggle-todo)
+(define-key superman-view-mode-map "x" 'superman-view-delete-entry)
+(define-key superman-view-mode-map "-" 'superman-view-delete-entry)
+(define-key superman-view-mode-map "+" 'superman-capture-item)
+(define-key superman-view-mode-map "X" 'superman-view-delete-marked)
+(define-key superman-view-mode-map "N" 'superman-new-item)
+;; (define-key superman-view-mode-map "N" 'superman-capture-thing)
+;; (define-key superman-view-mode-map "Q" 'superman-unison)
+(define-key superman-view-mode-map "R" 'superman-redo)
+(define-key superman-view-mode-map "S" 'superman-sort-section)
+(define-key superman-view-mode-map "V" 'superman-change-view)
+(define-key superman-view-mode-map "!" 'superman-goto-shell)
+(define-key superman-view-mode-map "?" 'superman-view-help)
+
+(define-key superman-view-mode-map "Bn" 'superman-new-ball)
+(define-key superman-view-mode-map "Bx" 'superman-delete-ball)
+(define-key superman-view-mode-map "Bs" 'superman-Capture)
+
+;; view context
+(define-key superman-view-mode-map "V" 'superman-toggle-context-view)
+(define-key superman-view-mode-map "v" 'superman-view-item)
+
+;; yank-capture
+(define-key superman-view-mode-map "Y" 'superman-yank)
+;; (define-key superman-view-mode-map [(mouse-2)] 'superman-mouse-yank)
+(define-key superman-view-mode-map "\M-y" 'superman-yank)
+(define-key superman-view-mode-map "\C-y" 'superman-yank)
+
+;; Git control
+(define-key superman-view-mode-map "g" 'superman-git-display)
+(define-key superman-view-mode-map "G " 'superman-git-last-log-file)
+(define-key superman-view-mode-map "Ga" 'superman-git-annotate)
+(define-key superman-view-mode-map "Gx" 'superman-git-delete-file)
+(define-key superman-view-mode-map "Gc" 'superman-git-commit-file)
+(define-key superman-view-mode-map "GC" 'superman-git-commit-marked)
+(define-key superman-view-mode-map "Gd" 'superman-git-diff-file)
+(define-key superman-view-mode-map "Gg" 'superman-git-grep)
+(define-key superman-view-mode-map "Gh" 'superman-git-history)
+(define-key superman-view-mode-map "GI" 'superman-git-init)
+(define-key superman-view-mode-map "Gl" 'superman-git-log-file)
+(define-key superman-view-mode-map "GL" 'superman-git-log-decoration-only-file)
+(define-key superman-view-mode-map "GP" 'superman-git-push)
+(define-key superman-view-mode-map "Gs" 'superman-git-status)
+(define-key superman-view-mode-map "GS" 'superman-git-search-log-of-file)
+(define-key superman-view-mode-map "GBs" 'superman-git-checkout-branch)
+(define-key superman-view-mode-map "GBn" 'superman-git-new-branch)
+;; (define-key superman-view-mode-map "G=" 'superman-git-difftool-file)
+
+;;}}}
+
+
 ;;{{{ unison
+
 
 (defvar superman-unison-mode-map (copy-keymap superman-view-mode-map)
   "Keymap used for `superman-unison-mode' commands.")
@@ -865,7 +1000,7 @@ Enabling superman-unison mode enables the unison keyboard to control single file
 					   (if (string= tmp-cmd "superman-unison-cmd")
 					       (eval (intern tmp-cmd)) tmp-cmd)))))
 				  ((boundp 'superman-unison-cmd) (eval superman-unison-cmd))
-				  (t "unison-gtk"))
+				  (t "unison"))
 			    " "
 			    (if (string-match org-bracket-link-regexp r1)
 				(org-match-string-no-properties 1 r1)
@@ -3113,139 +3248,8 @@ if it exists and add text-property org-hd-marker."
 			 (org-get-at-bol 'org-hd-marker) filename)
       filename)))
 ;;}}}
+
 ;;{{{ View-mode and hot-keys
-
-(defvar superman-view-mode-map (make-sparse-keymap)
-  "Keymap used for `superman-view-mode' commands.")
-   
-(define-minor-mode superman-view-mode
-     "Toggle superman project view mode.
-With argument ARG turn superman-view-mode on if ARG is positive, otherwise
-turn it off.
-                   
-Enabling superman-view mode electrifies the column view for documents
-for git and other actions like commit, history search and pretty log-view."
-     :lighter " *S*-View"
-     :group 'org
-     :keymap 'superman-view-mode-map)
-
-(defun superman-view-mode-on ()
-  (interactive)
-  (when superman-hl-line (hl-line-mode 1))
-  (superman-view-mode t))
-
-
-(defun superman-view-second-link ()
-  (interactive)
-  (let* ((m (org-get-at-bol 'org-hd-marker))
-	 (b (superman-current-cat))
-	 f)
-    (if (not m)
-	(error "Nothing to do here")
-      (org-with-point-at m
-	(cond (superman-mode
-	       (superman-return))
-	      ((re-search-forward org-any-link-re nil t)
-	       (re-search-forward org-any-link-re nil t)
-	       (superman-open-at-point))
-	      (t
-	       (widen)
-	       (show-all)
-	       (org-narrow-to-subtree)
-	       (switch-to-buffer (marker-buffer m))))))))
-	      ;; ((superman-view-index)
-	       ;; (org-narrow-to-subtree)))))))
-
-
-(define-key superman-view-mode-map [return] 'superman-hot-return)
-(define-key superman-view-mode-map [(meta left)] 'superman-one-left)
-(define-key superman-view-mode-map [(meta right)] 'superman-one-right)
-(define-key superman-view-mode-map [(meta up)] 'superman-one-up)
-(define-key superman-view-mode-map [(meta down)] 'superman-one-down)
-(define-key superman-view-mode-map [(meta return)] 'superman-view-second-link)
-
-(define-key superman-view-mode-map [(right)] 'superman-next-ball)
-(define-key superman-view-mode-map [(left)] 'superman-previous-ball)
-(define-key superman-view-mode-map [(control down)] 'superman-next-cat)
-(define-key superman-view-mode-map [(control up)] 'superman-previous-cat)
-(define-key superman-view-mode-map [(control n)] 'superman-next-cat)
-(define-key superman-view-mode-map [(control p)] 'superman-previous-cat)
-(define-key superman-view-mode-map "n" 'superman-next-entry)
-(define-key superman-view-mode-map "p" 'superman-previous-entry)
-
-(define-key superman-view-mode-map [(tab)] 'superman-tab)
-(define-key superman-view-mode-map [(shift tab)] 'superman-shifttab)
-(define-key superman-view-mode-map [S-iso-lefttab] 'superman-shifttab)
-(define-key superman-view-mode-map [(up)] 'superman-previous-entry)
-(define-key superman-view-mode-map [(down)] 'superman-next-entry)
-(define-key superman-view-mode-map [(shift up)] 'superman-view-priority-up)
-(define-key superman-view-mode-map [(shift down)] 'superman-view-priority-down)
-(define-key superman-view-mode-map "i" 'superman-view-index)
-(define-key superman-view-mode-map "I" 'superman-view-invert-marks)
-(define-key superman-view-mode-map "e" 'superman-view-edit-item)
-(define-key superman-view-mode-map "D" 'superman-view-dired)
-(define-key superman-view-mode-map "/" 'superman-view-filter)
-(define-key superman-view-mode-map "f" 'superman-view-file-list)
-(define-key superman-view-mode-map "m" 'superman-toggle-mark)
-(define-key superman-view-mode-map "M" 'superman-view-mark-all)
-(define-key superman-view-mode-map "r" 'superman-view-redo-line)
-(define-key superman-view-mode-map "q" 'superman-view-quit-help)
-(define-key superman-view-mode-map "Q" 'superman-view-quit-project)
-(define-key superman-view-mode-map "h" 'superman-view-help)
-(define-key superman-view-mode-map "\C-m" 'superman-view-show-make)
-(define-key superman-view-mode-map "c" 'superman-view-show-configurations)
-(define-key superman-view-mode-map "u" 'superman-view-show-unison)
-(define-key superman-view-mode-map "H" 'superman-ual)
-(define-key superman-view-mode-map "t" 'superman-view-toggle-todo)
-(define-key superman-view-mode-map "x" 'superman-view-delete-entry)
-(define-key superman-view-mode-map "-" 'superman-view-delete-entry)
-(define-key superman-view-mode-map "+" 'superman-capture-item)
-(define-key superman-view-mode-map "X" 'superman-view-delete-marked)
-(define-key superman-view-mode-map "N" 'superman-new-item)
-;; (define-key superman-view-mode-map "N" 'superman-capture-thing)
-;; (define-key superman-view-mode-map "Q" 'superman-unison)
-(define-key superman-view-mode-map "R" 'superman-redo)
-(define-key superman-view-mode-map "S" 'superman-sort-section)
-(define-key superman-view-mode-map "V" 'superman-change-view)
-(define-key superman-view-mode-map "!" 'superman-goto-shell)
-(define-key superman-view-mode-map "?" 'superman-view-help)
-
-(define-key superman-view-mode-map "Bn" 'superman-new-ball)
-(define-key superman-view-mode-map "Bx" 'superman-delete-ball)
-(define-key superman-view-mode-map "Bs" 'superman-Capture)
-
-;; view context
-(define-key superman-view-mode-map "V" 'superman-toggle-context-view)
-(define-key superman-view-mode-map "v" 'superman-view-item)
-
-;; yank-capture
-(define-key superman-view-mode-map "Y" 'superman-yank)
-;; (define-key superman-view-mode-map [(mouse-2)] 'superman-mouse-yank)
-(define-key superman-view-mode-map "\M-y" 'superman-yank)
-(define-key superman-view-mode-map "\C-y" 'superman-yank)
-
-;; Git control
-(define-key superman-view-mode-map "g" 'superman-git-display)
-(define-key superman-view-mode-map "G " 'superman-git-last-log-file)
-(define-key superman-view-mode-map "Ga" 'superman-git-annotate)
-(define-key superman-view-mode-map "Gx" 'superman-git-delete-file)
-(define-key superman-view-mode-map "Gc" 'superman-git-commit-file)
-(define-key superman-view-mode-map "GC" 'superman-git-commit-marked)
-(define-key superman-view-mode-map "Gd" 'superman-git-diff-file)
-(define-key superman-view-mode-map "Gg" 'superman-git-grep)
-(define-key superman-view-mode-map "Gh" 'superman-git-history)
-(define-key superman-view-mode-map "GI" 'superman-git-init)
-(define-key superman-view-mode-map "Gl" 'superman-git-log-file)
-(define-key superman-view-mode-map "GL" 'superman-git-log-decoration-only-file)
-(define-key superman-view-mode-map "GP" 'superman-git-push)
-(define-key superman-view-mode-map "Gs" 'superman-git-status)
-(define-key superman-view-mode-map "GS" 'superman-git-search-log-of-file)
-(define-key superman-view-mode-map "GBs" 'superman-git-checkout-branch)
-(define-key superman-view-mode-map "GBn" 'superman-git-new-branch)
-;; (define-key superman-view-mode-map "G=" 'superman-git-difftool-file)
-
-
-
 
 (defvar superman-capture-alist nil
   "List to find capture function. Elements have the form
