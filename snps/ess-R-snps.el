@@ -1,6 +1,6 @@
 ;;; ess-R-snps.el --- ess setup file for statistical software R
 
-;; Copyright (C) 2012  Thomas Alexander Gerds
+;; Copyright (C) 2012-2017  Thomas Alexander Gerds
 
 ;; Author: Thomas Alexander Gerds <tag@biostat.ku.dk>
 ;; Keywords: convenience, tools
@@ -278,5 +278,16 @@ See `ess-switch-to-ESS' and `ess-show-buffer' for buffer behaviour.
 	(switch-to-buffer rmd-buf)
 	(ess-show-buffer (buffer-name sbuffer) nil)))))
 ;;}}}
+
+;; (defun insert-c-calls-package ()
+;; (let* ((dir (read-directory-name "Path to R-package: "))
+;; (c-files (directory-files (concat dir "/src/" )
+;; ".c$"))
+;; (current-buffer (current-buffer)))
+;; (while c-files
+;; (find-file (car c-files))
+;; (setq c-files (cdr c-files)))))
+
+  
 (provide 'ess-R-snps)
 ;;; ess-R-snps.el ends here
