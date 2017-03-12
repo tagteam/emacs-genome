@@ -56,8 +56,9 @@
 user-full-name
 "}
 # #+LaTeX_HEADER:\\affil{Department of Biostatistics, University of Copenhagen, Copenhagen, Denmark}
-#+PROPERTY: header-args session *R*
-#+PROPERTY: header-args cache yes")))
+#+PROPERTY: header-args :session *R*
+#+PROPERTY: header-args :tange yes
+#+PROPERTY: header-args :cache yes")))
 
 (add-to-list
  'org-structure-template-alist
@@ -86,8 +87,9 @@ user-full-name
 #+LATEX_HEADER: \\RequirePackage{array}
 #+LATEX_HEADER: \\RequirePackage{multirow}
 #+LATEX_HEADER: \\DefineVerbatimEnvironment{verbatim}{Verbatim}{fontsize=\\small,formatcom = {\\color[rgb]{0.5,0,0}}}
-#+PROPERTY: header-args session *R*
-#+PROPERTY: header-args cache yes")))
+#+PROPERTY: header-args :session *R*
+#+PROPERTY: header-args :tangle yes
+#+PROPERTY: header-args :cache yes")))
 
 
 ;; Shrinking a slide
@@ -158,19 +160,19 @@ user-full-name
  '("Rr" "#+BEGIN_SRC R  :results output raw drawer  :exports results  :session *R* :cache yes \n?\n#+END_SRC"))
 (add-to-list
  'org-structure-template-alist
- '("Rg"  "#+BEGIN_SRC R :results graphics :file %file :exports results :session *R* :cache yes \n?\n#+END_SRC\n\n#+LABEL: fig:1\n#+ATTR_LATEX: :width 0.7\\textwidth\n#+CAPTION:\n"))
+ '("Rg"  "#+BEGIN_SRC R :results graphics :file %file :exports results :session *R* :cache yes \n?\n#+END_SRC\n\n#+name: fig:1\n#+ATTR_LATEX: :width 0.7\\textwidth\n#+CAPTION:\n"))
 
 (add-to-list
  'org-structure-template-alist
- '("g" "\n\n#+LABEL: fig:1\n#+ATTR_LATEX: :width 0.7\\textwidth\n#+CAPTION:\n"))
+ '("g" "\n\n#+name: fig:1\n#+ATTR_LATEX: :width 0.7\\textwidth\n#+CAPTION:\n"))
 
 (add-to-list
  'org-structure-template-alist
- '("Lg" "\n\n#+LABEL: fig:1\n#+ATTR_LATEX: :width 0.7\\textwidth\n#+CAPTION:\n"))
+ '("Lg" "\n\n#+name: fig:1\n#+ATTR_LATEX: :width 0.7\\textwidth\n#+CAPTION:\n"))
 
 (add-to-list
  'org-structure-template-alist
- '("Bg" "\n\n#+LABEL: fig:1\n#+ATTR_LATEX: :width 0.7\\textwidth\n#+CAPTION:\n"))
+ '("Bg" "\n\n#+name: fig:1\n#+ATTR_LATEX: :width 0.7\\textwidth\n#+CAPTION:\n"))
 
 (add-to-list
  'org-structure-template-alist
@@ -186,7 +188,7 @@ user-full-name
 ;;{{{ graphics
 (add-to-list
  'org-structure-template-alist
- '("Lw" "#+LABEL: fig:1\n#+ATTR_LATEX: :width 0.7\\textwidth\n#+CAPTION:\n#+results: fig1"))
+ '("Lw" "#+name: fig:1\n#+ATTR_LATEX: :width 0.7\\textwidth\n#+CAPTION:\n#+results: fig1"))
 
 (add-to-list
  'org-structure-template-alist
