@@ -1,6 +1,6 @@
 ;;; org-snps.el --- 
 
-;; Copyright (C) 2012-2015  Thomas Alexander Gerds
+;; Copyright (C) 2012-2017  Thomas Alexander Gerds
 
 ;; Author: Thomas Alexander Gerds <tag@linuxifsv007>
 ;; Keywords: convenience
@@ -46,7 +46,27 @@
 ;; if export actions *never* evaluate code:
 (setq org-export-babel-evaluate t)
 (add-to-list 'org-babel-default-header-args '(:eval . "never-export"))
+(add-to-list 'org-babel-default-header-args '(:tangle . "yes"))
+(add-to-list 'org-babel-tangle-lang-exts '("R" . "R"))
+;; org-src-lang-modes
+
 ;;}}}
+
+(defun ox-export-to-docx-and-open ()
+ "Export the current org file as a docx via markdown."
+ (interactive)
+ (let* ((bibfile (expand-file-name (car (org-ref-find-bibliography))))
+        ;; this is probably a full path
+        (current-file (buffer-file-name))
+        (basename (file-name-sans-extension current-file))
+        (docx-file (concat basename ".docx")))
+   (save-buffer)
+   (when (file-exists-p docx-file) (delete-file docx-file))
+   (shell-command (format
+                   "pandoc -s -S --bibliography=%s %s -o %s"
+                   bibfile current-file docx-file))
+   (org-open-file docx-file '(16))))
+
 ;;{{{ babel 
 (defun eg/indent-elisp-org-buffer ()
   (interactive)
@@ -198,7 +218,7 @@
 	;; ("basewidth" "{0.5em,0.4em}")))
 
 ;; [NO-DEFAULT-PACKAGES]
- (setq org-latex-classes nil)
+ ;; (setq org-latex-classes nil)
 (add-to-list 'org-latex-classes
 	     `("org-article"
 	       ,(concat "\\documentclass{article}
@@ -332,7 +352,7 @@
                ("\\paragraph{%s}" . "\\paragraph*{%s}")
                ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
 
-;; (setq org-latex-classes nil)
+(setq org-latex-classes nil)
 (add-to-list 'org-latex-classes
              `("monograph"
 	       ,(concat
@@ -345,7 +365,6 @@
 		 "\n\\usepackage{hyperref}"
 		 "\n\\usepackage{grffile}"
 		 "\n\\usepackage{color}"
-		 "\n\\usepackage{biblatex}"
 		 "\n\\renewcommand*\\familydefault{\\sfdefault}"
 		 "\n[NO-DEFAULT-PACKAGES]"
 		 "\n[NO-PACKAGES]"
