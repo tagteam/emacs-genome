@@ -1,6 +1,6 @@
 ;;; emacs-genome.el --- loading snps and genes from the emacs-genome
 
-;; Copyright (C) 2014 -- 2016  Thomas Alexander Gerds
+;; Copyright (C) 2014 -- 2017  Thomas Alexander Gerds
 
 ;; Author: Thomas Alexander Gerds <tag@biostat.ku.dk>
 ;; Keywords: convenience
@@ -88,8 +88,6 @@
 ;; org-ref
 (use-package org-ref :ensure t)
 
-
-
 (use-package org-ref-snps)
 
 (use-package company
@@ -110,9 +108,9 @@
   ;; :pin gnu
   ;; :ensure t)
 ;; folding
-(require 'fold-dwim nil t)
-(use-package folding-snps
-  :commands insert-folds folding-mode)
+(use-package folding)
+(use-package fold-dwim)
+(use-package folding-snps)
 ;; (use-package folding
 ;; :if (require 'fold-dwim nil t)
 ;; :init (require 'folding-snps nil t)
@@ -129,9 +127,6 @@
 (use-package auto-complete
   :ensure t)
 
-(use-package company
-  :ensure t)
-
 (use-package popup-complete
   :ensure t)
 
@@ -146,7 +141,7 @@
 
 ;; header buttons
 (use-package header-button)
-  ;; emacs-epackage--lib-header-button
+;; emacs-epackage--lib-header-button
 ;; iedit
 (use-package iedit
   :ensure t
@@ -186,14 +181,14 @@
 (use-package browse-url-snps
   :commands (browse-url google-search-prompt))
 ;; recent files
-(recentf-mode 1)
 (use-package recentf
   :commands recentf-open-files)
+(recentf-mode 1)
 ;; sos
 ;; (use-package sos  :commands sos)
 ;; deft
 (use-package deft
-    :ensure t)
+  :ensure t)
 
 ;; anything/helm
 (use-package helm
