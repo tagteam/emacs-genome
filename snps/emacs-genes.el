@@ -20,9 +20,9 @@
 ;;----------------------------------------------------------------------
 ;; created: Apr 12 2015 (09:51) 
 ;; Version: 
-;; last-updated: Nov 14 2016 (17:22) 
+;; last-updated: Feb 27 2017 (16:21) 
 ;;           By: Thomas Alexander Gerds
-;;     Update #: 66
+;;     Update #: 67
 ;;----------------------------------------------------------------------
 ;; 
 ;;; Commentary: Show important features {genes}. 
@@ -43,7 +43,7 @@
 		   ;; :test (:var emacs-genome)
 		   ;; :fun (lambda (&optional arg) (interactive) (superman-view-directory emacs-genome)))
 		   ("Recent files" :fun eg/recent-files)
-		   ("Projects" :fun S)
+		   ("Projects" :fun superman)
 		   ("Calendar" :fun superman-calendar)
 		   ("Todo-list" :fun superman-todo)
 		   ("Cheat sheet" :fun eg-cheat-sheet)
