@@ -352,7 +352,6 @@
                ("\\paragraph{%s}" . "\\paragraph*{%s}")
                ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
 
-(setq org-latex-classes nil)
 (add-to-list 'org-latex-classes
              `("monograph"
 	       ,(concat
