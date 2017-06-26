@@ -23,17 +23,15 @@
 ;;; Code:
 
 ;;{{{ loading org features
-(use-package org)
-(use-package org-capture)
-(use-package org-agenda)
-(use-package ox-bibtex)
-(use-package org-clock)
-;; (use-package ob-R)
-(use-package ox-latex)
-(use-package ox-beamer)
-(condition-case nil 
-    (use-package ox-odt)
-  (error nil))
+(require 'org nil t)
+(require 'org-capture nil t)
+(require 'org-agenda nil t)
+(require 'ox-bibtex nil t)
+(require 'org-clock nil t)
+;; (require 'ob-R)
+(require 'ox-latex nil t)
+(require 'ox-beamer nil t)
+(require 'ox-odt nil t)
 ;;}}}
 ;;{{{ global keys
 (global-set-key "\C-cl" 'org-store-link)
@@ -45,13 +43,16 @@
 ;; it is most transparent and convenient 
 ;; if export actions *never* evaluate code:
 (setq org-export-babel-evaluate t)
-(add-to-list 'org-babel-default-header-args '(:eval . "never-export"))
-(add-to-list 'org-babel-default-header-args '(:tangle . "yes"))
-(add-to-list 'org-babel-tangle-lang-exts '("R" . "R"))
+;; (setq org-babel-default-header-args '((:tangle . "yes") (:eval . "never-export") (:session . "none") (:results . "replace") (:exports . "code") (:cache . "no") (:noweb . "no") (:hlines . "no")))
+(add-to-list 'org-babel-default-header-args '(:eval . "never-export") 'append)
+(add-to-list 'org-babel-default-header-args '(:tangle . "yes") 'append)
+(add-to-list 'org-babel-tangle-lang-exts '("R" . "R") 'append)
 ;; org-src-lang-modes
 
 ;;}}}
-
+;;{{{ disable hypersetup
+(setq org-latex-with-hyperref nil)
+;;}}}
 (defun ox-export-to-docx-and-open ()
  "Export the current org file as a docx via markdown."
  (interactive)
@@ -241,6 +242,21 @@
                [EXTRA]"
 			eg/org-latex-common-header-string
 			"\\renewcommand*\\familydefault{\\sfdefault}\n\\itemsep2pt")
+	       ("\\section{%s}" . "\\section*{%s}")
+	       ("\\subsection{%s}" . "\\subsection*{%s}")
+	       ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+	       ("\\paragraph{%s}" . "\\paragraph*{%s}")
+	       ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
+
+
+(add-to-list 'org-latex-classes
+	     `("biostatistics"
+	       ,(concat "\\documentclass[oupdraft]{bio}
+                %% \\documentclass[oupdraft]{bio}
+	       [NO-PACKAGES]
+               [NO-DEFAULT-PACKAGES]
+               [EXTRA]"
+			eg/org-latex-common-header-string)
 	       ("\\section{%s}" . "\\section*{%s}")
 	       ("\\subsection{%s}" . "\\subsection*{%s}")
 	       ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
