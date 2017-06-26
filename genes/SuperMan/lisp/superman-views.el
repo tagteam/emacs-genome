@@ -1,6 +1,6 @@
 ;;; superman-views.el --- Superman views of project contents 
 
-;; Copyright (C) 2012-2016 Thomas Alexander Gerds, Klaus Kaehler Holst
+;; Copyright (C) 2012-2017 Thomas Alexander Gerds, Klaus Kaehler Holst
 
 ;; Authors: Thomas Alexander Gerds <tag@biostat.ku.dk>
 ;;          Klaus Kaehler Holst <kkho@biostat.ku.dk>
@@ -902,6 +902,8 @@ Enabling superman-unison mode enables the unison keyboard to control single file
       (ignore-errors (goto-char (previous-single-property-change (point-at-bol) 'unison)))
       (beginning-of-line)))
 (define-key superman-unison-mode-map "e" 'superman-unison-edit-item)
+(define-key superman-unison-mode-map "f" 'superman-view-file-list)
+(define-key superman-unison-mode-map "g" 'superman-git-display)
 (define-key superman-unison-mode-map "D" 'superman-unison-delete-item)
 (define-key superman-unison-mode-map "R" 'superman-redo)
 (define-key superman-unison-mode-map [(return)] 
@@ -955,6 +957,7 @@ Enabling superman-unison mode enables the unison keyboard to control single file
       (font-lock-mode -1)
       ;; minor-mode
       ;; (superman-view-mode)
+      (setq superman-view-mode t)
       (superman-unison-mode)
       (insert (superman-make-button
 	       "Superman unison"
@@ -1162,8 +1165,8 @@ Translate the branch names into buttons."
        (superman-make-button
 	title
 	'(:fun superman-git-new-branch
-	:face superman-header-button-face
-	:help "Create new git branch"))
+	       :face superman-header-button-face
+	       :help "Create new git branch"))
        " ")
       (put-text-property
        0 1
@@ -1171,8 +1174,8 @@ Translate the branch names into buttons."
       (superman-make-button
        current-branch
        '(:fun superman-git-status
-       :face superman-warning-face
-       :help "View status of current branch"))
+	      :face superman-warning-face
+	      :help "View status of current branch"))
       (insert "[" current-branch "]  ")
       (while other-branches
 	(let* ((b (car other-branches))
