@@ -751,7 +751,7 @@ See also `file-list-add'.
 		 '(lambda (entry) (string-match regexp (cadr entry))))
 		((string= by "ext") 
 		 '(lambda (entry)
-		    (string-match regexp
+		    (string-match (concat regexp "$")
 				  (or (file-name-extension (car entry)) ""))))
 		((string= by "size")
 		 '(lambda (entry)
@@ -1594,6 +1594,21 @@ Switches to the corresponding directory of each file."
 (defun file-list-query-replace (&optional file-list)
   (interactive)
   (let* ((file-list (or file-list file-list-current-file-list))
+	 (args (query-replace-read-args "Query-replace" nil t)))
+    (dolist (file file-list)
+      (save-window-excursion
+	(find-file (file-list-make-file-name file))
+	(save-restriction
+	  (widen)
+	  (goto-char (point-min))
+	  (query-replace (car args) (cadr args))
+	  (save-buffer)
+	  ;; (kill-buffer)
+	  )))))
+(defun file-list-query-replace-ignore-case (&optional file-list)
+  (interactive)
+  (let* ((file-list (or file-list file-list-current-file-list))
+	 (case-fold-search t)
 	 (args (query-replace-read-args "Query-replace" nil t)))
     (dolist (file file-list)
       (save-window-excursion
