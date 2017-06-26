@@ -57,7 +57,7 @@ user-full-name
 "}
 # #+LaTeX_HEADER:\\affil{Department of Biostatistics, University of Copenhagen, Copenhagen, Denmark}
 #+PROPERTY: header-args :session *R*
-#+PROPERTY: header-args :tange yes
+#+PROPERTY: header-args :tangle yes
 #+PROPERTY: header-args :cache yes")))
 
 (add-to-list
