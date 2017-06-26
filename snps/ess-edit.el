@@ -19,12 +19,11 @@
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ;;}}}
 ;;; Commentary:
-;; Compatibility: Emacs23 XEmacs21
 ;;
 ;;{{{ usage 
 ;;
 ;; load this file, then open some R-code, put
-;; the point inside the a call to an R function, e.g.
+;; the point inside the a call to a R function, e.g. the function c:
 ;;
 ;;  c(1,2,3,4)
 ;; 
@@ -54,7 +53,7 @@
 ;;}}}
 ;;{{{Issues
 ;;
-;; may not work perfectly when there are comments in a function call
+;; may not work perfectly when there are comments in the function call
 ;; 
 ;;
 ;;}}}
