@@ -1,6 +1,6 @@
 ;;; superman-export.el --- Buttonized org to latex export
 
-;; Copyright (C) 2014-2016  Thomas Alexander Gerds
+;; Copyright (C) 2014-2017  Thomas Alexander Gerds
 
 ;; Author: Thomas Alexander Gerds <tag@biostat.ku.dk>
 ;; Keywords: convenience
@@ -37,7 +37,10 @@
 
 ;;; Code:
 
-(defun superman-control-latex-export (&optional arg)
+(defun superman-control-export (&optional arg)
+  "If inside babel src code block, evaluate block
+with `superman-ess-eval-and-go' and otherwise export buffer
+with `superman-org-export-as'."
   (interactive "p")
   (if (and (string= (car (org-babel-get-src-block-info)) "R")
 	   ;; since org-element-at-point finds the nearest element,
@@ -124,6 +127,8 @@ This function works outside R src blocks. Inside R src block
 	   (concat (buffer-name org-buf) " | " tex-file " / " R-buf))
 	(superman-set-config
 	 (concat (buffer-name org-buf) " | " tex-file))))))
+(fset 'superman-export-as-pdf 'superman-export-as-latex)
+
 ;;{{{ superman org headline buttons
 
 (defvar superman-org-headline-map (make-sparse-keymap)
@@ -163,14 +168,17 @@ Use this map to set additional keybindings for when Org-mode is used.")
 
 
 (defun superman-org-export-as (&optional arg)
-  (cond ((string= superman-org-export-target "pdf")
-	 (superman-export-as-latex arg))
-	((string= superman-org-export-target "docx")
-	 (superman-export-as-docx))
-	((string= superman-org-export-target "html")
-	 (org-html-export-to-html)
-	 ;;(superman-browse-this-file)
-	 )))
+  "Find and apply target specific export function. Targets are defined 
+in `superman-org-export-target-list' and for target TARGET the export function 
+is either called superman-export-as-TARGET or org-export-to-TARGET."
+  (let* ((target superman-org-export-target)
+	 (super-candidate (intern (concat "superman-export-as-" target)))
+	 (org-candidate (intern (concat "org-" target "-export-to-" target))))
+    (cond ((functionp super-candidate)
+	   (funcall super-candidate))
+	  ((functionp org-candidate)
+	   (funcall org-candidate))
+	  (t (message (concat "Don't know how to export to " target))))))
 
 (define-minor-mode superman-org-headline-mode
   "Minor mode for headline buttons in header line in org buffers."

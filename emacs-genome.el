@@ -77,12 +77,14 @@
 (add-to-list 'load-path (expand-file-name "genes/SuperMan/lisp" emacs-genome))
 ;; (add-to-list 'load-path (expand-file-name "genes/org-mode/lisp/" emacs-genome))
 
+(use-package htmlize :ensure t)
 
 (use-package org
   :ensure org-plus-contrib ;; ensure org's devel
   :pin org
   :config
   ;; (setq org-odt-data-dir (expand-file-name "genes/org-mode/etc/" emacs-genome))
+  (use-package org-eldoc)
   (use-package org-snps)
   (use-package org-structure-snps))
 ;; org-ref
@@ -102,7 +104,9 @@
 ;; (use-package rainbow-mode
   ;; :ensure t)
 ;; keybindings
+
 (use-package key-snps)
+
 ;; mic-paren
 ;; (use-package mic-paren)
   ;; :pin gnu
@@ -164,7 +168,7 @@
   (setq ido-default-buffer-method 'selected-window)
   ;; Last visited files appear in ido-switch-buffer C-x b
   (setq ido-use-virtual-buffers t))
-(use-package ido-ubiquitous :ensure t)
+(use-package ido-completing-read+ :ensure t)
 ;; buffer cycling
 (use-package cycle-buffer-snps
   :init
@@ -181,9 +185,9 @@
 (use-package browse-url-snps
   :commands (browse-url google-search-prompt))
 ;; recent files
-(use-package recentf
-  :commands recentf-open-files)
-(recentf-mode 1)
+;; (use-package recentf
+  ;; :commands recentf-open-files)
+;; (recentf-mode 1)
 ;; sos
 ;; (use-package sos  :commands sos)
 ;; deft
@@ -207,6 +211,7 @@
 ;; pandoc: converting code and documents
 (use-package pandoc-mode
   :ensure t)
+
 (use-package  markdown-mode :ensure t)
 ;; Emacs speaks statistics
 ;; (setq ess-etc-directory-list nil)

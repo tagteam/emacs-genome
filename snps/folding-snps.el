@@ -1,6 +1,6 @@
 ;;{{{ Folding
-(require 'folding nil t)
-(require 'folding-dwim nil t)
+(use-package folding :ensure t)
+(use-package fold-dwim :ensure t)
 
 (folding-add-to-marks-list 'mediawiki-mode "<!-- {{{" "<!-- }}}" t)
 (folding-add-to-marks-list 'ess-mode "# {{{" "# }}}" t)

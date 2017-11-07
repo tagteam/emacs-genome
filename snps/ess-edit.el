@@ -373,6 +373,7 @@ replace absolute path to home directory by '~'.
 	(setq vec (ess-edit-replace-in-string vec "[\"]?)" ""))
 	(setq vec (ess-edit-replace-in-string vec "[\"]?,[\"]?" " + "))
 	(insert vec))))
+
 		 
 (defun ess-edit-clean-up ()
   (interactive)

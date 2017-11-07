@@ -541,7 +541,9 @@ commit the file to the git repository."
 	  (apply 'concat
 		 (mapcar `(lambda (f) (concat " " (superman-relative-name f ,dir))) file-list)))
 	 (cmd (concat "cd " dir ";" superman-cmd-git " add -f " file-list-string))
-	 (message (if commit (or message (read-string (concat "Commit message for " file-list-string ": "))))))
+	 (message (if commit (or message (read-string (if (= (length file-list) 1)
+							  (concat "Commit message for file:" file-list-string ": ")
+							(concat "Commit message for files:" file-list-string ": ")))))))
     (if message (setq cmd (concat cmd  ";" superman-cmd-git " commit -m \"" message "\" " file-list-string)))
     (superman-run-cmd cmd "*Superman-returns*" cmd)))
 

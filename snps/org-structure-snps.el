@@ -160,7 +160,7 @@ user-full-name
  '("Rr" "#+BEGIN_SRC R  :results output raw drawer  :exports results  :session *R* :cache yes \n?\n#+END_SRC"))
 (add-to-list
  'org-structure-template-alist
- '("Rg"  "#+BEGIN_SRC R :results graphics :file %file :exports results :session *R* :cache yes \n?\n#+END_SRC\n\n#+name: fig:1\n#+ATTR_LATEX: :width 0.7\\textwidth\n#+CAPTION:\n"))
+ '("Rg"  "#+BEGIN_SRC R :results graphics :file %file :exports none :session *R* :cache yes \n?\n#+END_SRC\n\n#+name: fig:1\n#+ATTR_LATEX: :width 0.7\\textwidth\n#+CAPTION:\n"))
 
 (add-to-list
  'org-structure-template-alist

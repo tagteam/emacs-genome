@@ -42,7 +42,7 @@
 (setq org-babel-hash-show-time t)
 ;; it is most transparent and convenient 
 ;; if export actions *never* evaluate code:
-(setq org-export-babel-evaluate t)
+(setq org-export-use-babel t)
 ;; (setq org-babel-default-header-args '((:tangle . "yes") (:eval . "never-export") (:session . "none") (:results . "replace") (:exports . "code") (:cache . "no") (:noweb . "no") (:hlines . "no")))
 (add-to-list 'org-babel-default-header-args '(:eval . "never-export") 'append)
 (add-to-list 'org-babel-default-header-args '(:tangle . "yes") 'append)
@@ -599,7 +599,7 @@
 	      (require 'superman-export)
 	      (define-key org-mode-map [(f12)] 'org-shifttab)
 	      (define-key org-mode-map [(tab)] 'eg/org-tab)	      
-	      (define-key org-mode-map [(meta k)] 'superman-control-latex-export)
+	      (define-key org-mode-map [(meta k)] 'superman-control-export)
 	      (define-key org-mode-map [(meta control k)] #'(lambda () (interactive)
 							      (if (string= (car (org-babel-get-src-block-info)) "R")
 								  (eg-switch-to-R 't))))

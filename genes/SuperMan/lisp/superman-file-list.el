@@ -1605,6 +1605,22 @@ Switches to the corresponding directory of each file."
 	  (save-buffer)
 	  ;; (kill-buffer)
 	  )))))
+
+
+(defun file-list-query-replace-regexp (&optional file-list)
+  (interactive)
+  (let* ((file-list (or file-list file-list-current-file-list))
+	 (args (query-replace-read-args "Query-replace" nil t)))
+    (dolist (file file-list)
+      (save-window-excursion
+	(find-file (file-list-make-file-name file))
+	(save-restriction
+	  (widen)
+	  (goto-char (point-min))
+	  (query-replace-regexp (car args) (cadr args))
+	  (save-buffer)
+	  )))))
+
 (defun file-list-query-replace-ignore-case (&optional file-list)
   (interactive)
   (let* ((file-list (or file-list file-list-current-file-list))
@@ -1825,6 +1841,7 @@ Switches to the corresponding directory of each file."
   (let ((f (file-list-file-at-point)))
     (file-list-rename-file-at-point
      (concat (file-name-sans-extension f)
+	     "-"
 	     (format-time-string "%Y%m%d")
 	     (file-name-extension f 'p)))))
 

@@ -164,14 +164,17 @@ To do move/tick/delete message in search results and press
 	     (re-search-forward "^date:" nil t)
 	     (buffer-substring-no-properties (point) (- (re-search-forward "\\.\\." nil t) 2)))))
       (cond ((string-match "3weeks" current)
-	     (gnus-notmuch-change-period "1day..now"))
-	    ((string-match "1day" current)
-	     (gnus-notmuch-change-period "1week..now"))
-	    ((string-match "1week" current)
-	     (gnus-notmuch-change-period "1month..now"))
-	    ((string-match "1month" current)
+	     (gnus-notmuch-change-period "3months..now"))
+	    ((string-match "3months" current)
+	     (gnus-notmuch-change-period "3years..now"))
+	    ((string-match "3years" current)
 	     (gnus-notmuch-change-period "1year..now"))
+	    ((string-match "1year" current)
+	     (gnus-notmuch-change-period "1day..now"))
 	    (t (gnus-notmuch-change-period "3weeks..now"))))))
+
+
+
 
 (defun gnus-notmuch-change-period (&optional period)
   (interactive)
