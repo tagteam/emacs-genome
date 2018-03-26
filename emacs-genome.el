@@ -1,6 +1,6 @@
 ;;; emacs-genome.el --- loading snps and genes from the emacs-genome
 
-;; Copyright (C) 2014 -- 2017  Thomas Alexander Gerds
+;; Copyright (C) 2014 -- 2018  Thomas Alexander Gerds
 
 ;; Author: Thomas Alexander Gerds <tag@biostat.ku.dk>
 ;; Keywords: convenience
@@ -70,12 +70,20 @@
 (require 'use-package)
 (setq use-package-verbose t)
 
-(use-package bind-key
-  :ensure t)
+(use-package bind-key  :ensure t)
+
 
 (add-to-list 'load-path (expand-file-name "snps/" emacs-genome))
 (add-to-list 'load-path (expand-file-name "genes/SuperMan/lisp" emacs-genome))
 ;; (add-to-list 'load-path (expand-file-name "genes/org-mode/lisp/" emacs-genome))
+
+
+;; general purpose look feel behaviour snps
+(use-package eg-utility-snps)
+;; look, feel and behaviour
+(use-package appearance-snps)
+;; keybindings
+(use-package key-snps)
 
 (use-package htmlize :ensure t)
 
@@ -95,17 +103,9 @@
 (use-package company
   :ensure t :config)
 
-;; general purpose look feel behaviour snps
-(use-package eg-utility-snps)
-;; look, feel and behaviour
-
-(use-package appearance-snps)
-(use-package doremi)
+;; (use-package doremi)
 ;; (use-package rainbow-mode
   ;; :ensure t)
-;; keybindings
-
-(use-package key-snps)
 
 ;; mic-paren
 ;; (use-package mic-paren)

@@ -304,6 +304,7 @@
 	       ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
 
 ;; [NO-DEFAULT-PACKAGES]
+
 (add-to-list 'org-latex-classes
 	     `("beamer"
 	       ,(concat "\\documentclass{beamer}"
