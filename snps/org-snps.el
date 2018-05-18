@@ -515,7 +515,7 @@
     (interactive)
     (if (and
 	 (string= (car (org-babel-get-src-block-info)) "R")
-	 (not (ess-inside-string-or-comment-p (point))))
+	 (not (save-restriction (org-narrow-to-block) (ess-inside-string-or-comment-p (point)))))
       (ess-insert-S-assign)
       (insert "_")))
 
@@ -580,12 +580,49 @@
 
 ;;}}}
 ;;{{{ org mode hook
+(defun sh-send-line-or-region (&optional step)
+  (interactive ())
+  (let ((proc (get-process "shell"))
+        pbuf min max command)
+    (unless proc
+      (let ((currbuff (current-buffer)))
+        (shell)
+        (switch-to-buffer currbuff)
+        (setq proc (get-process "shell"))
+        ))
+    (setq pbuff (process-buffer proc))
+    (if (use-region-p)
+        (setq min (region-beginning)
+              max (region-end))
+      (setq min (point-at-bol)
+            max (point-at-eol)))
+    (setq command (concat (buffer-substring min max) "\n"))
+    (with-current-buffer pbuff
+      (goto-char (process-mark proc))
+      (insert command)
+      (move-marker (process-mark proc) (point))
+      ) ;;pop-to-buffer does not work with save-current-buffer -- bug?
+    (process-send-string  proc command)
+    (display-buffer (process-buffer proc) t)
+    (when step 
+      (goto-char max)
+      (next-line))
+    ))
+(defun sh-send-line-or-region-and-step ()
+  (interactive)
+  (sh-send-line-or-region t))
+(defun sh-switch-to-process-buffer ()
+  (interactive)
+  (pop-to-buffer (process-buffer (get-process "shell")) t))
 
 (defun superman-run-R-or-export-as (&optional debug)
   (interactive "P")
-  (if (string= (car (org-babel-get-src-block-info)) "R")
-      (superman-ess-eval-and-go nil)
-    (superman-org-export-as nil)))
+  (cond ((string= (car (org-babel-get-src-block-info)) "R")
+	 (superman-ess-eval-and-go nil))
+	((string= (car (org-babel-get-src-block-info)) "sh")
+	 (progn (sh-send-line-or-region-and-step)
+		(sh-switch-to-process-buffer)))
+	(t (superman-org-export-as nil))))
 
 ;; never want tab to do a tab 
 (setq org-cycle-emulate-tab nil)

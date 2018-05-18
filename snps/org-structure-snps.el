@@ -91,7 +91,28 @@ user-full-name
 #+PROPERTY: header-args :tangle yes
 #+PROPERTY: header-args :cache yes")))
 
+;; slide with different background colour
+(add-to-list
+ 'org-structure-template-alist '("Bb" "
+ *** bla
+:PROPERTIES:
+    :BEAMER_env: ignoreheading
+    :END:
+\\setbeamercolor{background canvas}{bg=black}
 
+*** 
+\\color{white}
+
+\huge replace me
+
+*** bla
+:PROPERTIES:
+    :BEAMER_env: ignoreheading
+    :END:
+\\setbeamercolor{background canvas}{bg=white}
+
+"))
+ 
 ;; Shrinking a slide
 (add-to-list
  'org-structure-template-alist
