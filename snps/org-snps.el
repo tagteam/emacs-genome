@@ -179,6 +179,23 @@
 ;; (setq eg/org-latex-special-footnotes
 ;; "\newcommand{\sfootnote}[1]{\renewcommand{\thefootnote}{\fnsymbol{footnote}}\footnote{#1}\setcounter{footnote}{0}\renewcommand{\thefootnote}{\arabic{foot note}}}
 ;; \makeatletter\def\blfootnote{\xdef\@thefnmark{}\@footnotetext}\makeatother")
+(eval-after-load 'ox '(require 'ox-koma-letter))
+
+;; \\[DEFAULT-PACKAGES]
+;; \\[PACKAGES]
+;; \\[EXTRA]
+
+(eval-after-load 'ox-koma-letter
+  '(progn
+     (add-to-list 'org-latex-classes
+                  '("eg-letter"
+                    "\\documentclass\{scrlttr2\}
+     \\usepackage[english]{babel}
+     \\setkomavar{frombank}{(1234)\\,567\\,890}
+"
+		    ))
+     (setq org-koma-letter-default-class "eg-letter")))
+
 (setq org-latex-packages-alist
       '(("" "listings")
 	("" "color")
@@ -271,6 +288,20 @@
                 %% \\documentclass[useAMS,usenatbib]{biom}
                [PACKAGES]
                [EXTRA]"
+			eg/org-latex-common-header-string)
+	       ("\\section{%s}" . "\\section*{%s}")
+	       ("\\subsection{%s}" . "\\subsection*{%s}")
+	       ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+	       ("\\paragraph{%s}" . "\\paragraph*{%s}")
+	       ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
+
+
+(add-to-list 'org-latex-classes
+	     `("biometrical-journal"
+	       ,(concat "\\documentclass[bimj,fleqn]{w-art}
+               [NO-DEFAULT-PACKAGES]
+               \\usepackage{listings}
+                "
 			eg/org-latex-common-header-string)
 	       ("\\section{%s}" . "\\section*{%s}")
 	       ("\\subsection{%s}" . "\\subsection*{%s}")

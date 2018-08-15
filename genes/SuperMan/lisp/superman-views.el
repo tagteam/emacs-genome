@@ -836,6 +836,7 @@ for git and other actions like commit, history search and pretty log-view."
 (define-key superman-view-mode-map "\C-y" 'superman-yank)
 
 ;; Git control
+(define-key superman-view-mode-map "C" 'superman-git-commit-project)
 (define-key superman-view-mode-map "g" 'superman-git-display)
 (define-key superman-view-mode-map "G " 'superman-git-last-log-file)
 (define-key superman-view-mode-map "Ga" 'superman-git-annotate)
@@ -853,6 +854,7 @@ for git and other actions like commit, history search and pretty log-view."
 (define-key superman-view-mode-map "GS" 'superman-git-search-log-of-file)
 (define-key superman-view-mode-map "GBs" 'superman-git-checkout-branch)
 (define-key superman-view-mode-map "GBn" 'superman-git-new-branch)
+(define-key superman-view-mode-map "S" 'superman-git-status)
 ;; (define-key superman-view-mode-map "G=" 'superman-git-difftool-file)
 
 ;;}}}
@@ -1133,11 +1135,11 @@ Example:
   "Insert the git buttons
 Translate the branch names into buttons."
   (superman-view-insert-action-buttons
-   '(("[Diff project]" :fun superman-git-diff :face superman-default-button-face :help "Git diff" :width 17)
-     ("[Commit project]" :fun superman-git-commit-project :face superman-default-button-face :help "Git all project" :width 17)
-     ("[Commit marked]" :fun superman-git-commit-marked :face superman-default-button-face :help "Git commit marked files" :width 17)
-     ("[Status]" :fun superman-git-status :face superman-default-button-face :help "Git status" :width 17)
-     ("[Delete marked]" :fun superman-view-delete-marked :face superman-default-button-face :help "Delete marked files" :width 17)))
+   '(("Diff project" :fun superman-git-diff :face superman-default-button-face :help "Git diff" :width 17)
+     ("Commit project (C)" :fun superman-git-commit-project :face superman-default-button-face :help "Git all project" :width 17)
+     ("Commit marked (GC)" :fun superman-git-commit-marked :face superman-default-button-face :help "Git commit marked files" :width 17)
+     ("Status" :fun superman-git-status :face superman-default-button-face :help "Git status" :width 17)
+     ("Delete marked" :fun superman-view-delete-marked :face superman-default-button-face :help "Delete marked files" :width 17)))
   (put-text-property (point-at-bol) (1+ (point-at-bol)) 'git-buttons t))
 
 (defun superman-view-insert-git-branches (&optional dir)

@@ -1118,9 +1118,12 @@ is non-nil prompt for project."
 	 (loc (expand-file-name (superman-get-location entry)))
 	 (index (superman-get-index entry))
 	 (region (progn (gnus-summary-select-article-buffer)
-			(unless (use-region-p)
-			  (mark-whole-buffer))
-			(buffer-substring (region-beginning) (region-end))))
+			(if (use-region-p)
+			    ;; (mark-whole-buffer))
+			    (concat "----\n#+BEGIN_EXAMPLE\n" 
+				    (buffer-substring (region-beginning) (region-end))
+				    "#+END_EXAMPLE\n----\n")
+			  "")))
 	 (mailbox (file-name-as-directory
 		   (concat (file-name-as-directory loc) "Mailbox")))
 	 (from (message-fetch-field "from"))
@@ -1133,7 +1136,7 @@ is non-nil prompt for project."
      "Mail"
      nil
      `(("CaptureDate"  :hidden yes :value ,(format-time-string "<%Y-%m-%d %a>"))
-       (body :value ,(concat "----\n#+BEGIN_EXAMPLE\n" region "#+END_EXAMPLE\n----\n"))
+       (body :value region) 
        (body :value ,attachments)
        ("EmailDate" :value ,date)
        (hdr :value ,(concat "Mail from " from " " subject ) :test superman-test-hdr)
