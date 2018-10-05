@@ -838,8 +838,13 @@ If PROMPT is a string use it to ask for project."
 				  (setq plist (append (list superman-current-project)
 						      (remove superman-current-project plist))))))
 	 (completion-ignore-case t)
-	 (key (ido-completing-read (if (stringp prompt) prompt "Project: ")
-				   (mapcar 'car project-array)))
+	 (key (progn
+		(sort plist (lambda (x y)
+			      (> 
+			       (org-time-stamp-to-now (cdr (assoc "lastvisit" (cadr x))) 'seconds)
+			       (org-time-stamp-to-now (cdr (assoc "lastvisit" (cadr y))) 'seconds))))
+	  (ido-completing-read (if (stringp prompt) prompt "Project: ")
+				   (mapcar 'car project-array))))
 	 (nickname (cdr (assoc key project-array))))
     (assoc nickname superman-project-alist)))
 

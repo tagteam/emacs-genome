@@ -81,8 +81,11 @@ If JABBER is non-nil (and CREATE is nil) be talkative about non-existing heading
     (widen)
     (show-all)
     (goto-char (point-min))
+    (unless (eq major-mode 'org-mode)
+      (org-mode))
     (setq value
-	  (cond ((re-search-forward (format org-complex-heading-regexp-format (regexp-quote head)) nil t)
+	  (cond ((re-search-forward (format org-complex-heading-regexp-format
+					    (regexp-quote head)) nil t)
 		 (point-marker))
 		(create
 		 (let (marker)

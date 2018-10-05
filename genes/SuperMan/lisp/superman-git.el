@@ -1261,27 +1261,33 @@ repository of PROJECT which is located at DIR."
 			  (fname  (substring-no-properties x 3 (length x))))
 		      (list fname index-status work-tree-status)))
 		  (delete-if (lambda (x) (string= x ""))
-			     (split-string git-status "\n")))))
+			     (split-string git-status "\n"))))
+	 (flist))
     (goto-char (point-min))
+    (when (looking-at "git-output") (forward-line 1))
     (while (re-search-forward "^[^ \t\n]+" nil t)
-      (let* ((ff (buffer-substring (point-at-bol) (point-at-eol)))
+      (let* ((match (match-string-no-properties 0))
+	     (ff (buffer-substring (point-at-bol) (point-at-eol)))
 	     (dname (file-name-directory ff))
 	     (fname (file-name-nondirectory ff))
 	     (fullname (concat git-dir "/" ff))
 	     (status (assoc ff status-list)))
-	(replace-match
-	 (concat "** "
-		 fname
-		 "\n:PROPERTIES:\n:GitStatus: "
-		 (cond ((not status) "Committed")
-		       (t
-			(let* ((X (or (nth 1 status) " "))
-			       (Y (or (nth 2 status) " "))
-			       (XY (concat X Y)))
-			  (superman-label-status XY))))
-		 "\n:Directory: " (cond (dname) (t "."))  
-		 "\n:FILENAME: [[" fullname "]]\n:END:\n\n")
-	 'fixed)))))
+	(if (member fullname flist)
+	    (delete-region (point-at-bol) (point-at-eol))
+	  (setq flist (append (list fullname) flist))
+	  (replace-match
+	   (concat "** "
+		   fname
+		   "\n:PROPERTIES:\n:GitStatus: "
+		   (cond ((not status) "Committed")
+			 (t
+			  (let* ((X (or (nth 1 status) " "))
+				 (Y (or (nth 2 status) " "))
+				 (XY (concat X Y)))
+			    (superman-label-status XY))))
+		   "\n:Directory: " (cond (dname) (t "."))  
+		   "\n:FILENAME: [[" fullname "]]\n:END:\n\n")
+	   'fixed))))))
 
 (defvar superman-git-diff-status-letters
   '(("A" "addition" "addition of a file")

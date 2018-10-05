@@ -106,7 +106,7 @@
 		g-cal))))
       (let* ((pre-command
 	      (concat superman-google-cmd
-		      " add --calendar " "'" g-cal "'"
+		      " --calendar " "'" g-cal "' add"
 		      " --title '" g-string "'"
 		      " --where ''"
 		      " --when '" g-date "'"
