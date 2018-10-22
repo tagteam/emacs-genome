@@ -1,6 +1,6 @@
 ;;; ess-R-snps.el --- ess setup file for statistical software R
 
-;; Copyright (C) 2012-2017  Thomas Alexander Gerds
+;; Copyright (C) 2012-2018  Thomas Alexander Gerds
 
 ;; Author: Thomas Alexander Gerds <tag@biostat.ku.dk>
 ;; Keywords: convenience, tools
@@ -238,6 +238,7 @@
 
 ;;}}}
 ;;{{{ smart underscore
+
 (defun eg/ess-smart-underscore ()
   (interactive)
   (if (not (eq last-command 'eg/ess-smart-underscore))

@@ -1,6 +1,6 @@
 ;;; org-snps.el --- 
 
-;; Copyright (C) 2012-2017  Thomas Alexander Gerds
+;; Copyright (C) 2012-2018  Thomas Alexander Gerds
 
 ;; Author: Thomas Alexander Gerds <tag@linuxifsv007>
 ;; Keywords: convenience
@@ -116,6 +116,19 @@
 ;;  #+NAME: fig:1 and #+LABEL: fig:1
 ;; to \label{fig:1} instead of \label{orgparagraph1}
 (setq org-latex-prefer-user-labels t)
+
+;;{{{ html export
+;; see templates in ~/emacs-genome/snps/org-templates
+;; which can be invoked by specifying
+;; #+SETUPFILE: ~/.emacs.d/org-templates/level-N.org
+;; #+TITLE: My Title
+;; see also 
+;; https://orgmode.org/worg/org-tutorials/org-publish-html-tutorial.org.html
+(setq org-export-allow-bind-keywords t
+      org-export-allow-BIND t)
+(setq org-html-R-tutorial-home/up-format 
+"<ul class=\"navigation\"><li class=\"site-name\">TagTeam: R-tutorials</li><li><a accesskey=\"a\" href=\"%s\">Articles</a></li><li><a accesskey=\"c\" href=\"https://github.com/tagteam\">Code</a></li><li><a accesskey=\"i\" href=\"index.html\">Index</a></li></ul>")
+;;}}}
 
 ;;{{{ eg/org latex/export debug minor mode
 ;; see http://orgmode.org/manual/Export-options.html
@@ -541,14 +554,21 @@
   (if (string= (car (org-babel-get-src-block-info)) "R")
         (ess-eval-function-and-go)))
 
+;; see also eg/ess-smart-underscore in ess-R-snps.el 
+(setq ess-assign-list '(" <- " "_" ":="))
 (defun eg/org-smart-underscore ()
-    "Smart \"_\" key: insert <- if in SRC R block unless in string/comment."
-    (interactive)
-    (if (and
-	 (string= (car (org-babel-get-src-block-info)) "R")
-	 (not (save-restriction (org-narrow-to-block) (ess-inside-string-or-comment-p (point)))))
-      (ess-insert-S-assign)
-      (insert "_")))
+  "Smart \"_\" key: insert <- if in SRC R block unless in string/comment."
+  (interactive)
+  (if (and
+       (string= (car (org-babel-get-src-block-info)) "R")
+       (not (save-restriction (org-narrow-to-block) (ess-inside-string-or-comment-p (point)))))
+      (if (not (eq last-command 'eg/org-smart-underscore))
+	  (insert " <- ")
+	(undo)
+	(insert "_"))
+    ;;      (ess-cycle-assign)
+    ;; (ess-insert-assign)
+    (insert "_")))
 
 ;;}}}
 ;;{{{ bibtex

@@ -75,6 +75,7 @@
 		       (looking-at org-complex-heading-regexp)
 		       (match-string-no-properties 4)))
 	   (g-entry (org-entry-get nil superman-google-date-entry))
+	   (g-place (or (org-entry-get nil "Location") ""))
 	   (g-date
 	    ;; Strip this type of string "<2015-03-24 Tue 13:00--14:20>"
 	    (if (string-match "\\( +\\)\\([0-9]\\{1,2\\}:[0-9]\\{2\\}\\)\\(-+\\)\\([0-9]\\{1,2\\}:[0-9]\\{2\\}\\)" g-entry)
@@ -108,7 +109,7 @@
 	      (concat superman-google-cmd
 		      " --calendar " "'" g-cal "' add"
 		      " --title '" g-string "'"
-		      " --where ''"
+		      " --where '" g-place "'"
 		      " --when '" g-date "'"
 		      " --duration '" g-duration "'"
 		      " --description ''"
