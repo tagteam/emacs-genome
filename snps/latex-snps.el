@@ -41,6 +41,7 @@
 	     (setq TeX-master t)
 	     (TeX-PDF-mode t)
 	     (define-key LaTeX-mode-map "\C-ce" 'TeX-next-error)
+	     (define-key LaTeX-mode-map "\M-k" 'save-buffer)
 	     (define-key LaTeX-mode-map "\M-q" 'eg/indent-paragraph)
 	     (define-key LaTeX-mode-map "\M-j" 'eg/latex-save-and-run)))
 ;;}}}

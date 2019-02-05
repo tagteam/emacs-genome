@@ -72,7 +72,7 @@ Returns the corresponding buffer."
      "Configuration"
      "The window configuration is saved."
      nil
-     `(("Config" ,(superman-current-config))))))
+     `(("Config" :value ,(superman-current-config))))))
      
 (fset 'superman-save-config 'superman-capture-config)
 

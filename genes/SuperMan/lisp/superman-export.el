@@ -37,6 +37,7 @@
 
 ;;; Code:
 
+;; see also superman-run-R-or-export-as in org-snps.el
 (defun superman-control-export (&optional arg)
   "If inside babel src code block, evaluate block
 with `superman-ess-eval-and-go' and otherwise export buffer
@@ -50,9 +51,18 @@ with `superman-org-export-as'."
     ;; (progn
     ;; (ess-switch-to-end-of-ESS)
     ;; (when arg (erase-buffer) (inferior-ess-send-input)))
-    (if (string= superman-org-export-target "pdf")
-	(superman-export-as-latex 'debug)
-      (superman-org-export-as nil))))
+    (cond ((save-excursion
+	     (goto-char (point-min))
+	     (when (re-search-forward "^\\#\\+superman-export-target:[ \t]*" nil t)
+	       (let ((this (buffer-substring-no-properties
+			    (point)
+			    (progn (skip-chars-forward "[a-zA-z/]")
+				   (point)))))
+		 (setq superman-org-export-target this))))
+	   (superman-org-export-as nil))
+	  ((string= superman-org-export-target "pdf")
+	   (superman-export-as-latex 'debug))
+	  (superman-org-export-as nil))))
 
 ;; See library tex-buf for help on TeX-process.
 (defun superman-export-as-latex (&optional debug)
@@ -141,6 +151,7 @@ Use this map to set additional keybindings for when Org-mode is used.")
 (defvar superman-org-export-target-list '("pdf" "html" "docx")
   "Export targets.")
 (defvar superman-org-export-target "pdf" "current export target")
+
 (defvar superman-babel-target-list '("this-block" "all-blocks")
   "Babel R-block targets.")
 (defvar superman-babel-target "all-blocks" "Either 'all-blocks': action on all R-blocks\n or 'this-block': action on current R-block.")
@@ -187,6 +198,14 @@ is either called superman-export-as-TARGET or org-export-to-TARGET."
   (make-local-variable 'superman-babel-target)
   (make-local-variable 'superman-org-export-target-list)
   (make-local-variable 'superman-babel-target-list)
+  (save-excursion
+    (goto-char (point-min))
+    (when (re-search-forward "^\\#\\+superman-export-target:[ \t]*" nil t)
+      (let ((this (buffer-substring-no-properties
+		   (point)
+		   (progn (skip-chars-forward "[a-zA-z/]")
+			  (point)))))
+	(setq superman-org-export-target this))))
   (setq-local
    header-line-format
    (concat (header-button-format (concat "M-J:" (or superman-org-export-target "not set")) :action

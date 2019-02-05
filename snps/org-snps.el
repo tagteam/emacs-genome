@@ -666,6 +666,7 @@
   (interactive)
   (pop-to-buffer (process-buffer (get-process "shell")) t))
 
+;; see also superman-control-export in superman-export.el
 (defun superman-run-R-or-export-as (&optional debug)
   (interactive "P")
   (cond ((string= (car (org-babel-get-src-block-info)) "R")

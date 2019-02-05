@@ -41,6 +41,11 @@
 	  (replace-match new-fn))))))
 (fset 'beamer-fix-footnotes 'fix-orgmode-footnotes)
 
+
+
+      
+    
+
 ;; (setq org-odt-data-dir "~/emacs-genome/genes/org-mode/etc/")
 
 ;;{{{ applications for org-open-things
@@ -104,20 +109,24 @@
 
 ;;}}}
 
-;;{{{ Rmd-tutorials and exercises
+;;{{{ Basic statistics Rmd-tutorials and exercises
 
-;; (defun superman-get-org-headline-string-element  (headline backend info)
-  ;; "Return the org element representation of an element."
-  ;; (let ((prop-point (next-property-change 0 headline)))
-    ;; (if prop-point (plist-get (text-properties-at prop-point headline) :parent))))
-
-;; (defun superman-org-exclude-section (headline backend info)
-  ;; "Insert a clearpage at end of heading if property clearpage is non-nil."
-  ;; (when (org-export-derived-backend-p backend 'html)
-    ;; (let ((elm (superman-get-org-headline-string-element headline backend info)))
-      ;; (when (and elm (org-element-property :CLEARPAGE elm))
-        ;; (concat headline "\\clearpage\\n")))))
-;; (add-to-list 'org-export-filter-headline-functions 'superman-org-exclude-section)
+(defun export-master-basicstats ()
+  "export all files in homepage, exercises and R-tutorials"
+  (interactive)
+  (save-some-buffers)
+  (let* ((fl (append
+	      ;; (file-list-select nil "^[a-zA-Z]+.*.org$" "filename" nil "~/metropolis/Teaching/BasicStats/homepage" nil t t)
+	      ;; (file-list-select nil "^Exercises-.*.org$" "filename" nil "~/metropolis/Teaching/BasicStats/Exercises" nil t t)
+	      (file-list-select nil "^[a-zA-Z]+.*.org$" "filename" nil "~/public_html/Teaching/share/R-tutorials" nil t t)
+	      ;; (file-list-select nil "^[a-zA-Z]+.*.org$" "filename" nil "~/public_html/Teaching/share/Data" nil t t)
+	      ))
+	 (fn (mapcar 'file-list-make-file-name fl)))
+    (save-excursion
+      (while fn
+	(find-file (car fn))
+	(superman-control-export)
+	(setq fn (cdr fn))))))
 
 ;; export to Rmd
 (add-to-list 'load-path (expand-file-name "genes/orgmode-accessories/" emacs-genome))
@@ -257,17 +266,22 @@ space
     (save-excursion
       (goto-char (point-min))
       ;; when link does not exist org breaks the flow
-      (ignore-errors (insert "- [[./" rmd-file "][Open R-studio Rmarkdown version without R-code]]\n"))
-      (ignore-errors (insert "- [[./" (concat (file-name-sans-extension rmd-file) "-with-code.Rmd") "][Open R-studio Rmarkdown version with R-code]]\n")))
-    (save-buffer)
-    (setq exercise-with-code t)
+      (insert "You can read and work out the exercises directly in R-studio. Below are links to R-markdown files, 
+the first R-markdown file contains the exercise texts and empty R-chunks where you should put the R-code to solve the exercise. 
+The second R-markdown file contains in addtion the R-code that produces the results. This is recommended when your Rabilities are insufficient, or you want to cheat (there is nothing to be ashamed of in being in this situation)\n\n")
+      (ignore-errors (insert "- [[./" rmd-file "][Open R-markdown version without R-code]]\n"))
+      (ignore-errors (insert "- [[./" (concat (file-name-sans-extension rmd-file) "-with-code.Rmd") "][Open R-markdown version with R-code]]\n"))
+      (insert "# REMOVEUNTILHERE\n"))
+    ;; (save-buffer)
+    (setq exercise-with-code nil);; no need to see the code here
     (setq org-export-exclude-tags (list "noexport" "rmd" "solution"))
+    (setq org-export-with-toc t)
     (org-html-export-to-html)
     ;; get rid of the links to the rmd files
-    (save-excursion
-      (goto-char (point-min))
-      (while (looking-at "- \\[\\[.*Rmd\\]\\[.*\\]\n")
-	(kill-region (point-min) (1+ (point-at-eol)))))
+    (revert-buffer t t t)
+    (save-buffer)
+    ;; (save-excursion
+    ;; (kill-region (point-min) (goto-char (point-min) (re-search-forward "# REMOVEUNTILHERE"))))
     (setq exercise-with-code nil)
     ;; 
     ;; third, export to Rmd with code without toc
@@ -288,6 +302,7 @@ space
     (setq exercise-without-code t)
     (Rmd-export)
     (setq exercise-without-code nil)
+    (save-buffer)
     ;; revert rmd buffer
     (save-window-excursion
       (find-file (org-export-output-file-name ".Rmd"))
@@ -303,50 +318,31 @@ space
 
 
 (defun superman-export-as-rmd/html ()
-  "Save current buffer, then export to docx via soffice."
+  "Export as html and as rmd. R-chunks should have 
+ :eval (never-plain-export)
+in order to be exported to Rmd. 
+"
   (interactive)
-  (save-excursion
-    (goto-char (point-min))
-    ;; when link does not exist org breaks the flow
-    (ignore-errors (insert "[[./" (org-export-output-file-name ".Rmd") "][Open R-studio Rmarkdown version of this file]]\n"))
-    )
-  (save-buffer)
-  (org-html-export-to-html)
-  (save-excursion
-    (goto-char (point-min))
-    (kill-region (point-min) (1+ (point-at-eol))))
-  ;; remove toc
-  (save-excursion
-    (goto-char (point-min))
-    (when (and (re-search-forward "\\#\\+OPTIONS:" nil t)
-	       (re-search-forward "toc:t" nil t))
-      (kill-region (point) (1- (point)))
-      (insert "nil")
-      (org-set-regexps-and-options)
-      ;;(org-ctrl-c-ctrl-c)
-      ))
-  ;; (superman-ravel-export-to-Rmd)
-  (save-window-excursion
-    (find-file (org-export-output-file-name ".Rmd"))
-    ;; to avoid pop-up 
-    (kill-buffer))
-  (Rmd-export)
-  ;; add toc
-  (save-excursion
-    (goto-char (point-min))
-    (when (and (re-search-forward "\\#\\+OPTIONS:" nil t)
-	       (re-search-forward "toc:nil" nil t))
-      (kill-region (point) (- (point) 3))
-      (insert "t")
-      (org-set-regexps-and-options)
-      ;;(org-ctrl-c-ctrl-c)
-      ))
-  (save-window-excursion
-    (find-file (org-export-output-file-name ".Rmd"))
-    (revert-buffer t t t))
-  ;; (setq superman-org-export-target "rmd/html")
-  ;; (superman-org-headline-mode))
-  )
+  (let ((org-export-with-toc t))
+    (save-excursion
+      (goto-char (point-min))
+      ;; when link does not exist org breaks the flow
+      (ignore-errors (insert "[[./" (org-export-output-file-name ".Rmd") "][Open R-markdown version of this file]]\n"))
+      )
+    (save-buffer)
+    (org-html-export-to-html)
+    (save-excursion
+      (goto-char (point-min))
+      (kill-region (point-min) (1+ (point-at-eol))))
+    (save-window-excursion
+      (find-file (org-export-output-file-name ".Rmd"))
+      ;; to avoid pop-up 
+      (kill-buffer))
+    (setq org-export-with-toc nil)
+    (Rmd-export)
+    (save-window-excursion
+      (find-file (org-export-output-file-name ".Rmd"))
+      (revert-buffer t t t))))
 
 
 
@@ -403,7 +399,7 @@ space
 ;; html
 (add-to-list
  'org-structure-template-alist
- '("Ha" "#+Title:\n#+HTML_HEAD: <link rel=\"stylesheet\" type=\"text/css\" href=\"http://192.38.117.59/~tag/styles/BiomacsStyle.css\" />\n# #+HTML_HEAD: <link rel=\"stylesheet\" type=\"text/css\" href=\"~/public_html/styles/BiomacsStyle.css\" />\n#+OPTIONS: H:3 num:t toc:t :nil @:t ::t |:t ^:t -:t f:t *:t <:t\n#+PROPERTY: cache yes\n#+PROPERTY: session *R*\n"))
+ '("Ha" "#+Title:\n#+HTML_HEAD: <link rel=\"stylesheet\" type=\"text/css\" href=\"https://publicifsv.sund.ku.dk/~tag/styles/BiomacsStyle.css\" />\n# #+HTML_HEAD: <link rel=\"stylesheet\" type=\"text/css\" href=\"~/public_html/styles/BiomacsStyle.css\" />\n#+OPTIONS: H:3 num:t toc:t :nil @:t ::t |:t ^:t -:t f:t *:t <:t\n#+PROPERTY: cache yes\n#+PROPERTY: session *R*\n"))
 ;;}}}
 
 
