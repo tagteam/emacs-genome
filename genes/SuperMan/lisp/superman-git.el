@@ -52,7 +52,7 @@ result. PRE-HOOK and POST-HOOK are functions that are called before and after CM
     (unless (eq major-mode 'diff-mode)
       (diff-mode))
     ;;(unless (assoc 'orgstruct-mode minor-mode-alist)
-    (orgstruct-mode t)
+    ;; (orgstruct-mode t)
     (font-lock-mode 1)
     (setq buffer-read-only t)
     (let ((buffer-read-only nil))

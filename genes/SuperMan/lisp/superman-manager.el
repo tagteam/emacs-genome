@@ -865,7 +865,7 @@ If PROMPT is a string use it to ask for project."
 			   (find-file-noselect superman-profile))
     (save-excursion
       (goto-char (point-min))
-      (when (re-search-forward (concat ":NICKNAME:[ \t]?.*" (car project)) nil t)
+      (when (re-search-forward (concat ":NICKNAME:[ \t]?" (car project)) nil t)
 	(org-entry-put (point) "LastVisit"
 		       (format-time-string "<%Y-%m-%d %a %H:%M>"))
 	(save-buffer)))))

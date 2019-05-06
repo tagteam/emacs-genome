@@ -1191,7 +1191,7 @@ Translate the branch names into buttons."
 			nil
 			,(buffer-name view-buf))))
 	       (button (superman-make-button
-			b `(:fun fun :face font-lock-comment-face
+			b `(:fun ,fun :face font-lock-comment-face
 				 :help "Checkout branch"))))
 	  (setq other-branches (cdr other-branches))
 	  (put-text-property 0 1 'superman-header-marker t button)

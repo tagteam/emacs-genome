@@ -91,6 +91,12 @@ user-full-name
 #+PROPERTY: header-args :tangle yes
 #+PROPERTY: header-args :cache yes")))
 
+;; table attributes
+(add-to-list
+ 'org-structure-template-alist '("Bt" "
+#+ATTR_LATEX: :environment longtable :align l|lp{3cm}r|l :mode math :environment bmatrix :math-suffix \times :caption \bicaption{HeadingA}{HeadingB}
+"))
+
 ;; slide with different background colour
 (add-to-list
  'org-structure-template-alist '("Bb" "

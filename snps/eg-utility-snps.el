@@ -174,6 +174,9 @@ the current line."
 	  ;; (widen)))
 	  (t (fill-paragraph))))
    ((eq major-mode 'Rd-mode) nil)
+   ((eq major-mode 'c++-mode)
+    (progn (mark-paragraph) (indent-region (region-beginning) (region-end))
+	   ))
    ((eq major-mode 'bibtex-mode)
     (save-excursion
       (let ((beg (progn (backward-paragraph 1) (point)))

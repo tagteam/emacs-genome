@@ -44,6 +44,8 @@
 ;; if export actions *never* evaluate code:
 (setq org-export-use-babel t)
 ;; (setq org-babel-default-header-args '((:tangle . "yes") (:eval . "never-export") (:session . "none") (:results . "replace") (:exports . "code") (:cache . "no") (:noweb . "no") (:hlines . "no")))
+
+;; sanity is to set org-export-babel-evaluate to nil (Ista Zahn)
 (add-to-list 'org-babel-default-header-args '(:eval . "never-export") 'append)
 (add-to-list 'org-babel-default-header-args '(:tangle . "yes") 'append)
 (add-to-list 'org-babel-tangle-lang-exts '("R" . "R") 'append)
@@ -108,6 +110,17 @@
 	      (define-key org-mode-map "\C-c\C-v" 'superman-browse-this-file)
 	      (define-key org-mode-map [(meta up)] 'backward-paragraph)
 	      (define-key org-mode-map [(meta down)] 'forward-paragraph)))
+
+;;}}}
+
+;;{{{ org-metareturn-hook
+
+(add-hook 'org-metareturn-hook
+	  #'(lambda ()
+	      (when (save-excursion (beginning-of-line 0) (looking-at "\\#\\+CAPTION:"))
+		  (end-of-line 1)
+		(insert "\n#+CAPTION: ") t)))
+
 
 ;;}}}
 
@@ -257,6 +270,18 @@
                [EXTRA]"
 			eg/org-latex-common-header-string
 			 ;;"\\renewcommand*\\familydefault{\\sfdefault}\n\\itemsep2pt"
+			 )
+	       ("\\section{%s}" . "\\section*{%s}")
+	       ("\\subsection{%s}" . "\\subsection*{%s}")
+	       ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+	       ("\\paragraph{%s}" . "\\paragraph*{%s}")
+	       ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
+(add-to-list 'org-latex-classes
+	     `("els-article"
+	       ,(concat "\\documentclass{elsarticle}
+               [PACKAGES]
+               [EXTRA]"
+			eg/org-latex-common-header-string
 			 )
 	       ("\\section{%s}" . "\\section*{%s}")
 	       ("\\subsection{%s}" . "\\subsection*{%s}")
