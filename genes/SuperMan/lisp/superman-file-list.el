@@ -1591,6 +1591,24 @@ Switches to the corresponding directory of each file."
 	      (put-text-property (point-at-bol) (point-at-eol) 'file-info t))))
 	(file-list-next-file 1)))))
 
+(defun file-list-replace-nonstop (&optional file-list)
+  (interactive)
+  (let* ((file-list (or file-list file-list-current-file-list))
+	 (args (query-replace-read-args "Query-replace" nil t)))
+    (dolist (file file-list)
+      (save-window-excursion
+	(find-file (file-list-make-file-name file))
+	(widen)
+	(save-restriction
+	  (when (and (eq major-mode 'org-mode)
+                     (not visible-mode))
+	    (visible-mode 1))
+	  (goto-char (point-min))
+	  (while (re-search-forward (car args) nil t)
+	    (replace-match (cadr args) nil nil))
+	  (save-buffer)
+	  )))))
+
 (defun file-list-query-replace (&optional file-list)
   (interactive)
   (let* ((file-list (or file-list file-list-current-file-list))
@@ -1600,6 +1618,9 @@ Switches to the corresponding directory of each file."
 	(find-file (file-list-make-file-name file))
 	(save-restriction
 	  (widen)
+	  (when (and (eq major-mode 'org-mode)
+                     (not visible-mode))
+	    (visible-mode 1))
 	  (goto-char (point-min))
 	  (query-replace (car args) (cadr args))
 	  (save-buffer)
@@ -1808,7 +1829,13 @@ Switches to the corresponding directory of each file."
 (define-key file-list-mode-map "/e" 'file-list-by-ext)
 (define-key file-list-mode-map "/p" 'file-list-by-path)
 (define-key file-list-mode-map "/a" 'file-list-add)
-
+(define-key file-list-mode-map "1" 'file-list-remove-filter-1)
+(define-key file-list-mode-map "2" 'file-list-remove-filter-2)
+(define-key file-list-mode-map "3" 'file-list-remove-filter-3)
+(define-key file-list-mode-map "4" 'file-list-remove-filter-4)
+(define-key file-list-mode-map "5" 'file-list-remove-filter-5)
+(define-key file-list-mode-map "6" 'file-list-remove-filter-6)
+(define-key file-list-mode-map "7" 'file-list-remove-filter-7)
 
 (defun file-list-default-keybindings ()
   "Set up default keybindings'."

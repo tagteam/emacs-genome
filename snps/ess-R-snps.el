@@ -32,6 +32,10 @@
 
 ;;{{{ global custom
 (setq ess-use-tracebug nil)
+
+;; keep ess-buffer names simple 
+(setq ess-gen-proc-buffer-name-function 'ess-gen-proc-buffer-name:simple)
+
 (setq ess-display-buffer-reuse-frames nil)
 
 ;; I don't like if another frame pops up showing the inferior-ess buffer,
@@ -54,7 +58,6 @@
 ;;{{{ key bindings
 
 
-
 (require 'ess-edit)
 (add-hook 'ess-mode-hook 'eg/R-keybindings)
 (defun eg/R-keybindings ()
@@ -70,6 +73,7 @@
   (define-key ess-mode-map "\C-cf" 'ess-edit-insert-call)
   (define-key ess-mode-map "\C-cv" 'ess-edit-insert-vector)
   (define-key ess-mode-map "\C-cp" 'ess-edit-insert-path)
+  (define-key ess-mode-map "_" 'eg/ess-smart-underscore)
   (define-key ess-mode-map "\C-ch" 'ess-edit-mark-call)
   (define-key ess-mode-map "\M-H" 'eg/ess-get-help-R-object)
   (define-key ess-mode-map "\C-cF" 'ess-edit-insert-file-name)

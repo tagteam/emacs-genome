@@ -190,7 +190,7 @@ passed to `superman-run-cmd'."
 	   (shell-command-to-string
 	    (concat "cd " dir "; " superman-cmd-git " rev-parse --show-toplevel ")))))))
 
-(defun superman-git-branches (dir)
+(defun superman-git-list-branches (dir)
   (let* ((branch-list
 	  (mapcar #'(lambda (x)
 		      (replace-regexp-in-string
@@ -205,7 +205,7 @@ passed to `superman-run-cmd'."
 
 
 (defun superman-git-merge-branches (dir)
-  (let* ((branch-list (superman-git-branches dir))
+  (let* ((branch-list (superman-git-list-branches dir))
 	 (current-branch (car branch-list))
 	 (other-branches (cdr branch-list))
 	 (m-branch (completing-read
@@ -239,7 +239,7 @@ use the location of the current project, if no project is current prompt for pro
 		  (superman-project-home
 		   (superman-get-project nil))))
 	 (branch (or branch
-		     (let ((branches (superman-git-branches dir)))
+		     (let ((branches (superman-git-list-branches dir)))
 		       (completing-read "Choose branch to checkout: "
 					(mapcar* 'cons branches (make-list (length branches) `()))
 					nil t)))))
@@ -883,22 +883,21 @@ This function should be bound to a key or button."
 	(remote-start (next-single-property-change (point-min) 'git-remote))
 	(buttons (next-single-property-change (point-min) 'git-buttons))
 	(buffer-read-only nil))
-    (if (not branch-start)
-	(progn
-	  (goto-char (point-min))
-	  (forward-line 2))
-      (goto-char branch-start)
-      (delete-region (point-at-bol) (1+ (point-at-eol))))
+    ;; delete remote line
     (when remote-start
       (goto-char remote-start)
       (delete-region (point-at-bol) (1+ (point-at-eol))))
+    ;; delete branch line
+    (goto-char branch-start)
+    (delete-region (point-at-bol) (1+ (point-at-eol)))
     (when git-dir
       (superman-view-insert-git-branches git-dir)
       (if buttons
 	  (insert "\n")
 	(superman-view-insert-git-buttons)
 	)))
-  (when superman-git-mode
+  (when (and superman-git-mode
+	     (next-single-property-change (point-min) 'cat))
     (goto-char (next-single-property-change (point-min) 'cat))
     (superman-redo-cat)))
 

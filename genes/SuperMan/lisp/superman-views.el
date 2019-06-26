@@ -1148,27 +1148,33 @@ Translate the branch names into buttons."
   (let ((loc (or dir
 		 (get-text-property (point-min) 'git-dir)))
 	(view-buf (current-buffer)))
-    (let* ((branch-list (delq nil (superman-git-branches loc)))
+    (let* ((branch-list (delq nil (superman-git-list-branches loc)))
 	   (current-branch (car branch-list))
 	   (remote (member-if
 		    (lambda (x)
 		      (string-match "^remotes/" x)) branch-list))
 	   (other-branches (cdr branch-list))
 	   (title "Branch:"))
-      (when remote 
+      ;; (when remote 
 	;; (setq other-branches (delete remote other-branches)))
-	(setq other-branches
-	      (delete-if
-	       (lambda (x) (string-match "remotes/" x)) other-branches)))
+	;; (setq other-branches
+	      ;; (delete-if
+	       ;; (lambda (x) (string-match "remotes/" x)) other-branches)
+	      ;; ))
       (put-text-property 0 (length title) 'face 'org-level-2 title)
       (put-text-property 0 (length title) 'superman-header-marker t title)
       (put-text-property 0 (length title) 'git-branches t title)
       (insert
        (superman-make-button
 	title
-	'(:fun superman-git-new-branch
+	`(:fun (lambda () (interactive)
+		 (superman-run-cmd
+		  ,(concat "cd " loc "; "
+			   superman-cmd-git " show-branch --list --a -r --current\n")
+		  "*Superman-returns*"
+		  ,(concat "Result of git show-branch --list --a -r --current:\n")))
 	       :face superman-header-button-face
-	       :help "Create new git branch"))
+	       :help "Status of git branches via git show-branch --list --a -r --current"))
        " ")
       (put-text-property
        0 1
@@ -1213,10 +1219,6 @@ Translate the branch names into buttons."
 	       (git-p (member-if
 		       (lambda (x)
 			 (string-match "remotes/origin/master" x)) remote))
-	       ;; (fetch-cmd (if svn-p "svn fetch" "fetch origin"))
-	       ;; (merge-cmd "merge origin/master")
-	       ;; (pull-cmd (if svn-p "svn rebase" "pull"))
-	       ;; (push-cmd (if svn-p "svn dcommit" "push"))
 	       (remote-cmd (if git-p
 			       (if svn-p
 				   (concat
@@ -1323,7 +1325,16 @@ Translate the branch names into buttons."
 					 "*Superman-returns*"
 					 (concat "`" ,superman-cmd-git " svn dcommit' run below \n" ,loc "' returns:\n\n")))
 		     :face file-list-action-button-face
-		     :help "Push changes to remote svn repository")))))))))
+		     :help "Push changes to remote svn repository"))))
+	  ;; new branch
+	  (insert
+	   " | "
+	   (superman-make-button
+	    " new "
+	    `(:fun superman-git-new-branch
+		   :face file-list-info-button-face
+		   :help "Create a new (local) branch")))
+	  )))))
 
 
 ;;}}}
