@@ -1,3 +1,43 @@
+;;{{{
+(defun book-clean-chapter ()
+  (interactive)
+  (let ((dir 
+	 (file-name-nondirectory 
+	  (directory-file-name (file-name-directory (buffer-file-name (current-buffer)))))
+	 ))
+    (revert-buffer t t t)
+    (goto-char (point-min))
+    ;; (delete-region (point-min) (re-search-forward "\\\\begin{document}" nil t))
+    (while (re-search-forward "includegraphics" nil t)
+      (skip-chars-forward "^{")
+      (forward-char 1)
+      (insert "chapters/" dir "/"))
+    (goto-char (point-min))
+    (while (re-search-forward "\\phantomsection" nil t)
+      (replace-match ""))
+    (goto-char (point-min))
+    (while (re-search-forward "url{" nil t)
+      (replace-match "texttt{"))
+    (save-buffer)))
+
+(add-to-list 'superman-org-export-target-list "chapter")
+
+(defun superman-export-as-chapter ()
+  (interactive)
+  (let* ((org-buf (current-buffer))
+	 (raw-file (superman-file-name nil nil t ""))
+	 (tex-file (concat raw-file ".tex"))
+	 (book-file (or (get-file-buffer "~/research/Methods/PredictionModelsMonograph/medical-prediction-models/book.tex")
+			(find-file  "~/research/Methods/PredictionModelsMonograph/medical-prediction-models/book.tex"))))
+    (org-latex-export-to-latex nil nil nil 'body-only nil)
+    ;; (superman-export-as-latex 'debug)
+    (switch-to-buffer (or (get-file-buffer tex-file)
+			  (find-file tex-file)))
+    (book-clean-chapter)
+    (superman-set-config
+     (concat (buffer-name org-buf) " | " (buffer-name book-file)))))
+
+;;}}}
 ;;{{{ allow bind
 ;; (setq org-export-allow-BIND t)
 (setq org-export-allow-bind-keywords t)
@@ -315,7 +355,6 @@ The second R-markdown file contains in addtion the R-code that produces the resu
   (let ((outfile (org-export-output-file-name ".Rmd" subtreep)))
     (org-export-to-file 'ravel-markdown outfile
       async subtreep visible-only body-only ext-plist)))
-
 
 (defun superman-export-as-rmd/html ()
   "Export as html and as rmd. R-chunks should have 

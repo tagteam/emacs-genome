@@ -98,28 +98,37 @@
 (defvar dst-window-size nil)
 (defvar dst-screen-setting 'laptop)
 
+(defun dst-getwindow-name (&optional pre-command)
+  (let ((pre-command (or pre-command "")))
+    (concat "\'"
+	    (replace-regexp-in-string
+	     "\n" ""
+	     (shell-command-to-string
+	      (concat pre-command 
+		      "xdotool getwindowfocus getwindowname"))) "\'")))
+
 (defun dst-browser ()
   "Check if chromium is running and showing dst remote"
-  (let* ((emacs-window (shell-command-to-string "xdotool getwindowfocus getwindowname"))
+  (let* ((emacs-window (dst-getwindow-name ""))
 	 (async-shell-command-buffer 'new-buffer)
 	 (is-chromium (string-match "Chromium" (shell-command-to-string "wmctrl -l")))
 	 (chromium-window
 	  (progn
 	    (unless is-chromium
 	      (async-shell-command
-	       (concat "chromium-browser -new-instance -new-window http://remote.dst.dk/vdesk/hangup.php3;"
+	       (concat "chromium-browser --disable-infobars -new-instance -new-window http://remote.dst.dk/vdesk/hangup.php3;"
 		       "wmctrl -a " emacs-window)		       
 	       (get-buffer-create "*dst-browser*"))
-	      (sit-for 1)
+	      (sleep-for 1)
 	      (shell-command (concat "wmctrl -a " emacs-window)))
 	    (if (string-match "Chromium" (shell-command-to-string "wmctrl -l"))
 		;; now we know chromium has a window
-		(replace-regexp-in-string "\n+" "" (shell-command-to-string "wmctrl -a Chromium;xdotool getwindowfocus getwindowname"))
-	      (error  "Cannot see chromium window via shell-command:  wmctrl -a Chromium;xdotool getwindowfocus getwindowname"))))
+		(dst-getwindow-name "wmctrl -a Chromium;")
+	      (error  "Cannot see chromium window via dst-getwindow-name."))))
 	 (response
 	  ;; three different states: 0 = logged in, 1 = waiting for ident + password, 2 = logged out
 	  (cond ((string= "" chromium-window)
-		 (error  "Cannot see chromium window via shell-command: wmctrl -a Chromium;xdotool getwindowfocus getwindowname"))
+		 (error  "Cannot see chromium window via dst-getwindow-name."))
 		((string-match "logout page - Chromium" chromium-window) 
 		 "logout")
 		((string-match "remote.dst.dk - Chromium" chromium-window)
@@ -127,11 +136,10 @@
 		((string-match "F5 Dynamic Webtop - Chromium" chromium-window)
 		 "running")
 		(t (async-shell-command
-		    (concat "chromium-browser http://remote.dst.dk/vdesk/hangup.php3;"
+		    (concat "chromium-browser  --disable-infobars http://remote.dst.dk/vdesk/hangup.php3;"
 			    "wmctrl -a " emacs-window)
 		    (get-buffer-create "*dst-browser*"))
-		   (setq chromium-window 
-			 (replace-regexp-in-string "\n+" "" (shell-command-to-string "wmctrl -a Chromium;xdotool getwindowfocus getwindowname")))
+		   (setq chromium-window (dst-getwindow-name "wmctrl -a Chromium;"))
 		   "logout"))))
     ;; move chromium-window in place
     ;; (shell-command-to-string (concat "wmctrl -r Chromium -e 0,0,0," 
@@ -152,7 +160,7 @@
   (unless dst-ident 
     (error "You need to set the variable `dst-ident'"))
   (let* ((async-shell-command-buffer 'new-buffer)
-	 (emacs-window (shell-command-to-string "xdotool getwindowfocus getwindowname"))
+	 (emacs-window  (dst-getwindow-name ""))
 	 (cw (dst-browser))
 	 (chromium-status (plist-get cw :status))
 	 (chromium-window (plist-get cw :window))
@@ -165,32 +173,40 @@
 	     "xdotool key Tab;"
 	     "sleep 0.1;"
 	     (unless (string= chromium-status "waiting") 
-	       "xdotool key Return;"))))
-	 (cmd-2
-	  (concat
-	   "wmctrl -a " chromium-window ";"
-	   "xdotool mousemove " dst-click-position " click 1;"
-	   "sleep 0.1;"
-	   "xdotool key Tab;"
-	   "sleep 1.1;"
-	   "xdotool type '" dst-ident "';"
-	   "sleep 0.1;"
-	   "xdotool key Tab;"
-	   "sleep 1.1;"
-	   "xdotool type '" dst-firewall-code "';"
-	   "sleep 0.1;"
-	   "xdotool key Return;")))
+	       "xdotool key Return;")
+	     "wmctrl -a " emacs-window ";")))
+	 cmd-2)
     ;; xdotool getmouselocation
     (if (not cmd-1) chromium-window
       (message cmd-1)
       (shell-command-to-string cmd-1)
-      (shell-command (concat "wmctrl -a " emacs-window))
+      (sleep-for 1)
       (setq cw (dst-browser)
             chromium-status (plist-get cw :status)
             chromium-window (plist-get cw :window))
+      (message chromium-status)
+      (sleep-for 1)
       (if (string= chromium-status "waiting")
-	  (shell-command-to-string cmd-2)
-	(error "Cannot start typing ...")))))
+	  (progn
+	    (setq cmd-2
+	     (concat
+	      "wmctrl -a " chromium-window ";"
+	      "xdotool mousemove " dst-click-position " click 1;"
+	      "sleep 0.1;"
+	      "xdotool key Tab;"
+	      "sleep 1.1;"
+	      "xdotool type '" dst-ident "';"
+	      "sleep 0.1;"
+	      "xdotool key Tab;"
+	      "sleep 1.1;"
+	      "xdotool type '" dst-firewall-code "';"
+	      "sleep 0.1;"
+	      "xdotool key Return;"))
+	    (message cmd-2)
+	    (shell-command-to-string cmd-2))
+	(message chromium-status)
+	;;(message "Cannot start typing ...")
+	))))
   
 (defun dst-select (&optional project)
   (interactive)
@@ -226,7 +242,7 @@
 
 (defun dst-connect (&optional server)
   (interactive)
-  (let ((emacs-window (shell-command-to-string "xdotool getwindowfocus getwindowname")))
+  (let ((emacs-window  (dst-getwindow-name "")))
     ;; test firewall
     (dst-open-firewall);; starts browser if necessary, moves browser in position
     (let* ((server (or server (completing-read "Server: " dst-servers)))
@@ -241,7 +257,7 @@
       (setq rdp-buffer (generate-new-buffer "*rdp-response*"))
       (message cmd)
       (async-shell-command cmd rdp-buffer)
-      (sit-for 2)
+      (sleep-for 1)
       (if (process-live-p (get-buffer-process rdp-buffer))
 	  (message "First attempt succeeded")
 	(message "Second attempt  ...")
@@ -257,42 +273,66 @@
 (defun dst4 () (interactive) (dst-connect "srvfsegh4"))
 (defun dst5 () (interactive) (dst-connect "srvfsegh5"))
 
-	  
-(defun dst-change-passwords ()
-  "Go through the list of projects and change the passwords."
+
+(defun dst-change-all-passwords ()
   (interactive)
-  (let* ((new (read-string "New password: "))
-	 (wlist (shell-command-to-string "wmctrl -l"))
-	 (emacs-window (shell-command-to-string "xdotool getwindowfocus getwindowname"))
-	 this-project cmd
-	 (ddlist dst-login-list))
+  (let ((ddlist dst-login-list)
+	(new (read-string (concat "New password: "))))
     (while ddlist
       (setq this-project (car ddlist))
-      (if (string-match new (nth 2 this-project))
-	  (message (concat "Already new password: "(nth 0 this-project)))
-	(setq cmd (concat
-		   "xdotool mousemove 395 272 click 1;" ;; change-password-button
-		   "sleep 4;"
-		   "xdotool mousemove 977 342 click 1;"  ;; domain user field
-		   "sleep 1;"
-		   "xdotool type " dst-ident (nth 1 this-project) "@dstfse.local;"
-		   "sleep 1;"
-		   "xdotool mousemove 976 370 click 1;"  ;; current password
-		   "xdotool type " (nth 2 this-project);"
-		   "xdotool mousemove 976 400 click 1;" ;; new password
-		   "xdotool type " new ";"
-		   "xdotool mousemove 976 426 click 1;" ;; new password again
-		   "xdotool type " new ";"
-		   "sleep 1;"
-		   "xdotool mousemove 1059 466 click 1;" ;; submit
-		   "sleep 10;"
+      (dst-change-password this-project new 'submit)
+    (setq ddlist (cdr ddlist)))))
 
-		   WJA6632
-		   "xdotool key ctrl+w;"
-		   "sleep 3"
-		   "wmctrl -a " emacs-window))
-	(when (y-or-n-p (concat "Run this: " cmd)) (shell-command cmd)))
-      (setq ddlist (cdr ddlist)))))
+(defun dst-change-password (&optional project new-password click-submit)
+  "Go through the list of projects and change the passwords."
+  (interactive)
+  (let* ((wlist (shell-command-to-string "wmctrl -l"))
+	 (emacs-window  (dst-getwindow-name ""))
+	 (this-project (or project
+			   (let ((p (ido-completing-read
+				     "Choose DST-project: "
+				     dst-login-list
+				     nil nil nil dst-login-history dst-last-project)))
+			     (assoc p dst-login-list))))
+	 (new (or new-password (read-string (concat "New password for " (nth 1 this-project) " (old is " (nth 2 this-project) "): "))))
+	 (cw (dst-browser))
+	 (chromium-status (plist-get cw :status))
+	 (chromium-window (plist-get cw :window))
+	 cmd)
+    (unless (string= chromium-status "running")
+      (error "Chromium not logged into DST"))
+    (if (string-match new (nth 2 this-project))
+	(message (concat "Already new password: "(nth 0 this-project)))
+      (setq cmd (concat
+		 "wmctrl -a " chromium-window ";"
+		 "xdotool mousemove " dst-change-password-pos " click 1;" ;; change-password-button
+		 "sleep 4;"
+		 "xdotool mousemove " dst-domain-user-pos " click 1;"  ;; domain user field
+		 "sleep 1;"
+		 "xdotool type " dst-ident (nth 1 this-project) "@dstfse.local;"
+		 "sleep 1;"
+		 "xdotool mousemove " dst-current-password-pos " click 1;"  ;; current password
+		 "sleep 1;"
+		 "xdotool type " (nth 2 this-project) ";"
+		 "sleep 1;"
+		 "xdotool mousemove " dst-new-password-pos" click 1;" ;; new password
+		 "sleep 1;"
+		 "xdotool type " new ";"
+		 "sleep 1;"
+		 "xdotool mousemove " dst-confirm-password-pos " click 1;" ;; confirm password
+		 "xdotool type " new ";"
+		 "sleep 1;"
+		 (when click-submit
+		   (concat "xdotool mousemove " dst-submit-button-pos " click 1;"
+		       "sleep 1;"
+		       "xdotool key ctrl+w;"
+		       "sleep 1;"
+		       "wmctrl -a " emacs-window))))
+      (when (or (not click-submit)
+		(y-or-n-p (concat "Run this: " cmd)))
+	(message cmd)
+	(shell-command cmd)))))
+
 
 (provide 'dst-snps)
 ;;; dst-snps.el ends here

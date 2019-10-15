@@ -269,13 +269,14 @@
 (add-hook 'LaTeX-mode-hook
 	  '(lambda ()
 	     (add-to-list 'TeX-command-list '("make" "latexmk -f %t" TeX-run-TeX  nil "nil") t)
-	     (add-to-list 'TeX-command-list '("make-dvi" "latexmk -pvc -dvi -f %t" TeX-run-TeX  nil "nil") t)
-	     (add-to-list 'TeX-command-list '("make-ps"  "latexmk -pvc -ps -f %t" TeX-run-TeX  nil "nil") t)
+	     ;; (add-to-list 'TeX-command-list '("make-dvi" "latexmk -pvc -dvi -f %t" TeX-run-TeX  nil "nil") t)
+	     ;; (add-to-list 'TeX-command-list '("make-ps"  "latexmk -cd -pvc -ps -f %t" TeX-run-TeX  nil "nil") t)
 	     (add-to-list 'TeX-command-list '("make-pdf" "latexmk -pvc -pdf -f %t" TeX-run-TeX  nil "nil") t)
+	     (add-to-list 'TeX-command-list '("make-pdf-cd" "latexmk -pvc -cd -pdf -f %t" TeX-run-TeX  nil "nil") t)
 	     (add-to-list 'TeX-command-list '("make-ps2pdf" "latexmk -pvc -pdfps -f %t" TeX-run-TeX  nil "nil") t)
-	     (add-to-list 'TeX-command-list '("make-dvi-landscape" "latexmk -pvc -l -dvi -f %t" TeX-run-TeX  nil "nil") t)
-	     (add-to-list 'TeX-command-list '("make-ps-landscape" "latexmk  -pvc -l -ps -f %t" TeX-run-TeX  nil "nil") t)
-	     (add-to-list 'TeX-command-list '("make-pdf-landscape" "latexmk -pvc -l -pdf -f %t" TeX-run-TeX  nil "nil") t)
+	     ;; (add-to-list 'TeX-command-list '("make-dvi-landscape" "latexmk -pvc -l -dvi -f %t" TeX-run-TeX  nil "nil") t)
+	     ;; (add-to-list 'TeX-command-list '("make-ps-landscape" "latexmk  -pvc -l -ps -f %t" TeX-run-TeX  nil "nil") t)
+	     (add-to-list 'TeX-command-list '("make-pdf-landscape" "latexmk -pvc -cd -l -pdf -f %t" TeX-run-TeX  nil "nil") t)
 	     (add-to-list 'TeX-command-list '("make-ps2pdf-landscape" "latexmk -pvc -l -pdfps -f %t" TeX-run-TeX  nil "nil") t)))
 ;;}}}
 

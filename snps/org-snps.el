@@ -96,6 +96,14 @@
 (add-to-list 'auto-mode-alist '("\\.org$" . org-mode))
 (setq org-log-done t)
 
+(defun org-babel-execute-src-block-by-name (&optional name)
+  (interactive)
+  (save-excursion
+    (goto-char
+     (org-babel-find-named-block
+      (or name
+	  (completing-read "Code Block: " (org-babel-src-block-names)))))
+    (org-babel-execute-src-block-maybe)))
 
 (add-hook 'org-mode-hook
 	  #'(lambda nil
@@ -106,6 +114,7 @@
 	      (define-key org-mode-map [(meta e)] 'hippie-expand)
 	      (define-key org-mode-map [(control e)] 'end-of-line)
 	      (define-key org-mode-map [(control z)] 'org-shifttab)
+	      (define-key org-mode-map [(control meta j)] 'org-babel-execute-src-block-by-name)
 	      (define-key org-mode-map "\C-xpd" 'superman-view-documents)
 	      (define-key org-mode-map "\C-c\C-v" 'superman-browse-this-file)
 	      (define-key org-mode-map [(meta up)] 'backward-paragraph)
@@ -843,7 +852,69 @@
 
 ;;}}}
 
-;;{{{ 
+;;{{{ babel execute blocks above
+;; http://kitchingroup.cheme.cmu.edu/blog/2015/03/19/Restarting-org-babel-sessions-in-org-mode-more-effectively/
+(defun src-block-in-session-p (&optional name)
+  "Return if src-block is in a session of NAME.
+NAME may be nil for unnamed sessions."
+  (let* ((info (org-babel-get-src-block-info))
+         (lang (nth 0 info))
+         (body (nth 1 info))
+         (params (nth 2 info))
+         (session (cdr (assoc :session params))))
+
+    (cond
+     ;; unnamed session, both name and session are nil
+     ((and (null session)
+           (null name))
+      t)
+     ;; Matching name and session
+     ((and
+       (stringp name)
+       (stringp session)
+       (string= name session))
+      t)
+     ;; no match
+     (t nil))))
+
+(defun org-babel-restart-session-to-point (&optional arg)
+  "Restart session up to the src-block in the current point.
+Goes to beginning of buffer and executes each code block with
+`org-babel-execute-src-block' that has the same language and
+session as the current block. ARG has same meaning as in
+`org-babel-execute-src-block'."
+  (interactive "P")
+  (unless (org-in-src-block-p)
+    (error "You must be in a src-block to run this command"))
+  (let* ((current-point (point-marker))
+         (info (org-babel-get-src-block-info))
+         (lang (nth 0 info))
+         (params (nth 2 info))
+         (session (cdr (assoc :session params))))
+    (save-excursion
+      (goto-char (point-min))
+      (while (re-search-forward org-babel-src-block-regexp nil t)
+        ;; goto start of block
+        (goto-char (match-beginning 0))
+        (let* ((this-info (org-babel-get-src-block-info))
+               (this-lang (nth 0 this-info))
+               (this-params (nth 2 this-info))
+               (this-session (cdr (assoc :session this-params))))
+          (when
+              (and
+               (< (point) (marker-position current-point))
+               (string= lang this-lang)
+               (src-block-in-session-p session))
+            (org-babel-execute-src-block arg)))
+        ;; move forward so we can find the next block
+        (forward-line)))))
+(defun org-babel-run-blocks-above nil
+    (interactive)
+  (org-babel-restart-session-to-point))
+
+;;}}}
+
+;;{{{  org 2 rmd
 (defun org2rmd ()
   (interactive)
   ;; headers

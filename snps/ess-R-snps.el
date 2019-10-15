@@ -156,12 +156,12 @@
   ;; put the point in the lowest line and return
   (next-line arg))
 
-(add-hook 'ess-mode-hook 'eg/R-mode)
+(add-hook 'ess-r-mode-hook 'eg/R-mode)
 (defun eg/R-mode ()
   (interactive)
   (setq split-width-threshold nil)
   (setq dabbrev-abbrev-skip-leading-regexp "\\$") 
-  (setq ess-fancy-comments nil))
+  (setq ess-indent-with-fancy-comments nil))
 ;;}}}
 ;;{{{ scrolling iess window on output
 (setq comint-scroll-to-bottom-on-output 'this)

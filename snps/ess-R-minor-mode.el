@@ -47,7 +47,7 @@
   (interactive "P")
   ;; (make-variable-buffer-local 'hippie-expand-try-functions-list)
   (add-to-list 'hippie-expand-try-functions-list (lambda (old) (ess-complete-object-name)))
-  (setq ess-fancy-comments nil)
+  (setq ess-indent-with-fancy-comments nil)
   (setq R-minor-mode
 	(not (or (and (null arg) R-minor-mode)
 		 (<= (prefix-numeric-value arg) 0)))))

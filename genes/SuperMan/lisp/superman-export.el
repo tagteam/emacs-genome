@@ -152,6 +152,7 @@ Use this map to set additional keybindings for when Org-mode is used.")
 
 (defvar superman-org-export-target-list '("pdf" "html" "docx")
   "Export targets.")
+
 (defvar superman-org-export-target "pdf" "current export target")
 
 (defvar superman-babel-target-list '("this-block" "all-blocks")

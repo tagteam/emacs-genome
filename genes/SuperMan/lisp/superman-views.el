@@ -721,7 +721,8 @@ Enabling superman-make mode enables the make keyboard to control single files."
 		    (goto-char (point-min))
 		    (while (re-search-forward "^\\([a-zA-Z]+\\)::?" nil t)
 		      (setq targets (append targets (list (match-string-no-properties 1))))))
-		  (cons x targets))) mfiles))))
+		  (cons x targets)))
+	      mfiles))))
 
 ;;}}}
 ;;{{{ view mode map
