@@ -46,9 +46,9 @@
 ;; 2. In your init file (.emacs) adapt the following variables
 ;;    according to your own data
 ;;    dst-directory   : the directory where you keep the launcherxyZ123.rdp files
-;;    dst-window-size : a string like " /size:1600x1000" or "/f" for full size.
+;;    dst-window-size : a list of two strings 
 ;;    dst-ident : you three or four letter name
-;;    dst-server1-position
+;;    dst-servers: a list of servers and click positions for the correponding button
 ;;    dst-login-list: a list whose elements are lists with three elements,
 ;;    ("human-readable project identification" "project-user-name" "password")
 ;;
@@ -64,7 +64,12 @@
 ;;    Here is my setup:
 ;;
 ;;    (setq dst-directory "~/dst")
-;;    (setq dst-window-size "/size:1600x1000")
+;;    (setq dst-click-position "45 141")
+;;    (setq dst-window-size '("1900" "1050"))
+;;    (setq dst-servers '(("FSE Windows" . "999 276")
+;;   		    ("srvfsegh4" .  "435 325")
+;; 		    ("srvfsegh5" .  "740 325")))
+;;
 ;;    (setq dst-login-list
 ;;          ;; ("some-text-to-identify-project" "project-number" "password")
 ;;          '(("Regitze" "3775"  "xxxxxxxxx")
@@ -168,6 +173,8 @@
 	  (unless (string= chromium-status "running")
 	    (concat
 	     "wmctrl -a " chromium-window ";"
+	     "xdotool mousemove " dst-click-position " click 1;"
+	     "sleep 0.1;"
 	     "xdotool mousemove " dst-click-position " click 1;"
 	     "sleep 0.1;"
 	     "xdotool key Tab;"
@@ -286,7 +293,8 @@
 (defun dst-change-password (&optional project new-password click-submit)
   "Go through the list of projects and change the passwords."
   (interactive)
-  (let* ((wlist (shell-command-to-string "wmctrl -l"))
+  (let* ((log-buf (get-buffer-create "*dst-change-password-log*"))
+	 (wlist (shell-command-to-string "wmctrl -l"))
 	 (emacs-window  (dst-getwindow-name ""))
 	 (this-project (or project
 			   (let ((p (ido-completing-read
@@ -324,14 +332,17 @@
 		 "sleep 1;"
 		 (when click-submit
 		   (concat "xdotool mousemove " dst-submit-button-pos " click 1;"
-		       "sleep 1;"
-		       "xdotool key ctrl+w;"
-		       "sleep 1;"
-		       "wmctrl -a " emacs-window))))
-      (when (or (not click-submit)
+			   "sleep 1;"
+			   "xdotool key ctrl+w;"
+			   "sleep 1;"
+			   "wmctrl -a " emacs-window))))
+      (when (or click-submit
 		(y-or-n-p (concat "Run this: " cmd)))
 	(message cmd)
-	(shell-command cmd)))))
+	(shell-command cmd)
+	(save-excursion (set-buffer log-buf) 
+			(insert "Project: " (nth 1 this-project) "\told: " (nth 2 this-project) "\tnew: " new)
+			)))))
 
 
 (provide 'dst-snps)

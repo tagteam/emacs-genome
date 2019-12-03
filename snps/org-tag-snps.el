@@ -307,8 +307,10 @@ space
       (goto-char (point-min))
       ;; when link does not exist org breaks the flow
       (insert "You can read and work out the exercises directly in R-studio. Below are links to R-markdown files, 
-the first R-markdown file contains the exercise texts and empty R-chunks where you should put the R-code to solve the exercise. 
-The second R-markdown file contains in addtion the R-code that produces the results. This is recommended when your Rabilities are insufficient, or you want to cheat (there is nothing to be ashamed of in being in this situation)\n\n")
+the first R-markdown file contains the exercise text and empty R-chunks where you should put the R-code to solve the exercise. 
+The second R-markdown file contains also the R-code that produces the results. It is recommended that you work with the second file when your Rabilities are insufficient, or you want to cheat (there is nothing to be ashamed of in being in this situation).
+In any case, the focus of your work should be on the understanding of the results. A good way for you to check your understanding, is to write down your interpretation of the results in full English sentences
+in a style suitable for a manuscript that is read by your own kind (i.e., try the person sitting next to you).\n\n")
       (ignore-errors (insert "- [[./" rmd-file "][Open R-markdown version without R-code]]\n"))
       (ignore-errors (insert "- [[./" (concat (file-name-sans-extension rmd-file) "-with-code.Rmd") "][Open R-markdown version with R-code]]\n"))
       (insert "# REMOVEUNTILHERE\n"))

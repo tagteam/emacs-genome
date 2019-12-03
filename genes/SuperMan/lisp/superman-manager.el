@@ -955,9 +955,9 @@ If NOSELECT is set return the project."
         prefix arg is given, then browse the corresponding file on the superman-public-server"
   (interactive "P")
   (let ((superman-candidate (intern (concat "superman-browse-org-export-target-" superman-org-export-target))))
-    (cond ((functionp superman-candidate)
+    (cond ((and (not arg) (functionp superman-candidate))
 	   (funcall superman-candidate))
-	  ((string= superman-org-export-target "html")
+	  ((or (string= superman-org-export-target "html") (string= superman-org-export-target "exercise"))
 	   (let* ((bf (buffer-file-name (current-buffer)))
 		  (server-home (if (and arg (not superman-public-server-home))
 				   (read-string "Specify address on server: " "http://")

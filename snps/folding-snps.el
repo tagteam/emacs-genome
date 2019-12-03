@@ -7,8 +7,8 @@
 (folding-add-to-marks-list 'latex-mode "% {{{" "% }}}" t)
 (folding-add-to-marks-list 'c-mode "// {{{" "// }}}" t)
 (folding-add-to-marks-list 'muse-mode "; {{{" "; }}}" t)
-(folding-add-to-marks-list 'ESS-mode "# {{{" "# }}}" nil t)
-(folding-add-to-marks-list 'ESS-r-mode "# {{{" "# }}}" nil t)
+(folding-add-to-marks-list 'ess-mode "# {{{" "# }}}" nil t)
+(folding-add-to-marks-list 'ess-r-mode "# {{{" "# }}}" nil t)
 (folding-add-to-marks-list 'css-mode "/* {{{ */" "/* }}} */" nil t)
 
 ; (add-to-list 'folding-mode-marks-alist '(ess-mode "#{{{" " #}}}"))

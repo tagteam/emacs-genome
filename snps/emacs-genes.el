@@ -1,6 +1,6 @@
 ;;; emacs-genes.el
 
-;; Copyright (C) 2015  Thomas Alexander Gerds
+;; Copyright (C) 2015-2019  Thomas Alexander Gerds
 
 ;; Author: Thomas Alexander Gerds <tag@biostat.ku.dk>
 ;; Keywords: convenience
@@ -20,9 +20,9 @@
 ;;----------------------------------------------------------------------
 ;; created: Apr 12 2015 (09:51) 
 ;; Version: 
-;; last-updated: Apr 29 2018 (10:24) 
+;; last-updated: Dec  3 2019 (15:52) 
 ;;           By: Thomas Alexander Gerds
-;;     Update #: 68
+;;     Update #: 69
 ;;----------------------------------------------------------------------
 ;; 
 ;;; Commentary: Show important features {genes}. 
@@ -283,6 +283,7 @@ Previous buffer same mode :  \\M-p
      \\M-J : change export target (pdf, html, docx)
      \\M-j : export buffer to target
 \\C-c\\C-e : export to other formats
+\\C-c\\C-c : view export (pdf, html or docx)
      \\M-k : export buffer to pdf, show tex and R buffers for debugging
 
 * R 
