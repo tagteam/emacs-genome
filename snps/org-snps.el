@@ -33,11 +33,6 @@
 (require 'ox-beamer nil t)
 (require 'ox-odt nil t)
 ;;}}}
-;;{{{ global keys
-(global-set-key "\C-cl" 'org-store-link)
-(global-set-key "\C-ca" 'org-agenda)
-(global-set-key "\C-cb" 'org-iswitchb)
-;;}}}
 ;;{{{ babel settings
 (setq org-babel-hash-show-time t)
 ;; it is most transparent and convenient 
@@ -112,6 +107,7 @@
 	      (define-key org-mode-map (kbd "C-x c") 'superman-view-mode)
 	      (define-key org-mode-map [(control tab)] 'hide-subtree)
 	      (define-key org-mode-map [(meta e)] 'hippie-expand)
+	      (define-key org-mode-map [(f12)] 'visible-mode)
 	      (define-key org-mode-map [(control e)] 'end-of-line)
 	      (define-key org-mode-map [(control z)] 'org-shifttab)
 	      (define-key org-mode-map [(control meta j)] 'org-babel-execute-src-block-by-name)
@@ -149,7 +145,10 @@
 (setq org-export-allow-bind-keywords t
       org-export-allow-BIND t)
 (setq org-html-R-tutorial-home/up-format 
-"<ul class=\"navigation\"><li class=\"site-name\">TagTeam: R-tutorials</li><li><a accesskey=\"a\" href=\"%s\">Articles</a></li><li><a accesskey=\"c\" href=\"https://github.com/tagteam\">Code</a></li><li><a accesskey=\"i\" href=\"index.html\">Index</a></li></ul>")
+      "<ul class=\"navigation\"><li class=\"site-name\">TagTeam: R-tutorials</li><li><a accesskey=\"a\" href=\"%s\">Articles</a></li><li><a accesskey=\"c\" href=\"https://github.com/tagteam\">Code</a></li><li><a accesskey=\"i\" href=\"index.html\">Index</a></li></ul>")
+
+(setq org-html-preamble-format 
+      '(("en" "%d<br>%a")))
 ;;}}}
 
 ;;{{{ eg/org latex/export debug minor mode
@@ -740,13 +739,14 @@
 							      (if (string= (car (org-babel-get-src-block-info)) "R")
 								  (eg-switch-to-R 't))))
 	      (define-key org-mode-map [(meta J)] 'superman-org-export-change-target)
+	      ;; (define-key org-mode-map [(control c control b)] 'org-babel-execute-src-block-by-name)
+	      ;; (define-key org-mode-map [(control c control D)] '(lambda () (org-babel-execute-src-block-by-name "data")))
 	      (define-key org-mode-map [(meta j)] 'superman-run-R-or-export-as)
 	      (define-key org-mode-map [(control shift e)] 'eg/org-lazy-load)
 	      (define-key org-mode-map [(control xx)] 'eg/org-lazy-load)
 	      (define-key org-mode-map "\M-F" 'ess-eval-function-and-go)
 	      (define-key org-mode-map [(meta control i)] 'eg/org-indent)
-	      (define-key org-mode-map "_" 'eg/org-smart-underscore)
-	      ))
+	      (define-key org-mode-map "_" 'eg/org-smart-underscore)))
 
 ;;}}}
 ;;{{{ list documents

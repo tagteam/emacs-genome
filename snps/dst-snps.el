@@ -103,7 +103,8 @@
 (defvar dst-window-size nil)
 (defvar dst-screen-setting 'laptop)
 
-(defun dst-getwindow-name (&optional pre-command)
+(defun dst-active-window-name (&optional pre-command)
+  "Return title of current window"
   (let ((pre-command (or pre-command "")))
     (concat "\'"
 	    (replace-regexp-in-string
@@ -112,9 +113,31 @@
 	      (concat pre-command 
 		      "xdotool getwindowfocus getwindowname"))) "\'")))
 
+(defun dst-klargoer-browser ()
+  "Start chromium browser unless already running"
+  (interactive)
+  (let* ((chromium-running
+	  (string-match "[0-9]" (shell-command-to-string "xdotool search --onlyvisible --class 'chromium'"))))
+    (if chromium-running
+	(if (shell-command-to-string (concat "xdotool windowfocus" (replace-regexp-in-string
+							 "\n" ""
+							 (shell-command-to-string "xdotool search --onlyvisible --class 'chromium'"))
+					     " getwindowname"))
+	    ;; use async instead of shell-command so emacs does not freeze
+	    (async-shell-command
+	     ;; concat is like paste in R
+	     (concat "chromium-browser --disable-infobars -new-instance -new-window http://remote.dst.dk/vdesk/hangup.php3;")))
+      ;; now we know chromium-browser is up and running 
+    
+    ))
+	
+
+(defun dst-get-window-name ()  
+
 (defun dst-browser ()
+  (interactive)
   "Check if chromium is running and showing dst remote"
-  (let* ((emacs-window (dst-getwindow-name ""))
+  (let* ((emacs-window (dst-active-window-name ""))
 	 (async-shell-command-buffer 'new-buffer)
 	 (is-chromium (string-match "Chromium" (shell-command-to-string "wmctrl -l")))
 	 (chromium-window
@@ -128,33 +151,44 @@
 	      (shell-command (concat "wmctrl -a " emacs-window)))
 	    (if (string-match "Chromium" (shell-command-to-string "wmctrl -l"))
 		;; now we know chromium has a window
-		(dst-getwindow-name "wmctrl -a Chromium;")
-	      (error  "Cannot see chromium window via dst-getwindow-name."))))
+		(dst-active-window-name "wmctrl -a Chromium;")
+	      (error  "Cannot see chromium window via dst-active-window-name."))))
 	 (response
 	  ;; three different states: 0 = logged in, 1 = waiting for ident + password, 2 = logged out
 	  (cond ((string= "" chromium-window)
-		 (error  "Cannot see chromium window via dst-getwindow-name."))
+		 (error  "Cannot see chromium window via dst-active-window-name."))
 		((string-match "logout page - Chromium" chromium-window) 
+		 (message "DST browser: logout")
 		 "logout")
 		((string-match "remote.dst.dk - Chromium" chromium-window)
+		 (message "DST browser: waiting for login")
 		 "waiting")
 		((string-match "F5 Dynamic Webtop - Chromium" chromium-window)
+		 (message "DST browser: waiting")
 		 "running")
 		(t (async-shell-command
-		    (concat "chromium-browser  --disable-infobars http://remote.dst.dk/vdesk/hangup.php3;"
+		    (concat "chromium-browser  --disable-infobars http://remote.dst.dk/vdesk/hangup.php3"
 			    "wmctrl -a " emacs-window)
 		    (get-buffer-create "*dst-browser*"))
-		   (setq chromium-window (dst-getwindow-name "wmctrl -a Chromium;"))
+		   (setq chromium-window (dst-active-window-name "wmctrl -a Chromium;"))
+		   (message "DST browser: logout")
 		   "logout"))))
     ;; move chromium-window in place
     ;; (shell-command-to-string (concat "wmctrl -r Chromium -e 0,0,0," 
-    (shell-command-to-string (concat "wmctrl -r '" chromium-window "' -e 0,0,0," 
-				     (nth 0 dst-window-size)
-				     ","
-				     (nth 1 dst-window-size) ";"))
+
     ;; back to emacs
     (shell-command-to-string (concat "wmctrl -a " emacs-window))
     `(:status ,response :window ,chromium-window)))
+
+(defun dst-move-browser ()
+  (interactive)
+  (let ((chromium-window (dst-active-window-name "wmctrl -a Chromium;")))
+    (if chromium-window
+	(shell-command-to-string (concat "wmctrl -r '" chromium-window "' -e 0,0,0," 
+					 (nth 0 dst-window-size)
+					 ","
+					 (nth 1 dst-window-size) ";"))
+      (message "Chromium not running. Start via M-x dst-browser RET"))))
 
 
 (defun dst-open-firewall ()
@@ -165,7 +199,7 @@
   (unless dst-ident 
     (error "You need to set the variable `dst-ident'"))
   (let* ((async-shell-command-buffer 'new-buffer)
-	 (emacs-window  (dst-getwindow-name ""))
+	 (emacs-window  (dst-active-window-name ""))
 	 (cw (dst-browser))
 	 (chromium-status (plist-get cw :status))
 	 (chromium-window (plist-get cw :window))
@@ -249,7 +283,7 @@
 
 (defun dst-connect (&optional server)
   (interactive)
-  (let ((emacs-window  (dst-getwindow-name "")))
+  (let ((emacs-window  (dst-active-window-name "")))
     ;; test firewall
     (dst-open-firewall);; starts browser if necessary, moves browser in position
     (let* ((server (or server (completing-read "Server: " dst-servers)))
@@ -295,7 +329,7 @@
   (interactive)
   (let* ((log-buf (get-buffer-create "*dst-change-password-log*"))
 	 (wlist (shell-command-to-string "wmctrl -l"))
-	 (emacs-window  (dst-getwindow-name ""))
+	 (emacs-window  (dst-active-window-name ""))
 	 (this-project (or project
 			   (let ((p (ido-completing-read
 				     "Choose DST-project: "
