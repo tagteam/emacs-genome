@@ -129,10 +129,10 @@
 	     (concat "chromium-browser --disable-infobars -new-instance -new-window http://remote.dst.dk/vdesk/hangup.php3;")))
       ;; now we know chromium-browser is up and running 
     
-    ))
+    )))
 	
 
-(defun dst-get-window-name ()  
+;; (defun dst-get-window-name ()  
 
 (defun dst-browser ()
   (interactive)
