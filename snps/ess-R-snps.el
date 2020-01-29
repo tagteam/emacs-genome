@@ -57,7 +57,6 @@
 ;;}}}
 ;;{{{ key bindings
 
-
 (require 'ess-edit)
 (add-hook 'ess-mode-hook 'eg/R-keybindings)
 (defun eg/R-keybindings ()
@@ -79,7 +78,9 @@
   (define-key ess-mode-map "\C-cF" 'ess-edit-insert-file-name)
   (define-key ess-mode-map "\C-\M-k" #'(lambda () (interactive)(eg-switch-to-R 't)))
   (define-key ess-mode-map [(backspace)] 'delete-backward-char)
-  (define-key ess-mode-map [(meta backspace)] 'backward-kill-word))
+  (define-key ess-mode-map [(meta backspace)] 'backward-kill-word)
+  ;; (setcdr (assoc 'ess-indent-with-fancy-comments (cdr (assoc 'RRR ess-style-alist))) nil)
+  )
 
 (add-hook 'ess-mode-hook 'eg/R-keybindings)
 
@@ -156,12 +157,24 @@
   ;; put the point in the lowest line and return
   (next-line arg))
 
-(add-hook 'ess-r-mode-hook 'eg/R-mode)
+
 (defun eg/R-mode ()
   (interactive)
   (setq split-width-threshold nil)
-  (setq dabbrev-abbrev-skip-leading-regexp "\\$") 
+  (setq dabbrev-abbrev-skip-leading-regexp "\\$")
   (setq ess-indent-with-fancy-comments nil))
+(add-hook 'ess-r-mode-hook 'eg/R-mode)
+
+(defun dont-like-fancy ()
+  (setcdr (assoc 'ess-indent-with-fancy-comments (cdr (assoc 'RRR ess-style-alist))) nil)
+  )
+;; (defun dont-like-fancy ()
+       ;; (setq ess-indent-with-fancy-comments nil))
+(add-hook 'ess-mode-hook 'dont-like-fancy)
+(add-hook 'ess-r-mode-hook 'dont-like-fancy)
+
+
+
 ;;}}}
 ;;{{{ scrolling iess window on output
 (setq comint-scroll-to-bottom-on-output 'this)

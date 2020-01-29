@@ -29,6 +29,7 @@
   (when superman-view-mode
     (superman-file-list (superman-view-current-project))))
 
+
 (defun superman-file-list (project &optional ext)
   "List files in project's location that match extension EXT"
   (if (featurep 'superman-file-list)

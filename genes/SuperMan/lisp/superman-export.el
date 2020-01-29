@@ -1,6 +1,6 @@
 ;;; superman-export.el --- Buttonized org to latex export
 
-;; Copyright (C) 2014-2017  Thomas Alexander Gerds
+;; Copyright (C) 2014-2020  Thomas Alexander Gerds
 
 ;; Author: Thomas Alexander Gerds <tag@biostat.ku.dk>
 ;; Keywords: convenience

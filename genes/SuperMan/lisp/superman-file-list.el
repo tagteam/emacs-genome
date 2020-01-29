@@ -1135,6 +1135,14 @@ or by file-name if there is no sort-key yet"
 	     (goto-char (point-min))
 	     (forward-line (1- (string-to-number grep-line))))))))
 
+(defun file-list-choose-file-no-visit ()
+  (interactive)
+  (let ((cur-buf (current-buffer)))
+    (file-list-choose-file nil)
+    ;;(switch-to-buffer cur-buf)
+    (switch-to-buffer-other-window cur-buf)
+    (forward-line 1)))
+
 (defun file-list-choose-file-other-window (&optional event extent buffer magic)
   (interactive)
   (file-list-choose-file 4 event extent buffer magic))
@@ -1780,6 +1788,7 @@ Switches to the corresponding directory of each file."
 ;;}}}
 ;;{{{ keybindings for the file-list-display-buffer
 (define-key file-list-mode-map [(return)] 'file-list-choose-file)
+(define-key file-list-mode-map [(control return)]  'file-list-choose-file-no-visit)
 (define-key file-list-mode-map [(meta return)] 'file-list-choose-magic)
 (if (featurep 'xemacs)
     (define-key file-list-mode-map [(space)] 'file-list-choose-file-other-window)

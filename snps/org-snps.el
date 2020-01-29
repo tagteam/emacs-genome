@@ -91,6 +91,19 @@
 (add-to-list 'auto-mode-alist '("\\.org$" . org-mode))
 (setq org-log-done t)
 
+(defun org-babel-execute-above ()
+  "Execute all code chunks above."
+  (interactive)
+  (save-restriction
+    (save-excursion
+      (let ((info (org-babel-get-src-block-info)))
+	;; move out of current block
+	(when info (goto-char (- (nth 5 info) 1)))
+	(narrow-to-region (point-min) (point))
+	(org-babel-execute-buffer)
+	(widen)))))
+    
+
 (defun org-babel-execute-src-block-by-name (&optional name)
   (interactive)
   (save-excursion

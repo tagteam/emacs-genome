@@ -103,93 +103,77 @@
 (defvar dst-window-size nil)
 (defvar dst-screen-setting 'laptop)
 
-(defun dst-active-window-name (&optional pre-command)
-  "Return title of current window"
-  (let ((pre-command (or pre-command "")))
-    (concat "\'"
-	    (replace-regexp-in-string
-	     "\n" ""
-	     (shell-command-to-string
-	      (concat pre-command 
-		      "xdotool getwindowfocus getwindowname"))) "\'")))
+(defun dst-current-window ()
+  "Return currently active window as xdotool number"
+  (replace-regexp-in-string
+   "\n" ""  
+   (shell-command-to-string "xdotool getactivewindow")))
 
-(defun dst-klargoer-browser ()
-  "Start chromium browser unless already running"
+(defun dst-current-window-name ()
+  "Return title of currently active window"
+  (replace-regexp-in-string "\n" ""
+   (shell-command-to-string
+    (concat "xdotool getwindowname "
+	    (dst-current-window)))))
+
+(defun dst-chromium-window ()
+  (let ((cwin (shell-command-to-string
+	       "xdotool search --onlyvisible --class 'chromium'")))
+    (if (string= cwin "") nil
+      (replace-regexp-in-string "\n" "" cwin))))
+
+(defun dst-chromium-status ()
+  (let ((chromium-window (dst-chromium-window)))
+    (when chromium-window
+      (replace-regexp-in-string "\n" "" 
+      (shell-command-to-string
+       (concat
+	"xdotool getwindowname " chromium-window))))))
+
+(defun dst-launch-browser ()
+  "Start chromium browser unless already running."
   (interactive)
-  (let* ((chromium-running
-	  (string-match "[0-9]" (shell-command-to-string "xdotool search --onlyvisible --class 'chromium'"))))
-    (if chromium-running
-	(if (shell-command-to-string (concat "xdotool windowfocus" (replace-regexp-in-string
-							 "\n" ""
-							 (shell-command-to-string "xdotool search --onlyvisible --class 'chromium'"))
-					     " getwindowname"))
-	    ;; use async instead of shell-command so emacs does not freeze
-	    (async-shell-command
-	     ;; concat is like paste in R
-	     (concat "chromium-browser --disable-infobars -new-instance -new-window http://remote.dst.dk/vdesk/hangup.php3;")))
-      ;; now we know chromium-browser is up and running 
+  (let* ((chromium-window (dst-chromium-window)))
+    ;; start chromium when necessary
+    (unless chromium-window
+      (async-shell-command
+       (concat "chromium-browser --disable-infobars -new-instance -new-window http://remote.dst.dk/vdesk/hangup.php3;")))))
     
-    )))
-	
-
-;; (defun dst-get-window-name ()  
-
 (defun dst-browser ()
   (interactive)
-  "Check if chromium is running and showing dst remote"
-  (let* ((emacs-window (dst-active-window-name ""))
+  "Check if chromium is running and whether it is showing dst remote"
+  (let* ((emacs-window (dst-current-window))
 	 (async-shell-command-buffer 'new-buffer)
-	 (is-chromium (string-match "Chromium" (shell-command-to-string "wmctrl -l")))
-	 (chromium-window
-	  (progn
-	    (unless is-chromium
-	      (async-shell-command
-	       (concat "chromium-browser --disable-infobars -new-instance -new-window http://remote.dst.dk/vdesk/hangup.php3;"
-		       "wmctrl -a " emacs-window)		       
-	       (get-buffer-create "*dst-browser*"))
-	      (sleep-for 1)
-	      (shell-command (concat "wmctrl -a " emacs-window)))
-	    (if (string-match "Chromium" (shell-command-to-string "wmctrl -l"))
-		;; now we know chromium has a window
-		(dst-active-window-name "wmctrl -a Chromium;")
-	      (error  "Cannot see chromium window via dst-active-window-name."))))
+	 (chromium-window (dst-chromium-window))
+	 (chromium-status (dst-chromium-status))
 	 (response
 	  ;; three different states: 0 = logged in, 1 = waiting for ident + password, 2 = logged out
-	  (cond ((string= "" chromium-window)
-		 (error  "Cannot see chromium window via dst-active-window-name."))
-		((string-match "logout page - Chromium" chromium-window) 
+	  (cond ((not chromium-status)
+		 (error  "Cannot see a chromium window via dst-chromium-status."))
+		((string-match "logout page - Chromium" chromium-status) 
 		 (message "DST browser: logout")
 		 "logout")
-		((string-match "remote.dst.dk - Chromium" chromium-window)
+		((string-match "remote.dst.dk - Chromium" chromium-status)
 		 (message "DST browser: waiting for login")
 		 "waiting")
-		((string-match "F5 Dynamic Webtop - Chromium" chromium-window)
+		((string-match "F5 Dynamic Webtop - Chromium" chromium-status)
 		 (message "DST browser: waiting")
 		 "running")
-		(t (async-shell-command
-		    (concat "chromium-browser  --disable-infobars http://remote.dst.dk/vdesk/hangup.php3"
-			    "wmctrl -a " emacs-window)
-		    (get-buffer-create "*dst-browser*"))
-		   (setq chromium-window (dst-active-window-name "wmctrl -a Chromium;"))
-		   (message "DST browser: logout")
-		   "logout"))))
-    ;; move chromium-window in place
-    ;; (shell-command-to-string (concat "wmctrl -r Chromium -e 0,0,0," 
-
-    ;; back to emacs
-    (shell-command-to-string (concat "wmctrl -a " emacs-window))
+		(t (dst-launch-browser)))))
     `(:status ,response :window ,chromium-window)))
-
-(defun dst-move-browser ()
+  
+(defun dst-goto-click ()
   (interactive)
-  (let ((chromium-window (dst-active-window-name "wmctrl -a Chromium;")))
-    (if chromium-window
-	(shell-command-to-string (concat "wmctrl -r '" chromium-window "' -e 0,0,0," 
-					 (nth 0 dst-window-size)
-					 ","
-					 (nth 1 dst-window-size) ";"))
-      (message "Chromium not running. Start via M-x dst-browser RET"))))
+  (let* ((serv (if (= (length dst-servers) 1) (caar dst-servers)
+		 (completing-read "Server: " dst-servers)))
+	 (pos (cdr (assoc serv dst-servers))))
+    (dst-focus-chromium)
+    (shell-command (concat "xdotool mousemove " pos ";"))))
 
+(defun dst-current-mouse-position ()
+  (interactive)
+  (message (shell-command-to-string
+	    "xdotool getmouselocation")))
 
 (defun dst-open-firewall ()
   "Start alternative browser and open firewall at remote.dst.dk."
@@ -283,9 +267,9 @@
 
 (defun dst-connect (&optional server)
   (interactive)
-  (let ((emacs-window  (dst-active-window-name "")))
+  (let ((emacs-window  (dst-current-window)))
     ;; test firewall
-    (dst-open-firewall);; starts browser if necessary, moves browser in position
+    ;(dst-open-firewall);; starts browser if necessary, moves browser in position
     (let* ((server (or server (completing-read "Server: " dst-servers)))
 	   (pos (cdr (assoc server dst-servers)))
 	   pro-cmd cmd project rdp-buffer  
