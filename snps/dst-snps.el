@@ -1,6 +1,6 @@
 ;;; dst-snps.el --- Interactively start xfreerdp connection to Danmark statistics -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2018-2019  Thomas Alexander Gerds
+;; Copyright (C) 2018-2020  Thomas Alexander Gerds
 
 ;; Author: Thomas Alexander Gerds <tag@biostat.ku.dk>
 ;; Keywords: convenience
@@ -20,54 +20,71 @@
 
 ;;; Prequisites
 ;;
-;; a. You have a linux computer (may work for mac as well but not tested)
-;; b. Your linux computer has the following programs installed
+;; a. You have ubuntu (may work on other linux and mac as well but not tested)
+;; b. You have the following programs installed
 ;;
 ;;     (i) xfreerdp version 2.0.0-dev3 or higher
-;;  see 
+;;  see
+;;      https://github.com/FreeRDP/Remmina/wiki/Compile-on-Ubuntu-18.04
 ;;      http://publicifsv.sund.ku.dk/~tag/HomePage/biobuntu/dst.html
 ;;
 ;;    (ii) xdotool
-;;    (iv) chromium-browser (or another java-script enabled browser which is *not* your standard browser)
-;; c. You have an otherwise unused directory for keeping the launcher files (dst-directory)
+;;    (iv) chromium-browser
+;;         (may work with other java-script enabled browser which
+;;          is *not* your standard browser but would require a lot
+;;          of changes to the code below)
+;;
+;; c. You have a specific directory on your computer for keeping the
+;;    launcher files (dst-directory).
 ;; 
 ;;; Setup:
 ;;
-;; 1. Load this file from your init (.emacs) via one of the
-;;    following lines. The first two require that you save the
-;;    file in your load-path or modify your load-path to contain the
-;;    place where the file dst-snps.el lives:
+;; 1. Load the file you are reading once via M-x eval-buffer RET and
+;;    always by chaning your init (.emacs) file using one of the
+;;    following 3 methods. The first 2 methods:
 ;;
-;;    (require 'dst-snps)
+;;    (require 'dst-snps) 
 ;;    (use-package dst-snps)
+;;
+;;    both require that you save the file dst-snps.el somewhere in your emacs
+;;    load-path variable. If you don't know how to do this use the third method:
+;;
 ;;    (load-file "/path/to/dst-snps.el")
 ;;
-;; 2. In your init file (.emacs) adapt the following variables
-;;    according to your own data
-;;    dst-directory   : the directory where you keep the launcherxyZ123.rdp files
-;;    dst-window-size : a list of two strings 
-;;    dst-ident : you three or four letter name
-;;    dst-servers: a list of servers and click positions for the correponding button
+;; 2. In your init file (.emacs) adapt values of the following variables
+;;    according to your own setting (see my setting below)
+;;    dst-directory: the directory where you keep the launcherxyZ123.rdp files
+;;    dst-click-position: to find this position:
+;;                        I) start chromium-browser (M-x dst-start-browser)
+;;                       II) place mouse cursor on the red f5 symbol
+;;                      III) switch to a terminal back with the keyboard,
+;;                           i.e., without changing the mouse position. e.g., Alt-TAB
+;;                       IV) evaluate the command: xdotool getmouselocation
+;;                        V) save the x and the y position
+;;    dst-servers: a list of servers and click positions for the correponding buttons.
+;;                 the click positions for the servers are obtained with the same procedure
+;;                 as for dst-click-position described above
+;;    dst-window-size : the width and height of the remote desktop
+;;    dst-ident : your three or four letter name in the realm of DST 
 ;;    dst-login-list: a list whose elements are lists with three elements,
-;;    ("human-readable project identification" "project-user-name" "password")
+;;
+;;    ("human-readable project identification" "project-number" "password")
 ;;
 ;;    you can have elements like this
 ;;
-;;    ("human-readable project identification" "project-user-name" nil)
+;;    ("human-readable project identification" "project-number" nil)
 ;; 
 ;;    to get prompted for the password
-;;
-;;    and you can have (setq dst-login-list nil) to get prompted for both
-;;    user name and password.
 ;;
 ;;    Here is my setup:
 ;;
 ;;    (setq dst-directory "~/dst")
-;;    (setq dst-click-position "45 141")
-;;    (setq dst-window-size '("1900" "1050"))
-;;    (setq dst-servers '(("FSE Windows" . "999 276")
-;;   		    ("srvfsegh4" .  "435 325")
-;; 		    ("srvfsegh5" .  "740 325")))
+;;    (setq dst-indent "WJA") ;; most people have a 4 letter name. I have only three letters.
+;;    (setq dst-click-position "45 141") ;; mouse position of the red f5 symbol in chromium-browser 
+;;    (setq dst-window-size '("1900" "1050")) ;; size of the remote desktop window
+;;    (setq dst-servers '(("FSE Windows" . "999 276") ;; mouse position of the standard server
+;;   		    ("srvfsegh4" .  "435 325") ;; mouse position of Gentofte server 4
+;; 		    ("srvfsegh5" .  "740 325")))  ;; mouse position of Gentofte server 5
 ;;
 ;;    (setq dst-login-list
 ;;          ;; ("some-text-to-identify-project" "project-number" "password")
@@ -81,7 +98,7 @@
 ;;            ("RWAS" "6220" "xxxxxxxxx")))
 ;;
 ;;; Usage:
-;;     Step 1: https://remote.dst.dk/
+;;     Step 1: M-x dst-start-browser
 ;;
 ;;     M-x dst-open-firewall
 ;;
@@ -132,7 +149,7 @@
 	       "xdotool getwindowname " chromium-window))))))
     ;; three different states: 0 = logged in, 1 = waiting for ident + password, 2 = logged out
     (cond ((not chromium-status)
-	   (error  "Cannot see  Chromium. Start it via dst-launch-browser."))
+	   (error  "Cannot see  Chromium. Start it via dst-start-browser."))
 	  ((string-match "logout page - Chromium" chromium-status) 
 	   (message "DST browser: logout")
 	   "logout")
@@ -143,10 +160,10 @@
 	   (message "DST browser: running")
 	   "running")
 	  (t
-	   (error  "Cannot see Chromium. Start it via dst-launch-browser."))
+	   (error  "Cannot see Chromium. Start it via dst-start-browser."))
 	  )))
 
-(defun dst-launch-browser ()
+(defun dst-start-browser ()
   "Start chromium browser unless already running."
   (interactive)
   (let* ((cwin (dst-chromium-window))
@@ -157,7 +174,7 @@
     ;; start chromium when necessary
     (if cwin
 	(message "Chromium already running")
-      (message "Will now start chromium-browser. You have to manually go back to emacs.")
+      (message "Will now start chromium-browser. You have to manually go back to emacs to open the firewall via M-x dst-open-firewall.")
       (sit-for 1)
       (async-shell-command
        (concat "chromium-browser --disable-infobars -new-instance -new-window http://remote.dst.dk/vdesk/hangup.php3;"
@@ -169,7 +186,7 @@
   (let ((cwin (dst-chromium-window))
 	(ewin (dst-current-window)))
     (if (not cwin)
-	(message "Cannot see chromium. Use M-x dst-launch-browser RET to start it.")
+	(message "Cannot see chromium. Use M-x dst-start-browser RET to start it.")
       (shell-command (concat "xdotool windowraise " cwin
 			     " mousemove " dst-click-position)))))
   
@@ -198,21 +215,21 @@
 	 (buffer-read-only t)
 	 cmd)
     (unless cwin
-      (error "Cannot see chromium. Use M-x dst-launch-browser RET to start it."))
+      (error "Cannot see chromium. Use M-x dst-start-browser RET to start it."))
     (if	(string= status "running")
 	(message "Nothing to do. Firewall is already open.")
       (if (string= status "waiting")
 	  (setq cmd (concat "xdotool windowraise " cwin " mousemove --sync " dst-click-position
-			    ";xdotool click 1"
-			    ";sleep 0.5;"
-			    "xdotool key Tab;"
+			    ";xdotool click 1;"
 			    "sleep 0.5;"
+			    "xdotool key Tab;"
+			    "sleep 1.5;"
 			    "xdotool type '" dst-ident "';"
-			    "sleep 0.5;"
+			    "sleep 1.5;"
 			    "xdotool key Tab;"
-			    "sleep 0.5;"
+			    "sleep 1.5;"
 			    "xdotool type '" dst-firewall-code "';"
-			    "sleep 0.5;"
+			    "sleep 1.5;"
 			    "xdotool key Return;"))
 	;; logout
 	(setq cmd (concat "xdotool windowraise " cwin " mousemove --sync " dst-click-position
@@ -263,7 +280,7 @@
 	(cwin (dst-chromium-window))
 	cmd result)
     (unless cwin
-      (error "Cannot see chromium. Use M-x dst-launch-browser RET to start it."))
+      (error "Cannot see chromium. Use M-x dst-start-browser RET to start it."))
     (unless (string= "running" (dst-chromium-status))
       (message "Need to open firewall via M-x dst-open-firewall"))
     (setq cmd
