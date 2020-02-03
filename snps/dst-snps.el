@@ -27,8 +27,7 @@
 ;;  see 
 ;;      http://publicifsv.sund.ku.dk/~tag/HomePage/biobuntu/dst.html
 ;;
-;;    (ii) wmctrl
-;;   (iii) xdotool
+;;    (ii) xdotool
 ;;    (iv) chromium-browser (or another java-script enabled browser which is *not* your standard browser)
 ;; c. You have an otherwise unused directory for keeping the launcher files (dst-directory)
 ;; 
@@ -123,44 +122,56 @@
       (replace-regexp-in-string "\n" "" cwin))))
 
 (defun dst-chromium-status ()
-  (let ((chromium-window (dst-chromium-window)))
-    (when chromium-window
-      (replace-regexp-in-string "\n" "" 
-      (shell-command-to-string
-       (concat
-	"xdotool getwindowname " chromium-window))))))
+  (let* ((chromium-window (dst-chromium-window))
+	 (chromium-status
+	  (when chromium-window
+	    (replace-regexp-in-string
+	     "\n" "" 
+	     (shell-command-to-string
+	      (concat
+	       "xdotool getwindowname " chromium-window))))))
+    ;; three different states: 0 = logged in, 1 = waiting for ident + password, 2 = logged out
+    (cond ((not chromium-status)
+	   (error  "Cannot see  Chromium. Start it via dst-launch-browser."))
+	  ((string-match "logout page - Chromium" chromium-status) 
+	   (message "DST browser: logout")
+	   "logout")
+	  ((string-match "remote.dst.dk - Chromium" chromium-status)
+	   (message "DST browser: waiting for login")
+	   "waiting")
+	  ((string-match "F5 Dynamic Webtop - Chromium" chromium-status)
+	   (message "DST browser: running")
+	   "running")
+	  (t
+	   (error  "Cannot see Chromium. Start it via dst-launch-browser."))
+	  )))
 
 (defun dst-launch-browser ()
   "Start chromium browser unless already running."
   (interactive)
-  (let* ((chromium-window (dst-chromium-window)))
-    ;; start chromium when necessary
-    (unless chromium-window
-      (async-shell-command
-       (concat "chromium-browser --disable-infobars -new-instance -new-window http://remote.dst.dk/vdesk/hangup.php3;")))))
-    
-(defun dst-browser ()
-  (interactive)
-  "Check if chromium is running and whether it is showing dst remote"
-  (let* ((emacs-window (dst-current-window))
+  (let* ((cwin (dst-chromium-window))
+	 (ewin (dst-current-window))
 	 (async-shell-command-buffer 'new-buffer)
-	 (chromium-window (dst-chromium-window))
-	 (chromium-status (dst-chromium-status))
-	 (response
-	  ;; three different states: 0 = logged in, 1 = waiting for ident + password, 2 = logged out
-	  (cond ((not chromium-status)
-		 (error  "Cannot see a chromium window via dst-chromium-status."))
-		((string-match "logout page - Chromium" chromium-status) 
-		 (message "DST browser: logout")
-		 "logout")
-		((string-match "remote.dst.dk - Chromium" chromium-status)
-		 (message "DST browser: waiting for login")
-		 "waiting")
-		((string-match "F5 Dynamic Webtop - Chromium" chromium-status)
-		 (message "DST browser: waiting")
-		 "running")
-		(t (dst-launch-browser)))))
-    `(:status ,response :window ,chromium-window)))
+	 (obuf (get-buffer-create "*chromium-output-buffer*"))
+	 (ebuf (get-buffer-create "*chromium-error-buffer*")))
+    ;; start chromium when necessary
+    (if cwin
+	(message "Chromium already running")
+      (message "Will now start chromium-browser. You have to manually go back to emacs.")
+      (sit-for 1)
+      (async-shell-command
+       (concat "chromium-browser --disable-infobars -new-instance -new-window http://remote.dst.dk/vdesk/hangup.php3;"
+	       "xdotool windowraise " ewin)
+       obuf ebuf))))
+
+(defun dst-show-click-position ()
+  (interactive)
+  (let ((cwin (dst-chromium-window))
+	(ewin (dst-current-window)))
+    (if (not cwin)
+	(message "Cannot see chromium. Use M-x dst-launch-browser RET to start it.")
+      (shell-command (concat "xdotool windowraise " cwin
+			     " mousemove " dst-click-position)))))
   
 (defun dst-goto-click ()
   (interactive)
@@ -178,64 +189,53 @@
 (defun dst-open-firewall ()
   "Start alternative browser and open firewall at remote.dst.dk."
   (interactive)
-  (unless dst-firewall-code 
-    (error "You need to set the variable `dst-firewall-code'"))
+  (unless dst-firewall-code
+    (error "You need to set the variable `dst-firewall-code', i.e., when your code is 1234 add a line (setq dst-firewall-code \"1234\") to your .emacs file"))
   (unless dst-ident 
-    (error "You need to set the variable `dst-ident'"))
-  (let* ((async-shell-command-buffer 'new-buffer)
-	 (emacs-window  (dst-active-window-name ""))
-	 (cw (dst-browser))
-	 (chromium-status (plist-get cw :status))
-	 (chromium-window (plist-get cw :window))
-	 (cmd-1
-	  (unless (string= chromium-status "running")
-	    (concat
-	     "wmctrl -a " chromium-window ";"
-	     "xdotool mousemove " dst-click-position " click 1;"
-	     "sleep 0.1;"
-	     "xdotool mousemove " dst-click-position " click 1;"
-	     "sleep 0.1;"
-	     "xdotool key Tab;"
-	     "sleep 0.1;"
-	     (unless (string= chromium-status "waiting") 
-	       "xdotool key Return;")
-	     "wmctrl -a " emacs-window ";")))
-	 cmd-2)
-    ;; xdotool getmouselocation
-    (if (not cmd-1) chromium-window
-      (message cmd-1)
-      (shell-command-to-string cmd-1)
-      (sleep-for 1)
-      (setq cw (dst-browser)
-            chromium-status (plist-get cw :status)
-            chromium-window (plist-get cw :window))
-      (message chromium-status)
-      (sleep-for 1)
-      (if (string= chromium-status "waiting")
-	  (progn
-	    (setq cmd-2
-	     (concat
-	      "wmctrl -a " chromium-window ";"
-	      "xdotool mousemove " dst-click-position " click 1;"
-	      "sleep 0.1;"
-	      "xdotool key Tab;"
-	      "sleep 1.1;"
-	      "xdotool type '" dst-ident "';"
-	      "sleep 0.1;"
-	      "xdotool key Tab;"
-	      "sleep 1.1;"
-	      "xdotool type '" dst-firewall-code "';"
-	      "sleep 0.1;"
-	      "xdotool key Return;"))
-	    (message cmd-2)
-	    (shell-command-to-string cmd-2))
-	(message chromium-status)
-	;;(message "Cannot start typing ...")
-	))))
+    (error "You need to set the variable `dst-ident', i.e., when your indent is ABCD add a line (setq dst-indent \"ABCD\") to your .emacs file"))
+  (let* ((cwin (dst-chromium-window))
+	 (status (dst-chromium-status))
+	 (buffer-read-only t)
+	 cmd)
+    (unless cwin
+      (error "Cannot see chromium. Use M-x dst-launch-browser RET to start it."))
+    (if	(string= status "running")
+	(message "Nothing to do. Firewall is already open.")
+      (if (string= status "waiting")
+	  (setq cmd (concat "xdotool windowraise " cwin " mousemove --sync " dst-click-position
+			    ";xdotool click 1"
+			    ";sleep 0.5;"
+			    "xdotool key Tab;"
+			    "sleep 0.5;"
+			    "xdotool type '" dst-ident "';"
+			    "sleep 0.5;"
+			    "xdotool key Tab;"
+			    "sleep 0.5;"
+			    "xdotool type '" dst-firewall-code "';"
+			    "sleep 0.5;"
+			    "xdotool key Return;"))
+	;; logout
+	(setq cmd (concat "xdotool windowraise " cwin " mousemove --sync " dst-click-position
+			  ";xdotool click 1;"
+			  "sleep 0.5;"
+			  "xdotool key Tab;"
+			  "sleep 0.5;"
+			  "xdotool key Return;"
+			  "sleep 0.5;"
+			  "xdotool type '" dst-ident "';"
+			  "sleep 0.5;"
+			  "xdotool key Tab;"
+			  "sleep 0.5;"
+			  "xdotool type '" dst-firewall-code "';"
+			  "sleep 0.5;"
+			  "xdotool key Return;")))
+      (message cmd)
+      (shell-command cmd))))
+     
   
-(defun dst-select (&optional project)
+(defun dst-select (launcher &optional project)
   (interactive)
-  (let* ((last-launcher (car (directory-files dst-directory t "launch" t)))
+  (let* ((launcher (or launcher (car (directory-files dst-directory t "launch" t))))
 	 (project (or project (if dst-login-list
 				  (let* ((p (ido-completing-read
 					     "Choose DST-project: "
@@ -247,7 +247,7 @@
 				       (p (read-passwd (concat "password for " u ": "))))
 				  `("none" ,u ,p)))))
 	 (user (concat dst-ident (nth 1 project) "@dstfse.local"))
-	 (cmd  (concat "xfreerdp " last-launcher " /size:"
+	 (cmd  (concat "xfreerdp " launcher " /size:"
 		       (nth 0 dst-window-size)
 		       "x" (nth 1 dst-window-size) 
 		       " /u:" user " /p:"
@@ -255,44 +255,53 @@
 			   (read-passwd (concat "Password for " user ": "))))))
     `(:project ,project :cmd ,cmd)))
 
-(defun dst-download-launcher (server pos)
+(defun dst-download-launcher (pos)
   ;; remove old launchers
-  (shell-command (concat "rm " dst-directory "/launch*.rdp"))
+  (shell-command-to-string (concat "rm " dst-directory "/launch*.rdp"))
   ;; download new launcher
-  (shell-command (concat
-		  "wmctrl -a F5 Dynamic Webtop;"
-		  "xdotool mousemove " pos " click 1;"
-		  "sleep 2;"))
-  (shell-command-to-string (concat "mv ~/Downloads/launch*.rdp " dst-directory)))
+  (let ((ewin (dst-current-window))
+	(cwin (dst-chromium-window))
+	cmd result)
+    (unless cwin
+      (error "Cannot see chromium. Use M-x dst-launch-browser RET to start it."))
+    (unless (string= "running" (dst-chromium-status))
+      (message "Need to open firewall via M-x dst-open-firewall"))
+    (setq cmd
+     (concat
+      "xdotool windowraise " cwin "; xdotool mousemove " pos ";"
+      "xdotool click 1; sleep 1;"
+      "xdotool windowraise " ewin ";"))
+    (message cmd)
+    (message "HA:")
+    (message (shell-command-to-string cmd))
+    (setq result (shell-command-to-string (concat "mv ~/Downloads/launch*.rdp " dst-directory)))
+    (if (string-match "cannot" result)
+	nil
+       (car (directory-files dst-directory t "launch" t)))))
 
 (defun dst-connect (&optional server)
   (interactive)
-  (let ((emacs-window  (dst-current-window)))
-    ;; test firewall
-    ;(dst-open-firewall);; starts browser if necessary, moves browser in position
-    (let* ((server (or server (completing-read "Server: " dst-servers)))
-	   (pos (cdr (assoc server dst-servers)))
-	   pro-cmd cmd project rdp-buffer  
-	   (async-shell-command-buffer 'new-buffer))
-      (dst-download-launcher server pos)
-      (shell-command (concat "wmctrl -a " emacs-window))
-      (setq pro-cmd (dst-select)
-	    cmd (plist-get pro-cmd :cmd)
-	    project (plist-get pro-cmd :project))
+  (let* ((server (or server (completing-read "Server: " dst-servers)))
+	 (pos (cdr (assoc server dst-servers)))
+	 pro-cmd cmd project rdp-buffer
+	 (launcher (dst-download-launcher pos))
+	 (async-shell-command-buffer 'new-buffer))
+    (setq pro-cmd (dst-select launcher)
+	  cmd (plist-get pro-cmd :cmd)
+	  project (plist-get pro-cmd :project))
+    (setq rdp-buffer (generate-new-buffer "*rdp-response*"))
+    (message cmd)
+    (async-shell-command cmd rdp-buffer)
+    (sleep-for 1)
+    (if (process-live-p (get-buffer-process rdp-buffer))
+	(message "First attempt succeeded")
+      (message "Second attempt  ...")
+      (setq launcher (dst-download-launcher pos))
       (setq rdp-buffer (generate-new-buffer "*rdp-response*"))
+      (setq proc-cmd  (dst-select launcher project)
+	    cmd (plist-get pro-cmd :cmd))
       (message cmd)
-      (async-shell-command cmd rdp-buffer)
-      (sleep-for 1)
-      (if (process-live-p (get-buffer-process rdp-buffer))
-	  (message "First attempt succeeded")
-	(message "Second attempt  ...")
-	(dst-download-launcher server pos)
-	(shell-command (concat "wmctrl -a " emacs-window))
-	(setq rdp-buffer (generate-new-buffer "*rdp-response*"))
-	(setq proc-cmd  (dst-select project)
-	      cmd (plist-get pro-cmd :cmd))
-	(message cmd)
-	(async-shell-command cmd rdp-buffer)))))
+      (async-shell-command cmd rdp-buffer))))
 
 (defun dst1 () (interactive) (dst-connect "FSE Windows"))
 (defun dst4 () (interactive) (dst-connect "srvfsegh4"))
@@ -300,6 +309,7 @@
 
 
 (defun dst-change-all-passwords ()
+  "Go through the list of projects and change the passwords."
   (interactive)
   (let ((ddlist dst-login-list)
 	(new (read-string (concat "New password: "))))
@@ -309,11 +319,9 @@
     (setq ddlist (cdr ddlist)))))
 
 (defun dst-change-password (&optional project new-password click-submit)
-  "Go through the list of projects and change the passwords."
-  (interactive)
-  (let* ((log-buf (get-buffer-create "*dst-change-password-log*"))
-	 (wlist (shell-command-to-string "wmctrl -l"))
-	 (emacs-window  (dst-active-window-name ""))
+  "Change passwords."
+  (let* ((emacs-window  (dst-current-window))
+	 (log-buf (get-buffer-create "*dst-change-password-log*"))
 	 (this-project (or project
 			   (let ((p (ido-completing-read
 				     "Choose DST-project: "
@@ -321,18 +329,18 @@
 				     nil nil nil dst-login-history dst-last-project)))
 			     (assoc p dst-login-list))))
 	 (new (or new-password (read-string (concat "New password for " (nth 1 this-project) " (old is " (nth 2 this-project) "): "))))
-	 (cw (dst-browser))
-	 (chromium-status (plist-get cw :status))
-	 (chromium-window (plist-get cw :window))
+	 (buffer-read-only t)
+	 (chromium-window (dst-chromium-window))
+	 (chromium-status (dst-chromium-status))
 	 cmd)
     (unless (string= chromium-status "running")
       (error "Chromium not logged into DST"))
     (if (string-match new (nth 2 this-project))
 	(message (concat "Already new password: "(nth 0 this-project)))
       (setq cmd (concat
-		 "wmctrl -a " chromium-window ";"
-		 "xdotool mousemove " dst-change-password-pos " click 1;" ;; change-password-button
-		 "sleep 4;"
+		 "xdotool windowraise " chromium-window ";"
+		 "xdotool mousemove --sync " dst-change-password-pos " click 1;" ;; change-password-button
+		 "sleep 1;"
 		 "xdotool mousemove " dst-domain-user-pos " click 1;"  ;; domain user field
 		 "sleep 1;"
 		 "xdotool type " dst-ident (nth 1 this-project) "@dstfse.local;"
@@ -347,19 +355,20 @@
 		 "sleep 1;"
 		 "xdotool mousemove " dst-confirm-password-pos " click 1;" ;; confirm password
 		 "xdotool type " new ";"
-		 "sleep 1;"
+		 "sleep 3;"
 		 (when click-submit
 		   (concat "xdotool mousemove " dst-submit-button-pos " click 1;"
-			   "sleep 1;"
+			   "sleep 5;"
 			   "xdotool key ctrl+w;"
 			   "sleep 1;"
-			   "wmctrl -a " emacs-window))))
+			   "xdotool windowraise " emacs-window))))
       (when (or click-submit
 		(y-or-n-p (concat "Run this: " cmd)))
 	(message cmd)
 	(shell-command cmd)
-	(save-excursion (set-buffer log-buf) 
-			(insert "Project: " (nth 1 this-project) "\told: " (nth 2 this-project) "\tnew: " new)
+	(save-excursion (set-buffer log-buf)
+			(goto-char (point-max))
+			(insert "Project: " (nth 1 this-project) "\told: " (nth 2 this-project) "\tnew: " new "\n")
 			)))))
 
 
