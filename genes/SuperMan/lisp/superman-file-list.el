@@ -1082,8 +1082,9 @@ or by file-name if there is no sort-key yet"
 	    (if reverse
 		(reverse (sort file-list sortfun))
 	      (sort file-list sortfun)))
-      (let ((buffer-read-only nil))
-	(put-text-property (point-min) (1+ (point-min)) 'sort-key `(,by ,reverse))))
+      (unless dont-display
+	(let ((buffer-read-only nil))
+	  (put-text-property (point-min) (1+ (point-min)) 'sort-key `(,by ,reverse)))))
     (if dont-display
 	sorted-list
       (setq file-list-current-file-list sorted-list)

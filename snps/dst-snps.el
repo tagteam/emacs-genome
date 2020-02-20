@@ -125,6 +125,9 @@
    "\n" ""  
    (shell-command-to-string "xdotool getactivewindow")))
 
+(defvar dst-click-delay "1"
+  "number of seconds between clicks and keystrokes")
+
 (defun dst-current-window-name ()
   "Return title of currently active window"
   (replace-regexp-in-string "\n" ""
@@ -206,48 +209,49 @@
 (defun dst-open-firewall ()
   "Start alternative browser and open firewall at remote.dst.dk."
   (interactive)
-  (unless dst-firewall-code
-    (error "You need to set the variable `dst-firewall-code', i.e., when your code is 1234 add a line (setq dst-firewall-code \"1234\") to your .emacs file"))
-  (unless dst-ident 
-    (error "You need to set the variable `dst-ident', i.e., when your indent is ABCD add a line (setq dst-indent \"ABCD\") to your .emacs file"))
-  (let* ((cwin (dst-chromium-window))
-	 (status (dst-chromium-status))
-	 (buffer-read-only t)
-	 cmd)
-    (unless cwin
-      (error "Cannot see chromium. Use M-x dst-start-browser RET to start it."))
-    (if	(string= status "running")
-	(message "Nothing to do. Firewall is already open.")
-      (if (string= status "waiting")
+  (let ((buffer-read-only t))
+    (unless dst-firewall-code
+      (error "You need to set the variable `dst-firewall-code', i.e., when your code is 1234 add a line (setq dst-firewall-code \"1234\") to your .emacs file"))
+    (unless dst-ident 
+      (error "You need to set the variable `dst-ident', i.e., when your indent is ABCD add a line (setq dst-indent \"ABCD\") to your .emacs file"))
+    (let* ((cwin (dst-chromium-window))
+	   (status (dst-chromium-status))
+	   (buffer-read-only t)
+	   cmd)
+      (unless cwin
+	(error "Cannot see chromium. Use M-x dst-start-browser RET to start it."))
+      (if	(string= status "running")
+	  (message "Nothing to do. Firewall is already open.")
+	(if (string= status "waiting")
+	    (setq cmd (concat "xdotool windowraise " cwin " mousemove --sync " dst-click-position
+			      ";xdotool click 1;"
+			      "sleep " dst-click-delay ";"
+			      "xdotool key Tab;"
+			      "sleep " dst-click-delay ";"
+			      "xdotool type '" dst-ident "';"
+			      "sleep " dst-click-delay ";"
+			      "xdotool key Tab;"
+			      "sleep " dst-click-delay ";"
+			      "xdotool type '" dst-firewall-code "';"
+			      "sleep " dst-click-delay ";"
+			      "xdotool key Return;"))
+	  ;; logout
 	  (setq cmd (concat "xdotool windowraise " cwin " mousemove --sync " dst-click-position
-			    ";xdotool click 1;"
-			    "sleep 0.5;"
+			    " xdotool click 1;"
+			    "sleep " dst-click-delay ";"
 			    "xdotool key Tab;"
-			    "sleep 1.5;"
+			    "sleep " dst-click-delay ";"
+			    "xdotool key Return;"
+			    "sleep " dst-click-delay ";"
 			    "xdotool type '" dst-ident "';"
-			    "sleep 1.5;"
+			    "sleep " dst-click-delay ";"
 			    "xdotool key Tab;"
-			    "sleep 1.5;"
+			    "sleep " dst-click-delay ";"
 			    "xdotool type '" dst-firewall-code "';"
-			    "sleep 1.5;"
-			    "xdotool key Return;"))
-	;; logout
-	(setq cmd (concat "xdotool windowraise " cwin " mousemove --sync " dst-click-position
-			  ";xdotool click 1;"
-			  "sleep 0.5;"
-			  "xdotool key Tab;"
-			  "sleep 0.5;"
-			  "xdotool key Return;"
-			  "sleep 0.5;"
-			  "xdotool type '" dst-ident "';"
-			  "sleep 0.5;"
-			  "xdotool key Tab;"
-			  "sleep 0.5;"
-			  "xdotool type '" dst-firewall-code "';"
-			  "sleep 0.5;"
-			  "xdotool key Return;")))
-      (message cmd)
-      (shell-command cmd))))
+			    "sleep " dst-click-delay ";"
+			    "xdotool key Return;")))
+	(message cmd)
+	(shell-command cmd)))))
      
   
 (defun dst-select (launcher &optional project)
@@ -285,8 +289,8 @@
       (message "Need to open firewall via M-x dst-open-firewall"))
     (setq cmd
      (concat
-      "xdotool windowraise " cwin "; xdotool mousemove " pos ";"
-      "xdotool click 1; sleep 1;"
+      "xdotool windowraise " cwin "; xdotool mousemove --sync " pos ";"
+      "xdotool click 1; sleep " dst-click-delay ";"
       "xdotool windowraise " ewin ";"))
     (message cmd)
     (message "HA:")
