@@ -59,10 +59,10 @@ with `superman-org-export-as'."
 			    (progn (skip-chars-forward "[a-zA-z/]")
 				   (point)))))
 		 (setq superman-org-export-target this))))
-	   (superman-org-export-as nil))
+	   (superman-org-export-as superman-org-export-target arg))
 	  ((and (boundp 'superman-org-export-target) (string= superman-org-export-target "pdf"))
-	   (superman-export-as-latex 'debug))
-	  (t (superman-org-export-as nil)))))
+	   (superman-export-as-latex arg))
+	  (t (superman-org-export-as "pdf" arg)))))
 
 ;; See library tex-buf for help on TeX-process.
 (defun superman-export-as-latex (&optional debug)
@@ -181,7 +181,7 @@ Use this map to set additional keybindings for when Org-mode is used.")
   (superman-org-headline-mode))
 
 
-(defun superman-org-export-as (&optional arg)
+(defun superman-org-export-as (&optional target arg)
   "Find and apply target specific export function. Targets are defined 
 in `superman-org-export-target-list' and for target TARGET the export function 
 is either called superman-export-as-TARGET or org-export-to-TARGET."
@@ -189,9 +189,9 @@ is either called superman-export-as-TARGET or org-export-to-TARGET."
 	 (super-candidate (intern (concat "superman-export-as-" target)))
 	 (org-candidate (intern (concat "org-" target "-export-to-" target))))
     (cond ((functionp super-candidate)
-	   (funcall super-candidate))
+	   (funcall super-candidate arg))
 	  ((functionp org-candidate)
-	   (funcall org-candidate))
+	   (funcall org-candidate arg))
 	  (t (message (concat "Don't know how to export to " target))))))
 
 (define-minor-mode superman-org-headline-mode

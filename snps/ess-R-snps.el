@@ -31,7 +31,7 @@
 						 truncate-partial-width-windows nil)))
 
 ;;{{{ global custom
-(setq ess-use-tracebug nil)
+(setq ess-use-tracebug t)
 
 ;; keep ess-buffer names simple 
 (setq ess-gen-proc-buffer-name-function 'ess-gen-proc-buffer-name:simple)

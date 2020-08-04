@@ -118,6 +118,7 @@
 (defvar dst-auto-click 'chromium)
 (defvar dst-window-size nil)
 (defvar dst-screen-setting 'laptop)
+(defvar dst-use-wmctrl t)
 
 (defun dst-current-window ()
   "Return currently active window as xdotool number"
@@ -128,11 +129,15 @@
 (defvar dst-click-delay "1"
   "number of seconds between clicks and keystrokes")
 
+
+;; xprop -id $(xprop -root _NET_ACTIVE_WINDOW | cut -d ' ' -f 5) WM_NAME | awk -F '"' '{print $2}'
+;; xprop -id $(xprop -root _NET_ACTIVE_WINDOW | cut -d ' ' -f 5) WM_NAME | sed -e 's/.*"\(.*\)".*/\1/'
 (defun dst-current-window-name ()
   "Return title of currently active window"
   (replace-regexp-in-string "\n" ""
    (shell-command-to-string
     (concat "xdotool getwindowname "
+	    ;; "xdotool getwindowfocus getwindowname"
 	    (dst-current-window)))))
 
 (defun dst-chromium-window ()
@@ -152,7 +157,7 @@
 	       "xdotool getwindowname " chromium-window))))))
     ;; three different states: 0 = logged in, 1 = waiting for ident + password, 2 = logged out
     (cond ((not chromium-status)
-	   (error  "Cannot see  Chromium. Start it via dst-start-browser."))
+	   (message  "Cannot see  Chromium. Start it via dst-start-browser."))
 	  ((string-match "logout page - Chromium" chromium-status) 
 	   (message "DST browser: logout")
 	   "logout")
@@ -166,40 +171,133 @@
 	   (error  "Cannot see Chromium. Start it via dst-start-browser."))
 	  )))
 
+(defun dst ()
+  "3-in-1 function. 
+   Step 1: open DST in Chromium.
+   Step 2: login-dst
+   Step 3: choose project, download launcher and start session."
+  (interactive)
+  (if (string= "running" (dst-start-browser))
+      (if (dst-open-firewall)
+	  (let* ((project (let* ((p (ido-completing-read
+				     "Choose DST-project: "
+				     dst-login-list
+				     nil nil nil dst-login-history dst-last-project)))
+			    (setq dst-last-project p)
+			    (assoc p dst-login-list)))
+		 (server (or (nth 3 project)
+			     (completing-read "Server: " dst-servers)))
+		 (user (concat dst-ident (nth 1 project) "@dstfse.local"))
+		 (pss (nth 2 project))
+		 (pos (cdr (assoc server dst-servers)))
+		 pro-cmd cmd project rdp-buffer
+		 (launcher (dst-download-launcher pos))
+		 (cmd  (concat "xfreerdp " launcher " /size:"
+			       (nth 0 dst-window-size)
+			       "x" (nth 1 dst-window-size) 
+			       " /u:" user " /p:" pss))
+		 (async-shell-command-buffer 'new-buffer))
+	    (setq rdp-buffer (generate-new-buffer "*rdp-response*"))
+	    (message cmd)
+	    (async-shell-command cmd rdp-buffer)
+	    (sleep-for 1)
+	    (if (process-live-p (get-buffer-process rdp-buffer))
+		(message "First attempt succeeded")
+	      (message "Second attempt  ...")
+	      (setq launcher (dst-download-launcher pos))
+	      (setq rdp-buffer (generate-new-buffer "*rdp-response*"))
+	      (setq proc-cmd  (dst-select launcher project)
+		    cmd (plist-get pro-cmd :cmd))
+	      (message cmd)
+	      (async-shell-command cmd rdp-buffer))))))
+  
+  
+
 (defun dst-start-browser ()
   "Start chromium browser unless already running."
   (interactive)
   (let* ((cwin (dst-chromium-window))
-	 (ewin (dst-current-window))
+	 ;; (ewin (dst-current-window))
+	 ;; (emacs-window-name (dst-active-window-name))
 	 (async-shell-command-buffer 'new-buffer)
 	 (obuf (get-buffer-create "*chromium-output-buffer*"))
 	 (ebuf (get-buffer-create "*chromium-error-buffer*")))
     ;; start chromium when necessary
     (if cwin
-	(message "Chromium already running")
-      (message "Will now start chromium-browser. You have to manually go back to emacs to open the firewall via M-x dst-open-firewall.")
+	"running" ;;(message "Chromium already running")
+      (message "Launching chromium-browser. You have to manually go back to emacs to open the firewall via M-x dst-open-firewall.")
       (sit-for 1)
       (async-shell-command
-       (concat "chromium-browser --disable-infobars -new-instance -new-window http://remote.dst.dk/vdesk/hangup.php3;"
-	       "xdotool windowraise " ewin)
+        "chromium-browser --disable-infobars -new-instance -new-window http://remote.dst.dk/vdesk/hangup.php3"
+	       ;; (if dst-use-wmctrl
+	 ;; "wmctrl -a " emacs-window-name)
+		   ;; "xdotool windowraise " ewin))
        obuf ebuf))))
 
+(defun dst-show-domain-user-pos ()
+  (interactive)
+  (let ((cwin (dst-chromium-window)))
+    (if (not cwin)
+	(message "Cannot see chromium. Use M-x dst-start-browser RET to start it.")
+      (shell-command (concat "xdotool windowraise " cwin
+			     " mousemove --window " (dst-chromium-window) " " dst-domain-user-pos)))))
+(defun dst-show-current-password-pos ()
+  (interactive)
+  (let ((cwin (dst-chromium-window)))
+    (if (not cwin)
+	(message "Cannot see chromium. Use M-x dst-start-browser RET to start it.")
+      (shell-command (concat "xdotool windowraise " cwin
+			     " mousemove --window " (dst-chromium-window) " " dst-current-password-pos)))))
+(defun dst-show-new-password-pos ()
+  (interactive)
+  (let ((cwin (dst-chromium-window)))
+    (if (not cwin)
+	(message "Cannot see chromium. Use M-x dst-start-browser RET to start it.")
+      (shell-command (concat "xdotool windowraise " cwin
+			     " mousemove --window " (dst-chromium-window) " " dst-new-password-pos)))))
+(defun dst-show-confirm-password-pos ()
+  (interactive)
+  (let ((cwin (dst-chromium-window)))
+    (if (not cwin)
+	(message "Cannot see chromium. Use M-x dst-start-browser RET to start it.")
+      (shell-command (concat "xdotool windowraise " cwin
+			     " mousemove --window " (dst-chromium-window) " " dst-confirm-password-pos)))))
+
+(defun dst-show-submit-button-pos ()
+  (interactive)
+  (let ((cwin (dst-chromium-window)))
+    (if (not cwin)
+	(message "Cannot see chromium. Use M-x dst-start-browser RET to start it.")
+      (shell-command (concat "xdotool windowraise " cwin
+			     " mousemove --window " (dst-chromium-window) " " dst-submit-button-pos)))))
+
 (defun dst-show-click-position ()
+  (interactive)
+  (let ((cwin (dst-chromium-window)))
+    (if (not cwin)
+	(message "Cannot see chromium. Use M-x dst-start-browser RET to start it.")
+      (shell-command (concat "xdotool windowraise " cwin
+			     " mousemove --window " (dst-chromium-window) " " dst-click-position)))))
+
+(defun dst-show-change-password-position ()
   (interactive)
   (let ((cwin (dst-chromium-window))
 	(ewin (dst-current-window)))
     (if (not cwin)
 	(message "Cannot see chromium. Use M-x dst-start-browser RET to start it.")
       (shell-command (concat "xdotool windowraise " cwin
-			     " mousemove " dst-click-position)))))
-  
+			     " mousemove --window "
+			     (dst-chromium-window) " "
+			     dst-change-password-pos)))))
+
+
 (defun dst-goto-click ()
   (interactive)
   (let* ((serv (if (= (length dst-servers) 1) (caar dst-servers)
 		 (completing-read "Server: " dst-servers)))
 	 (pos (cdr (assoc serv dst-servers))))
-    (dst-focus-chromium)
-    (shell-command (concat "xdotool mousemove " pos ";"))))
+    ;; (dst-focus-chromium)
+    (shell-command (concat "xdotool mousemove --window " (dst-chromium-window) " " pos ";"))))
 
 (defun dst-current-mouse-position ()
   (interactive)
@@ -221,9 +319,9 @@
       (unless cwin
 	(error "Cannot see chromium. Use M-x dst-start-browser RET to start it."))
       (if	(string= status "running")
-	  (message "Nothing to do. Firewall is already open.")
+	  'running;; (message "Nothing to do. Firewall is already open.")
 	(if (string= status "waiting")
-	    (setq cmd (concat "xdotool windowraise " cwin " mousemove --sync " dst-click-position
+	    (setq cmd (concat "xdotool windowraise " cwin " mousemove --sync --window " (dst-chromium-window) " " dst-click-position
 			      ";xdotool click 1;"
 			      "sleep " dst-click-delay ";"
 			      "xdotool key Tab;"
@@ -236,7 +334,7 @@
 			      "sleep " dst-click-delay ";"
 			      "xdotool key Return;"))
 	  ;; logout
-	  (setq cmd (concat "xdotool windowraise " cwin " mousemove --sync " dst-click-position
+	  (setq cmd (concat "xdotool windowraise " cwin " mousemove --sync --window " (dst-chromium-window) " " dst-click-position
 			    " xdotool click 1;"
 			    "sleep " dst-click-delay ";"
 			    "xdotool key Tab;"
@@ -251,7 +349,8 @@
 			    "sleep " dst-click-delay ";"
 			    "xdotool key Return;")))
 	(message cmd)
-	(shell-command cmd)))))
+	(shell-command cmd)
+	nil))))
      
   
 (defun dst-select (launcher &optional project)
@@ -289,7 +388,7 @@
       (message "Need to open firewall via M-x dst-open-firewall"))
     (setq cmd
      (concat
-      "xdotool windowraise " cwin "; xdotool mousemove --sync " pos ";"
+      "xdotool windowraise " cwin "; xdotool mousemove --sync --window " (dst-chromium-window) " " pos ";"
       "xdotool click 1; sleep " dst-click-delay ";"
       "xdotool windowraise " ewin ";"))
     (message cmd)
@@ -324,6 +423,7 @@
       (message cmd)
       (async-shell-command cmd rdp-buffer))))
 
+
 (defun dst1 () (interactive) (dst-connect "FSE Windows"))
 (defun dst4 () (interactive) (dst-connect "srvfsegh4"))
 (defun dst5 () (interactive) (dst-connect "srvfsegh5"))
@@ -337,7 +437,9 @@
     (while ddlist
       (setq this-project (car ddlist))
       (dst-change-password this-project new 'submit)
-    (setq ddlist (cdr ddlist)))))
+      (setq ddlist (cdr ddlist)))))
+
+;;(dst-change-password (car dst-login-list) "bla" nil)
 
 (defun dst-change-password (&optional project new-password click-submit)
   "Change passwords."
@@ -360,25 +462,25 @@
 	(message (concat "Already new password: "(nth 0 this-project)))
       (setq cmd (concat
 		 "xdotool windowraise " chromium-window ";"
-		 "xdotool mousemove --sync " dst-change-password-pos " click 1;" ;; change-password-button
+		 "xdotool mousemove --sync --window " (dst-chromium-window) " " dst-change-password-pos " click 1;" ;; change-password-button
 		 "sleep 1;"
-		 "xdotool mousemove " dst-domain-user-pos " click 1;"  ;; domain user field
+		 "xdotool mousemove --window " (dst-chromium-window) " " dst-domain-user-pos " click 1;"  ;; domain user field
 		 "sleep 1;"
 		 "xdotool type " dst-ident (nth 1 this-project) "@dstfse.local;"
 		 "sleep 1;"
-		 "xdotool mousemove " dst-current-password-pos " click 1;"  ;; current password
+		 "xdotool mousemove --window " (dst-chromium-window) " " dst-current-password-pos " click 1;"  ;; current password
 		 "sleep 1;"
 		 "xdotool type " (nth 2 this-project) ";"
 		 "sleep 1;"
-		 "xdotool mousemove " dst-new-password-pos" click 1;" ;; new password
+		 "xdotool mousemove --window " (dst-chromium-window) " " dst-new-password-pos" click 1;" ;; new password
 		 "sleep 1;"
 		 "xdotool type " new ";"
 		 "sleep 1;"
-		 "xdotool mousemove " dst-confirm-password-pos " click 1;" ;; confirm password
+		 "xdotool mousemove --window " (dst-chromium-window) " " dst-confirm-password-pos " click 1;" ;; confirm password
 		 "xdotool type " new ";"
 		 "sleep 3;"
 		 (when click-submit
-		   (concat "xdotool mousemove " dst-submit-button-pos " click 1;"
+		   (concat "xdotool mousemove --window " (dst-chromium-window) " " dst-submit-button-pos " click 1;"
 			   "sleep 5;"
 			   "xdotool key ctrl+w;"
 			   "sleep 1;"

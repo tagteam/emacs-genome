@@ -192,7 +192,7 @@ to an integer then do not trim the string STR."
 	tlink)
     ;; plainlinks
     (let* ((len (car args)))
-      (if (string-match org-link-re-with-space link)
+      (if (string-match org-link-any-re link)
 	  (concat "[[" link "]["
 		  (superman-trim-string link len) "]]")
 	link))))
@@ -3096,8 +3096,13 @@ The value is non-nil unless the user regretted and the entry is not deleted.
 
 (defun superman-next-entry ()
   (interactive)
-  (forward-line 1))
-  ;; (superman-choose-entry))
+  ;; (ignore-errors
+    ;; (goto-char (next-single-property-change (point) 'superman-item-marker)))
+  ;; (when (eq (point) (point-at-eol))
+    ;; (ignore-errors
+      ;; (goto-char (next-single-property-change (point) 'superman-item-marker)))))
+ (forward-line 1))
+;; (superman-choose-entry))
 
 (defun superman-choose-entry ()
   "Call function stored in text property 'superman-choice' at beginning of line."
@@ -3108,7 +3113,12 @@ The value is non-nil unless the user regretted and the entry is not deleted.
 
 (defun superman-previous-entry ()
   (interactive)
-  (forward-line -1))
+  ;; (ignore-errors
+    ;; (goto-char (previous-single-property-change (point) 'superman-item-marker)))
+  ;; (when (eq (point) (point-at-eol))
+    ;; (ignore-errors
+      ;; (goto-char (previous-single-property-change (point) 'superman-item-marker)))))
+   (forward-line -1))
 ;; (superman-choose-entry))
 
 (defun superman-view-filter ()

@@ -283,7 +283,7 @@
 	;; ("basewidth" "{0.5em,0.4em}")))
 
 ;; [NO-DEFAULT-PACKAGES]
- ;; (setq org-latex-classes nil)
+;;(setq org-latex-classes nil)
 (add-to-list 'org-latex-classes
 	     `("org-article"
 	       ,(concat "\\documentclass{article}
@@ -405,6 +405,20 @@
 	       ("\\paragraph{%s}" . "\\paragraph*{%s}")
 	       ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
 
+
+(add-to-list 'org-latex-classes
+	     `("ims-article"
+	       ,(concat "\\documentclass[sts]{imsart}
+                %% \\documentclass[useAMS,usenatbib]{biom}
+               [PACKAGES]
+               [EXTRA]"
+			eg/org-latex-common-header-string)
+	       ("\\section{%s}" . "\\section*{%s}")
+	       ("\\subsection{%s}" . "\\subsection*{%s}")
+	       ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+	       ("\\paragraph{%s}" . "\\paragraph*{%s}")
+	       ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
+
 ;; [NO-DEFAULT-PACKAGES]
 
 (add-to-list 'org-latex-classes
@@ -436,9 +450,9 @@
 \\setbeamercolor{subitem}{fg=orange}
 \\setbeamercolor*{sidebar}{use=structure,bg=structure.fg}
 \\setbeamercolor*{palette sidebar primary}{use=structure,fg=structure.fg!10}
-\\setbeamercolor*{palette sidebar secondary}{fg=white}
+\\setbeamercolor*{palette sidebar secondary}{fg=black}
 \\setbeamercolor*{palette sidebar tertiary}{use=structure,fg=structure.fg!50}
-\\setbeamercolor*{palette sidebar quaternary}{fg=white}
+\\setbeamercolor*{palette sidebar quaternary}{fg=black}
 \\setbeamercolor*{titlelike}{parent=palette primary}
 \\setbeamercolor*{separation line}{}
 \\setbeamercolor*{fine separation line}{}

@@ -47,52 +47,25 @@
 
 (define-key gnus-group-mode-map "s" 'gnus-notmuch-search)
 
-(defun gnus-notmuch-search ()
+(defun gnus-notmuch-search (&optional arg)
   (interactive)
   (save-window-excursion (async-shell-command "notmuch new" "*notmuch-update*"))
   (switch-to-buffer "*gnus-notmuch-search*")
-  (delete-other-windows)
-  (gnus-notmuch-insert-form))
+  ;; (delete-other-windows)
+  (goto-char (point-min))
+  (if (or arg (not (looking-at "Search:")))
+	  (gnus-notmuch-insert-form)
+    (goto-char (point-min))
+    (forward-char 8)))
   
-
 (defun gnus-notmuch-insert-form ()
-  (erase-buffer)
-  ;; (let ((from "from:")
-  ;; (to "to:")
-  ;; (period "date:")
-  ;; (search "expression:"))
   (font-lock-mode -1)
   (font-lock-default-function nil)
-  ;; (add-text-properties 0 (length from) '(face superman-capture-button-face) from)
-  ;; (add-text-properties 0 (length to) '(face superman-capture-button-face) to)
-  ;; (add-text-properties 0 (length period) '(face superman-capture-button-face) period)
-  ;; (add-text-properties 0 (length search) '(face superman-capture-button-face) search)
-  ;; (insert "# Use tab on from: and to: fields to complete from bbdb\n"
-  ;; from
-  ;; (insert " ")
-  ;; (add-text-properties (- (point) 1) (point) '(beg-from t))
-  ;; (backward-char 1)
-  ;; (insert " " from)
-  ;; (add-text-properties (- (point) 0) (- (point) (length from)) '(read-only "Not on field"))
-  ;; ;; to
-  ;; (forward-char 1)
-  ;; (insert " ")
-  ;; (add-text-properties (- (point) 1) (point) '(beg-to t))
-  ;; (backward-char 1)
-  ;; (insert "  " to)
-  ;; (add-text-properties (- (point) 0) (- (point) (length to)) '(read-only "Not on field"))
-  ;; (add-text-properties (- (point) (length to) 1) (- (point) (length to)) '(end-from t))
-  ;; ;; period
-  ;; (forward-char 1)
-  ;; (insert " ")
-  ;; (add-text-properties (- (point) 1) (point) '(beg-period t))
-  ;; (backward-char 1)
-  ;; ;; search
-  (insert
-   (superman-make-button "Search:" `(:fun gnus-notmuch-run-search 
-					  :width 8
-					  :face font-lock-warning-face
-					  :help "* search syntax
+  (insert (superman-make-button "Search:"
+				`(:fun gnus-notmuch-run-search 
+				       :width 8
+				       :face font-lock-warning-face
+				       :help "* search syntax
 
  +term1 -term2 NEAR/6 term3 ADJ/17 term4 
  
@@ -111,70 +84,18 @@
   (insert "\n///")
   (put-text-property (point-at-bol) (1+ (point-at-bol)) 'end-search t)
   (put-text-property (point-at-bol) (point-at-eol) 'face 'font-lock-warning-face)
-  (insert "\n\n")
-  (insert "\n"
-	  (superman-make-button
-	   "Evaluate search (J)" `(:fun gnus-notmuch-run-search
-					    :width 23 
-					    :face superman-capture-button-face
-					    :help "Hints: 
-				  https://notmuchmail.org/searching/
-				  https://notmuchmail.org/manpages/notmuch-search-terms-7/
-
-To do move/tick/delete message in search results and press 
-'A W' : gnus-warp-to-article 
- or 
-'A T' : gnus-summary-refer-thread.\n")))
-  (insert " "
-	  (superman-make-button
-	   "Reset/update (R)" `(:fun gnus-notmuch-search
-				     :width 21 
-				     :face superman-capture-button-face
-				     :help "Hints: 
-To do move/tick/delete message in search results and press 
-'A W' : gnus-warp-to-article 
- or 
-'A T' : gnus-summary-refer-thread.\n")))
-  (insert "\n"
-	  (superman-make-button "Change period (P)"
-				`(:fun gnus-notmuch-change-period
-				       :width 23
-				       :face superman-capture-button-face
-				       :help "Change time limits of search"))
-	  " "
-	  (superman-make-button "Toggle period (T)"
-				`(:fun 'gnus-notmuch-change-period-1
-				       :width 21
-				       :face superman-capture-button-face
-				       :help "Change time limits of search")))
-  (insert "\n\n\nReferences:
- https://notmuchmail.org/searching/
- https://notmuchmail.org/manpages/notmuch-search-terms-7/
-  ")
+  (insert "\n\n" (make-string 43 (string-to-char "-")) 
+	  "\n0 = today, 1 = 3 weeks, 2 = 3 months, 3= 3years\n"
+	  "To do move/tick/delete message in search results press\n - 'A W' : gnus-warp-to-article or 'A T' : gnus-summary-refer-thread.\n")
+  (insert "\n\n\nReferences: https://notmuchmail.org/searching/\n https://notmuchmail.org/manpages/notmuch-search-terms-7/ ")
   (gnus-notmuch-search-mode)
   (goto-char (point-min))
   (forward-char 8))
 
-(defun gnus-notmuch-change-period-1 ()
+(defun gnus-notmuch-search-1-day ()
   (interactive)
-  (save-excursion
-    (let ((current
-	   (progn
-	     (goto-char (point-min))
-	     (re-search-forward "^date:" nil t)
-	     (buffer-substring-no-properties (point) (- (re-search-forward "\\.\\." nil t) 2)))))
-      (cond ((string-match "3weeks" current)
-	     (gnus-notmuch-change-period "3months..now"))
-	    ((string-match "3months" current)
-	     (gnus-notmuch-change-period "3years..now"))
-	    ((string-match "3years" current)
-	     (gnus-notmuch-change-period "1year..now"))
-	    ((string-match "1year" current)
-	     (gnus-notmuch-change-period "1day..now"))
-	    (t (gnus-notmuch-change-period "3weeks..now"))))))
-
-
-
+  (gnus-notmuch-change-period "1day..now")
+  (gnus-notmuch-run-search))
 
 (defun gnus-notmuch-change-period (&optional period)
   (interactive)
@@ -185,6 +106,17 @@ To do move/tick/delete message in search results and press
       (kill-line)
       (insert period))))
 
+(defun gnus-notmuch-increase (&optional decrease)
+  (interactive)
+  (save-excursion
+    (goto-char (point-min))
+    (re-search-forward "^date:\\([0-9]+\\)" nil t)
+    (replace-match
+     (concat "date:"
+	     (int-to-string
+	      (if decrease
+		  (1- (string-to-number (match-string 1)))
+		  (1+ (string-to-number (match-string 1)))))))))
 
 (defface notmuch-search-face
   '((t (:height 1.0
@@ -220,10 +152,12 @@ To do move/tick/delete message in search results and press
 (define-key gnus-notmuch-search-mode-map [(return)] 'gnus-notmuch-run-search)
 (define-key gnus-notmuch-search-mode-map "J" 'gnus-notmuch-run-search)
 (define-key gnus-notmuch-search-mode-map "\t" 'gnus-notmuch-complete-from-bbdb)
-(define-key gnus-notmuch-search-mode-map "U" #'(lambda () (interactive) (async-shell-command "notmuch new")))
-(define-key gnus-notmuch-search-mode-map "R" 'gnus-notmuch-search)
-(define-key gnus-notmuch-search-mode-map "P" 'gnus-notmuch-change-period)
-(define-key gnus-notmuch-search-mode-map "T" 'gnus-notmuch-change-period-1)
+(define-key gnus-notmuch-search-mode-map [(control R)] #'(lambda () (interactive) (async-shell-command "notmuch new")))
+(define-key gnus-notmuch-search-mode-map "\C-c\C-c" 'gnus-notmuch-search)
+(define-key gnus-notmuch-search-mode-map [(control +)] 'gnus-notmuch-increase)
+(define-key gnus-notmuch-search-mode-map [(control -)] 'gnus-notmuch-decrease)
+;; (define-key gnus-notmuch-search-mode-map "P" 'gnus-notmuch-change-period)
+;; (define-key gnus-notmuch-search-mode-map "T" 'gnus-notmuch-change-period-1)
 
 (defun gnus-notmuch-run-search ()
   (interactive)

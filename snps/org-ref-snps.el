@@ -24,11 +24,7 @@
 
 ;;; Code:
 
-
-
-
-
-(setq org-ref-bibliography-notes "~/epapers/org-ref-notes.org")
+;(setq org-ref-bibliography-notes "~/epapers/org-ref-notes.org")
 (setq doi-utils-download-pdf nil)
 (defun bibtex-add-entry (&optional query)
   (interactive)

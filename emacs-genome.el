@@ -1,6 +1,6 @@
 ;;; emacs-genome.el --- loading snps and genes from the emacs-genome
 
-;; Copyright (C) 2014 -- 2018  Thomas Alexander Gerds
+;; Copyright (C) 2014 -- 2020  Thomas Alexander Gerds
 
 ;; Author: Thomas Alexander Gerds <tag@biostat.ku.dk>
 ;; Keywords: convenience
@@ -135,10 +135,10 @@
   :ensure t)
 
 (use-package yasnippet
-  :ensure t
-  :config
-  (add-to-list 'yas-snippet-dirs (concat emacs-genome "/snps/yasnippets"))
-  (yas-global-mode 1))
+  :ensure t)
+;; :config
+(setq yas-snippet-dirs `(,(concat emacs-genome "/snps/yasnippets")))
+(yas-global-mode 1)
 
 (use-package auto-yasnippet
   :ensure t)

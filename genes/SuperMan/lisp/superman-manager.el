@@ -863,6 +863,8 @@ If PROMPT is a string use it to ask for project."
   (if superman-frame-title-format (superman-set-frame-title))
   (with-current-buffer (or (find-buffer-visiting superman-profile)
 			   (find-file-noselect superman-profile))
+    ;; in case that the profile was edited elsewhere
+    (revert-buffer t t t)
     (save-excursion
       (goto-char (point-min))
       (when (re-search-forward (concat ":NICKNAME:[ \t]?" (car project)) nil t)

@@ -1,3 +1,5 @@
+(setq org-startup-folded nil)
+
 ;;{{{
 (defun book-clean-chapter ()
   (interactive)
@@ -11,7 +13,8 @@
     (while (re-search-forward "includegraphics" nil t)
       (skip-chars-forward "^{")
       (forward-char 1)
-      (insert "chapters/" dir "/"))
+      (unless (looking-at "{chapters")
+	(insert "chapters/" dir "/")))
     (goto-char (point-min))
     (while (re-search-forward "\\phantomsection" nil t)
       (replace-match ""))
@@ -22,7 +25,7 @@
 
 (add-to-list 'superman-org-export-target-list "chapter")
 
-(defun superman-export-as-chapter ()
+(defun superman-export-as-chapter (&optional arg)
   (interactive)
   (let* ((org-buf (current-buffer))
 	 (raw-file (superman-file-name nil nil t ""))
@@ -119,6 +122,7 @@
 (add-hook 'org-mode-hook
 	  '(lambda nil
 	     (setq comment-region-function 'comment-region-default)
+	     (eldoc-mode 0)
 	     (define-key org-mode-map "\C-cf" 'ess-edit-insert-call)
 	     (define-key org-mode-map "\C-cv" 'ess-edit-insert-vector)
 	     (define-key org-mode-map "\C-cp" 'ess-edit-insert-path)
@@ -187,6 +191,7 @@
   (if (memq org-export-current-backend '(ravel-markdown))
       "yes" "no"))
 
+(add-to-list 'superman-org-export-target-list "rmd")
 (add-to-list 'superman-org-export-target-list "rmd/html")
 (add-to-list 'superman-org-export-target-list "exercise")
 
@@ -358,7 +363,7 @@ in a style suitable for a manuscript that is read by your own kind (i.e., try th
     (org-export-to-file 'ravel-markdown outfile
       async subtreep visible-only body-only ext-plist)))
 
-(defun superman-export-as-rmd/html ()
+(defun superman-export-as-rmd/html (&optional arg)
   "Export as html and as rmd. R-chunks should have 
  :eval (never-plain-export)
 in order to be exported to Rmd. 
@@ -372,6 +377,26 @@ in order to be exported to Rmd.
       )
     (save-buffer)
     (org-html-export-to-html)
+    (save-excursion
+      (goto-char (point-min))
+      (kill-region (point-min) (1+ (point-at-eol))))
+    (save-window-excursion
+      (find-file (org-export-output-file-name ".Rmd"))
+      ;; to avoid pop-up 
+      (kill-buffer))
+    (setq org-export-with-toc nil)
+    (Rmd-export)
+    (save-window-excursion
+      (find-file (org-export-output-file-name ".Rmd"))
+      (revert-buffer t t t))))
+(defun superman-export-as-rmd (&optional arg)
+  "Export as html and as rmd. R-chunks should have 
+ :eval (never-plain-export)
+in order to be exported to Rmd. 
+"
+  (interactive)
+  (let ((org-export-with-toc t))
+    (save-buffer)
     (save-excursion
       (goto-char (point-min))
       (kill-region (point-min) (1+ (point-at-eol))))

@@ -658,8 +658,12 @@ If a file is associated with the current-buffer save it.
 
 (defun superman-test-nickname ()
   ;; check if nickname exists 
-  (when (assoc  (superman-get-property (point) "nickname") superman-project-alist)
-    "Name already in use"))
+  (if
+      (save-excursion (goto-char (point-min))
+		      (re-search-forward "Superman edits item" nil t))
+      nil
+    (when (assoc  (superman-get-property (point) "nickname") superman-project-alist)
+      "Name already in use")))
 
 (defun superman-test-hdr (&optional message)
   (let ((hdr (ignore-errors (org-get-heading t t))))
