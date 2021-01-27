@@ -1236,8 +1236,10 @@ repository of PROJECT which is located at DIR."
 	 (concat "** "
 		 fname
 		 "\n:PROPERTIES:\n:GitStatus: " status
-		 "\n:Directory: " (cond (dname) (t "."))  
-		 "\n:FILENAME: [[" fullname "]]\n:END:\n\n") 'fixed)))))
+		 "\n:Directory: " (cond (dname) (t "."))
+		 "\n:Filename-nondirectory: " (file-name-nondirectory fullname)
+		 "\n:FILENAME: [[" fullname "]]\n:END:\n\n")
+	 'fixed)))))
 
 (defun superman-git-submodule-pre-display-hook ()
   (while (re-search-forward "^[ -][^ \t]+" nil t)
@@ -1284,7 +1286,8 @@ repository of PROJECT which is located at DIR."
 				 (Y (or (nth 2 status) " "))
 				 (XY (concat X Y)))
 			    (superman-label-status XY))))
-		   "\n:Directory: " (cond (dname) (t "."))  
+		   "\n:Directory: " (cond (dname) (t "."))
+		   "\n:Filename-nondirectory: " (file-name-nondirectory fullname)
 		   "\n:FILENAME: [[" fullname "]]\n:END:\n\n")
 	   'fixed))))))
 
@@ -1313,7 +1316,8 @@ repository of PROJECT which is located at DIR."
 		 fname
 		 "\n:PROPERTIES:\n:GitStatus: "
 		 (cadr (assoc status superman-git-diff-status-letters))
-		 "\n:Directory: " (cond (dname) (t "."))  
+		 "\n:Directory: " (cond (dname) (t "."))
+		 "\n:Filename-nondirectory: " (file-name-nondirectory fullname)
 		 "\n:FILENAME: [[" fullname "]]\n:END:\n\n")
 	 'fixed)))))
 
@@ -1376,8 +1380,9 @@ repository of PROJECT which is located at DIR."
 
 
 (defun superman-git-set-filter ()
-  "Match regexp against value of one of the columns
-and remove the whole line in case of no-match."
+  "In git displays, match lines regexp against value of one of the columns
+and keep only the matching lines. Works only if the column name of the
+ display is equal to the name of the property."
   (interactive)
   (let* ((cstart (next-single-property-change (point-min) 'column-names))
 	 (column-names (superman-list-to-alist
@@ -1390,21 +1395,10 @@ and remove the whole line in case of no-match."
 		   (if filenamep " (default: Filename): " ": "))
 	   column-names nil t nil nil
 	   (when filenamep "Filename")))
-	 (prop (cond ((assoc-ignore-case col balls)
-		      (car (assoc-ignore-case col balls)))
-		     ((car (rassoc-if '(lambda (u)
-					 (let ((name
-						(or
-						 (cadr (assoc "name" u))
-						 (car u))))
-					   (unless (stringp name)
-					     (setq name (symbol-name name)))
-					   (string-match col name)))
-				      balls)))))
-	 ;; (dim (progn
-	 ;; (goto-char cstart)
-	 ;; (re-search-forward col nil t)
-	 ;; (superman-ball-dimensions)))
+	 ;; works only if the column name of the display is equal to the
+	 ;; name of the property 
+	 ;; search filename without the path
+	 (prop (if (string= col "Filename") "Filename-nondirectory" col))
 	 (regexp 
 	  (read-string "Filter regexp: "))
 	 (filter-name (concat col " matches " regexp))
@@ -1421,7 +1415,6 @@ and remove the whole line in case of no-match."
 		     (get-text-property next 'org-hd-marker)
 		     prop))
 	       (string-match regexp val))
-	  ;; (if (re-search-forward regexp (+ (point) (nth 1 dim)) t)
 	  nil
 	(beginning-of-line)
 	(setq catch (append catch

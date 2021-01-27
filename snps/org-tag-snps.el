@@ -1,6 +1,42 @@
 (setq org-startup-folded nil)
 
 ;;{{{
+
+
+(defun latex-slides-2-org ()
+  (interactive)
+  (goto-char (point-min))
+  (while (re-search-forward "begin{slide}\\|end{slide}\\|begin{itemize}\\|end{itemize}\\|begin{enumerate}\\|end{enumerate}" nil t)
+    (kill-entire-line))
+  (goto-char (point-min))
+  (while (re-search-forward "\\\\item" nil t)
+    (replace-match " - ")
+    (beginning-of-line))
+  ;; em, it etc
+  (goto-char (point-min))
+  (while (re-search-forward "{\\\\em[ ]+\\([^}]+\\)}" nil t)
+    (let ((emtext (match-string-no-properties 1)))
+      (replace-match (concat "*" emtext "*") t t)))
+  ;; danish letters
+  (goto-char (point-min))
+  (let ((clist
+	 '(("{\\ae}" "æ")
+	   ("{\\Ae}" "Æ")
+	   ("{\\o}" "ø")
+	   ("{\\O}" "Ø")
+	   ("{\\aa}" "å")
+	   ("{\\Aa}" "Å"))))
+    (while clist
+      (save-excursion
+	(goto-char (point-min))
+	(while (search-forward (caar clist) nil t)
+	  (replace-match  (cadr (car clist)))))
+      (setq clist (cdr clist))))
+  (goto-char (point-min))
+  (while (re-search-forward "\\\\slidetitle{\\(.*\\)}" nil t)
+    (let ((title (match-string-no-properties 1)))
+      (replace-match (concat "*** " title) t t))))
+
 (defun book-clean-chapter ()
   (interactive)
   (let ((dir 
@@ -258,7 +294,7 @@
       (revert-buffer t t t))
     (superman-set-config (concat (buffer-name) " | " rmd-file))))
 
-(defun superman-export-as-exercise ()
+(defun superman-export-as-exercise (&optional arg)
   "Export orgmode R-exercise to 4 different targets:
    html without code
    Rmd without code

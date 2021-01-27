@@ -1618,10 +1618,14 @@ Switches to the corresponding directory of each file."
 	  (save-buffer)
 	  )))))
 
-(defun file-list-query-replace (&optional file-list)
+(defun file-list-query-replace (&optional file-list args)
+  "Apply `query-replace' to FILE-LIST which defaults to `file-list-current-file-list' current.
+When ARGS is given it should have the same format as the result of `query-replace-read-args'. E.g., 
+(list 'match' 'replacement' nil nil)."
   (interactive)
+  (save-some-buffers)
   (let* ((file-list (or file-list file-list-current-file-list))
-	 (args (query-replace-read-args "Query-replace" nil t)))
+	 (args (or args (query-replace-read-args "Query-replace" nil t))))
     (dolist (file file-list)
       (save-window-excursion
 	(find-file (file-list-make-file-name file))

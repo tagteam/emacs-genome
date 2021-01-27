@@ -1021,7 +1021,8 @@ Creates the project directory and index file."
 (defun superman-capture-calendar (&optional project marker ask)
   (interactive)  
   (superman-capture-meeting "Calendar" marker ask))
-  
+
+
 (defun superman-capture-meeting (&optional project marker ask)
   "Capture a meeting for PROJECT. MARKER is a marker or the name of a section 
 which defaults to 'Calendar'. If ASK 

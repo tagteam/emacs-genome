@@ -1,6 +1,6 @@
 ;;; superman-google.el --- superman has google
 
-;; Copyright (C) 2013-2016  Thomas Alexander Gerds
+;; Copyright (C) 2013-2020  Thomas Alexander Gerds
 
 ;; Author: Thomas Alexander Gerds <tag@biostat.ku.dk>
 ;; Keywords: convenience
@@ -121,8 +121,71 @@
 			    "*Superman-google-calendar*"
 			    (concat "Running\n" g-command " returned:\n\n"))))))
    (widen))
-;; gcalcli add --calendar "Tag Team" --title "bla" --where '' --when '2015/01/19 1:00pm' --duration 60 --description '' --remind '0'
-;; gcalcli add --calendar "Tag Team" --title "bla" --where '' --when '2015/08/19' --allday --duration 3 --description '' --remind '0'
+
+
+;; gnus articles med outlook invitation
+(defun superman-google-export-outlook ()
+  (interactive)
+  (save-window-excursion
+    (goto-char (point-min))
+    (when (re-search-forward "[ Accept ]" nil t)
+      (let* ((g-cal superman-google-default-calendar)
+	     (g-remind "0")
+	     (g-string (save-excursion
+			 ;; should be g-title but g-string is sjover
+			 (re-search-forward "^Summary:[ \t]+\\(.*\\)$" nil t)
+			 (match-string-no-properties 1)))
+	     (g-entry (save-excursion
+			(re-search-forward "^Time:[ \t]+\\(.*\\)$" nil t)
+			(match-string-no-properties 1)))
+	     (g-place  (save-excursion
+			 (re-search-forward "^Location:[ \t]+\\(.*\\)$" nil t)
+			 (match-string-no-properties 1)))
+	     (g-date
+	      ;; Strip this type of string "<2015-03-24 Tue 13:00--14:20>"
+	      (if (string-match "\\( +\\)\\([0-9]\\{1,2\\}:[0-9]\\{2\\}\\)\\(-+\\)\\([0-9]\\{1,2\\}:[0-9]\\{2\\}\\)" g-entry)
+		  (let* ((a (match-string-no-properties 2 g-entry))
+			 (sep (match-string-no-properties 3 g-entry))
+			 (b (match-string-no-properties 4 g-entry))
+			 (d (concat (replace-in-string g-entry (concat sep b) ""))))
+		    (string-match org-ts-regexp d)
+		    (match-string-no-properties 1 d))
+		(string-match org-ts-regexp g-entry)
+		(match-string-no-properties 1 g-entry)))
+	     (g-duration
+	      (or (superman-google-calculate-duration g-entry)
+		  superman-google-default-duration)))
+	(when (or
+	       ;; use entry calendar
+	       g-cal
+	       ;; interactively choose google calendar
+	       (and 
+		g-entry
+		(progn
+		  (setq g-cal
+			(completing-read
+			 (concat "Choose google calendar (default: " superman-google-default-calendar "): ")
+			 (mapcar #'(lambda (entry) (cons entry nil)) superman-google-calendars)
+			 nil t nil nil
+			 superman-google-default-calendar))
+		  (org-set-property "GoogleCalendar" g-cal)
+		  g-cal))))
+	(let* ((pre-command
+		(concat superman-google-cmd
+			" --calendar " "'" g-cal "' add"
+			" --title '" g-string "'"
+			" --where '" g-place "'"
+			" --when '" g-date "'"
+			" --duration '" g-duration "'"
+			" --description ''"
+			" --remind '" (or g-remind "0") "'"))
+	       (g-command
+		(read-string "Google calendar entry: " pre-command)))
+	  (when (> (length g-command) 0)
+	    (superman-run-cmd g-command
+			      "*Superman-google-calendar*"
+			      (concat "Running\n" g-command " returned:\n\n"))))))
+    (widen)))
 
 (defun superman-google-calculate-duration (string)
   "Calculate duration of meeting in minutes.

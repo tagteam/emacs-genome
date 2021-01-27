@@ -143,6 +143,7 @@
 (defun dst-chromium-window ()
   (let ((cwin (shell-command-to-string
 	       "xdotool search --onlyvisible --class 'chromium'")))
+    
     (if (string= cwin "") nil
       (replace-regexp-in-string "\n" "" cwin))))
 
@@ -177,6 +178,7 @@
    Step 2: login-dst
    Step 3: choose project, download launcher and start session."
   (interactive)
+  (save-window-excursion
   (if (string= "running" (dst-start-browser))
       (if (dst-open-firewall)
 	  (let* ((project (let* ((p (ido-completing-read
@@ -209,7 +211,7 @@
 	      (setq proc-cmd  (dst-select launcher project)
 		    cmd (plist-get pro-cmd :cmd))
 	      (message cmd)
-	      (async-shell-command cmd rdp-buffer))))))
+	      (async-shell-command cmd rdp-buffer)))))))
   
   
 
@@ -241,6 +243,22 @@
 	(message "Cannot see chromium. Use M-x dst-start-browser RET to start it.")
       (shell-command (concat "xdotool windowraise " cwin
 			     " mousemove --window " (dst-chromium-window) " " dst-domain-user-pos)))))
+(defun dst-show-server-4-pos ()
+  (interactive)
+  (let ((cwin (dst-chromium-window)))
+    (if (not cwin)
+	(message "Cannot see chromium. Use M-x dst-start-browser RET to start it.")
+      (shell-command (concat "xdotool windowraise " cwin
+			     " mousemove --window " (dst-chromium-window) " " (cdr (assoc "srvfsegh4" dst-servers)))))))
+
+(defun dst-show-fse-server-pos ()
+  (interactive)
+  (let ((cwin (dst-chromium-window)))
+    (if (not cwin)
+	(message "Cannot see chromium. Use M-x dst-start-browser RET to start it.")
+      (shell-command (concat "xdotool windowraise " cwin
+			     " mousemove --window " (dst-chromium-window) " " (cdr (assoc "FSE Windows" dst-servers)))))))
+
 (defun dst-show-current-password-pos ()
   (interactive)
   (let ((cwin (dst-chromium-window)))

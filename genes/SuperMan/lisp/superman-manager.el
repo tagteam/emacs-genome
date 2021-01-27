@@ -937,7 +937,8 @@ If NOSELECT is set return the project."
 	  (superman-switch-config pro nil)
 	;; the next command 
 	;; re-sets superman-config-cycle-pos 
-	(superman-switch-config pro 0)))))
+	(superman-switch-config pro 0))
+      )))
 
 (defun superman-list-files (dir ext sort-by)
   (if (featurep 'file-list)

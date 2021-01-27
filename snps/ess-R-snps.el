@@ -57,6 +57,7 @@
 ;;}}}
 ;;{{{ key bindings
 
+
 (require 'ess-edit)
 (add-hook 'ess-mode-hook 'eg/R-keybindings)
 (defun eg/R-keybindings ()
