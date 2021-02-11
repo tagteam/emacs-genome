@@ -741,7 +741,11 @@
 ;; see also superman-control-export in superman-export.el
 (defun superman-run-R-or-export-as (&optional debug)
   (interactive "P")
-  (cond ((string= (car (org-babel-get-src-block-info)) "R")
+  (cond ((and (string= (car (org-babel-get-src-block-info)) "R")
+	      (not (and (looking-at "[ \t]*$")
+			(save-excursion (forward-line -1)
+					(beginning-of-line)
+					(looking-at "#\\+END_SRC")))))
 	 (superman-ess-eval-and-go nil))
 	((string= (car (org-babel-get-src-block-info)) "sh")
 	 (progn (sh-send-line-or-region-and-step)

@@ -230,6 +230,7 @@
 (add-to-list 'superman-org-export-target-list "rmd")
 (add-to-list 'superman-org-export-target-list "rmd/html")
 (add-to-list 'superman-org-export-target-list "exercise")
+(add-to-list 'superman-org-export-target-list "opgave")
 
 (defun superman-ravel-export-to-Rmd (&optional async subtreep visible-only body-only ext-plist)
   (interactive)
@@ -271,7 +272,6 @@
 ;; #+BEGIN_SRC R  :results output :exports (exercise-without-code)  :session *R* :cache yes :eval (never-plain-export) 
 ;; #+BEGIN_SRC R :exports (exercise-with-solutions) :results output  :session *R* :cache yes 
 
-
 (defun superman-export-as-vignette ()
   "Export orgmode to Rmd target:
 "
@@ -294,6 +294,7 @@
       (revert-buffer t t t))
     (superman-set-config (concat (buffer-name) " | " rmd-file))))
 
+  
 (defun superman-export-as-exercise (&optional arg)
   "Export orgmode R-exercise to 4 different targets:
    html without code
