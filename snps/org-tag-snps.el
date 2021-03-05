@@ -1,8 +1,8 @@
 (setq org-startup-folded nil)
 
+(require 'org-opgave-snps)
+	 
 ;;{{{
-
-
 (defun latex-slides-2-org ()
   (interactive)
   (goto-char (point-min))
@@ -243,8 +243,13 @@
 
 (fset 'Rmd-export
       (lambda (&optional arg) "Keyboard macro."
-	(interactive "p") 
+	(interactive "p")
 	(kmacro-exec-ring-item (quote ("rm" 0 "%d")) arg)))
+
+;; (defun Rmd-export (&optional arg) "Keyboard macro."
+       ;; (interactive "p")
+       ;; (message (if exercise-with-code "Ueja" "Uejb"))
+       ;; (kmacro-exec-ring-item (quote ("rm" 0 "%d")) arg))
 
 (setq exercise-without-code nil)
 (setq exercise-with-code nil)
@@ -254,14 +259,19 @@
 
 (defun exercise-with-code ()
   (if exercise-with-code "both" "none"))
+
 (defun exercise-without-code ()
   (if exercise-without-code "both" "none"))
+
 (defun exercise-with-solutions ()
   (if exercise-with-solutions "both" "none"))
+
 (defun graphics-for-solutions ()
   (if exercise-with-solutions "graphics" "none"))
+
 (defun exercise-without-solutions ()
   (if (not exercise-with-solutions) "both" "none"))
+
 (defun eval-graphics-with-solutions ()
   (if exercise-with-solutions "both" "none"))
 

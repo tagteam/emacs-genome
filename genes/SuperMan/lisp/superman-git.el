@@ -129,6 +129,25 @@ result. PRE-HOOK and POST-HOOK are functions that are called before and after CM
       (concat "cd " dir ";"
 	      superman-cmd-git " rev-parse --is-inside-work-tree ")))))
 
+
+(defun superman-list-project-subdirs (dir)
+  "List subdirectories of directory DIR"
+  (let ((dir-list (file-name-all-completions "" dir)))
+    (setq dir-list
+	  (delq nil
+		(mapcar #'(lambda (file)
+			    (when (and (directory-name-p file) (not (member file '("./" "../"))))
+			      file)) dir-list)))
+    dir-list))
+
+(defun superman-list-git-subdirs (dir)
+  "List subdirectories of directory DIR"
+  (let ((dir-list (superman-list-project-subdirs dir)))
+    (setq dir-list
+	  (delq nil
+		(mapcar 'superman-git-toplevel dir-list)))
+	  dir-list))
+
 (defun superman-git-action (action &optional dir buf)
   "Run a git command ACTION in directory DIR and display result. Optional argument BUF is
 passed to `superman-run-cmd'."
@@ -181,7 +200,7 @@ passed to `superman-run-cmd'."
       (superman-git-action "pull" dir))))
 
 (defun superman-git-toplevel (file)
-  "Find the toplevel directory DIR is under git control."
+  "Check if the toplevel directory DIR is under git control."
   (when (and file (file-exists-p file))
     (let ((dir (if (file-directory-p file) file (file-name-directory file))))
       (if (superman-git-p dir)
@@ -803,7 +822,6 @@ see M-x manual-entry RET git-diff RET.")
 5) post-hook is is called after `superman' has played the balls.
 ")
 
-
 (defun superman-git-display (&optional project)
   "Display git control for the current project's directory
  (if it is git controlled). This function inserts the header
@@ -904,7 +922,7 @@ This function should be bound to a key or button."
 
 (defun superman-initialize-git-control-string (dir)
   (concat "\n\nDirectory " dir " is not yet under git control.\n"
-	  "press `GI' or this button to: " 
+	  "press `I' or this button to: " 
 	  (superman-make-button
 	   "initialize git control"
 	   '(:fun superman-git-init

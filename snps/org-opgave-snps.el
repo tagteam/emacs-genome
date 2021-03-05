@@ -40,10 +40,14 @@
 (add-to-list 'superman-org-export-target-list "opgave")
 
 (defun exercise-with-code ()
-  (if exercise-without-code "both" "none"))
+  (if exercise-with-code "both" "none"))
 
 (defun exercise-with-solutions ()
   (if exercise-with-solutions "both" "none"))
+
+(defun superman-Rmd-export (exercise-with-code exercise-with-solutions) "Keyboard macro."
+       (interactive "p")
+       (kmacro-exec-ring-item (quote ("rm" 0 "%d")) 1))
 
 (defun superman-export-as-opgave (&optional arg)
   "Export orgmode R-exercise to 3 different targets:
@@ -61,11 +65,11 @@ and similarly the rdm only sections
 
 there are two blocks:
 
-#+BEGIN_SRC R  :results output :exports (exercise-without-code) :cache yes :eval (never-plain-export)
+#+BEGIN_SRC R  :results output :exports (exercise-with-code) :cache yes :eval (never-plain-export)
   # put your R-code here 
 #+END_SRC
 
-#+BEGIN_SRC R  :results output :exports (exercise-with-code)  :session *R* :cache yes  :eval (never-plain-export)
+#+BEGIN_SRC R  :results output :exports (exercise-with-solutions)  :session *R* :cache yes  :eval (never-plain-export)
 library(data.table)
 space <- fread('data/space.csv')
 space
@@ -78,8 +82,8 @@ space
 	 (rmd-solution-file (concat (file-name-sans-extension rmd-file) "-with-solution.Rmd"))
 	 (org-export-exclude-tags (list "noexport"))
 	 (org-export-with-toc t)
-	 (exercise-with-code nil)
-	 (exercise-with-solutions nil))
+	 (exercise-with-code t)
+	 (exercise-with-solutions t))
     ;; 
     ;; export to Rmd with code without toc (first without solutions)
     ;;
@@ -89,7 +93,7 @@ space
     ;; (find-file rmd-file)
     ;; (kill-buffer))
     (setq exercise-with-code t  ;; evaluate blocks/chunks when :exports (exercise-with-code)
-	  org-export-exclude-tags (list "noexport" "solution") ;; ignore these sections
+	  org-export-exclude-tags (list "noexport" "solution" "solutions") ;; ignore these sections
 	  org-export-with-toc nil)
     (Rmd-export)
     (copy-file rmd-file (concat (file-name-sans-extension rmd-file) "-with-code.Rmd") 'ok)
@@ -102,7 +106,7 @@ space
 	  org-export-with-toc nil)
     (Rmd-export)
     (copy-file rmd-file (concat (file-name-sans-extension rmd-file) "-with-solution.Rmd") 'ok)
-    (setq exercise-without-code nil)
+    (setq exercise-with-solutions nil)
     (save-buffer)
     ;; revert rmd buffer
     (find-file (concat (file-name-sans-extension rmd-file) "-with-solution.Rmd"))

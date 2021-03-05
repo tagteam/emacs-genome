@@ -1,6 +1,6 @@
 ;;; superman-views.el --- Superman views of project contents 
 
-;; Copyright (C) 2012-2017 Thomas Alexander Gerds, Klaus Kaehler Holst
+;; Copyright (C) 2012-2021 Thomas Alexander Gerds, Klaus Kaehler Holst
 
 ;; Authors: Thomas Alexander Gerds <tag@biostat.ku.dk>
 ;;          Klaus Kaehler Holst <kkho@biostat.ku.dk>
@@ -278,7 +278,7 @@ at (point-min) is git controlled."
 		       '(:fun superman-git-display
 			      :help "Control git repository"))
 		    (superman-make-button
-		     "not set. <> press button or `GI' to initialize git control"
+		     "Type `I' to initialize git control."
 		     `(:fun superman-git-init
 			    :help (concat
 				   "Initialize git repository at " ,git-dir))))))
@@ -793,7 +793,7 @@ for git and other actions like commit, history search and pretty log-view."
 (define-key superman-view-mode-map [(shift up)] 'superman-view-priority-up)
 (define-key superman-view-mode-map [(shift down)] 'superman-view-priority-down)
 (define-key superman-view-mode-map "i" 'superman-view-index)
-(define-key superman-view-mode-map "I" 'superman-view-invert-marks)
+;; (define-key superman-view-mode-map "I" 'superman-view-invert-marks)
 (define-key superman-view-mode-map "e" 'superman-view-edit-item)
 (define-key superman-view-mode-map "D" 'superman-view-dired)
 (define-key superman-view-mode-map "/" 'superman-view-filter)
@@ -847,7 +847,7 @@ for git and other actions like commit, history search and pretty log-view."
 (define-key superman-view-mode-map "Gd" 'superman-git-diff-file)
 (define-key superman-view-mode-map "Gg" 'superman-git-grep)
 (define-key superman-view-mode-map "Gh" 'superman-git-history)
-(define-key superman-view-mode-map "GI" 'superman-git-init)
+(define-key superman-view-mode-map "I" 'superman-git-init)
 (define-key superman-view-mode-map "Gl" 'superman-git-log-file)
 (define-key superman-view-mode-map "GL" 'superman-git-log-decoration-only-file)
 (define-key superman-view-mode-map "GP" 'superman-git-push)
@@ -856,7 +856,6 @@ for git and other actions like commit, history search and pretty log-view."
 (define-key superman-view-mode-map "GBs" 'superman-git-checkout-branch)
 (define-key superman-view-mode-map "GBn" 'superman-git-new-branch)
 (define-key superman-view-mode-map "S" 'superman-git-status)
-;; (define-key superman-view-mode-map "G=" 'superman-git-difftool-file)
 
 ;;}}}
 
@@ -1923,7 +1922,8 @@ to refresh the view.
 			   (or redo
 			       `(superman-view-project ,nick t)))
 	(put-text-property (point-at-bol) (point-at-eol) 'git-dir
-			   (superman-git-toplevel loc))
+			   (or (superman-git-toplevel loc)
+			       (car (superman-list-git-subdirs loc))))
 	(put-text-property (point-at-bol) (point-at-eol) 'dir loc)
 	(put-text-property (point-at-bol) (point-at-eol) 'project-view t) ;; to identify project-view buffer, do not copy to other views
 	(put-text-property (point-at-bol) (point-at-eol) 'nickname nick)
