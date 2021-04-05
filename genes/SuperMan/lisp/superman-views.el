@@ -1951,7 +1951,7 @@ to refresh the view.
 	      (append cats `(,description)))
 	;; loop over cats
 	(goto-char (point-max))
-	(insert "\n\n")
+	;; (insert "\n\n")
 	(while cats
 	  (unless (string= (plist-get (car cats) :HEADING) "Configuration")
 	    (superman-format-cat (car cats) ibuf vbuf loc))

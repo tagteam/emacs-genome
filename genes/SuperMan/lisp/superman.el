@@ -370,7 +370,12 @@ the existing properties."
 
 ;;}}}
 ;;{{{ black board
-(defvar superman-black-board "~/.superman-black-board.org" "File in which to save the black board")
+;; fixme: make superman-home relative to superman-default-directory
+(defvar superman-home "~/metropolis/" "Directory in which to save the superman stuff")
+(defvar superman-black-board
+  (concat superman-home "superman-black-board.org") "File in which to save the black board")
+(defvar superman-calendar-files `(,(concat superman-home "superman-calendar.org")) "List of files with appointments ")
+
 (defun superman-black-board () (interactive) (find-file superman-black-board))
 ;;}}}
 ;;{{{ Agenda
@@ -387,9 +392,10 @@ all dates."
 	(org-agenda-custom-commands nil))
     (add-to-list 'org-agenda-custom-commands
 		 '("A" "Superman agenda"
-		   ((agenda "" ((org-agenda-files (superman-index-list)))))
+		   ;;((agenda "" superman-agenda-files))
+		   ((agenda "" ((org-agenda-files (superman-calendar-list)))))
 		   ((org-agenda-compact-blocks nil)
-		    (org-agenda-show-all-dates nil)
+		    (org-agenda-show-all-dates t)
 		    (org-agenda-buffer-name "*SuperMan-Agenda*")
 		    (org-agenda-this-buffer-name "*SuperMan-Agenda*")
 		    (org-agenda-window-setup 'current-window)
@@ -485,6 +491,9 @@ all dates."
 ;;}}}
 ;;{{{ Calendar
 
+(defun superman-calendar-list ()
+  (list (car (superman-index-list))))
+
 (defun superman-calendar (&optional project)
   "Show events from all projects in a calendar view."
   (interactive)
@@ -493,7 +502,8 @@ all dates."
 	(org-agenda-custom-commands nil))
     (add-to-list 'org-agenda-custom-commands
 		 '("C" "Superman calendar"
-		   ((agenda "" ((org-agenda-files (superman-index-list)))))
+		   ((agenda "" ((org-agenda-files (superman-calendar-list)))))
+		   ;;((agenda "" ((org-agenda-files (superman-index-list)))))
 		   ((org-agenda-compact-blocks nil)
 		    (org-agenda-show-all-dates t)
 		    (org-agenda-span 7)
@@ -919,5 +929,6 @@ Enabling superman mode electrifies the superman buffer for project management."
 
 (provide 'superman)
 ;;; superman.el ends here
+
 
 

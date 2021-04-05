@@ -76,7 +76,7 @@ result. PRE-HOOK and POST-HOOK are functions that are called before and after CM
 
 (defun superman-git-init ()
   (interactive)
-  (or (get-text-property (point-min) 'git-dir)
+  (or (superman-git-p (get-text-property (point-min) 'git-dir))
       (let ((pro (superman-view-current-project)))
 	(superman-git-init-directory (superman-get-location pro))
 	(superman-redo))))
@@ -132,13 +132,15 @@ result. PRE-HOOK and POST-HOOK are functions that are called before and after CM
 
 (defun superman-list-project-subdirs (dir)
   "List subdirectories of directory DIR"
-  (let ((dir-list (file-name-all-completions "" dir)))
-    (setq dir-list
-	  (delq nil
-		(mapcar #'(lambda (file)
-			    (when (and (directory-name-p file) (not (member file '("./" "../"))))
-			      file)) dir-list)))
-    dir-list))
+  (when (directory-name-p dir)
+    (let ((dir-list (file-name-all-completions "" dir)))
+      (setq dir-list
+	    (delq nil
+		  (mapcar #'(lambda (file)
+			      (when (and (directory-name-p file) (not (member file '("./" "../"))))
+				(concat dir file)))
+			  dir-list)))
+      dir-list)))
 
 (defun superman-list-git-subdirs (dir)
   "List subdirectories of directory DIR"
