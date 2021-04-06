@@ -88,12 +88,11 @@
 ; 	    (assq-delete-all 'muse-mode font-lock-keywords-alist))))
 ;;}}}
 
-(unless (featurep 'xemacs)
-  (defun kill-entire-line ()
-    (interactive)
-    (progn
-      (beginning-of-line)
-      (kill-line))))
+(defun kill-entire-line ()
+  (interactive)
+  (progn
+    (beginning-of-line)
+    (kill-line)))
 
 
 ;;{{{ latex

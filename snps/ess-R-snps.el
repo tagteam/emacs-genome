@@ -59,31 +59,23 @@
 
 
 (require 'ess-edit)
-(add-hook 'ess-mode-hook 'eg/R-keybindings)
-(defun eg/R-keybindings ()
-  (interactive)
-  (define-key ess-mode-map "\M-j" 'eg/ess-eval-and-go)
-  (define-key ess-mode-map "\M-r" 'copy-region-as-kill)
-  (define-key ess-mode-map "\M-q" 'eg/indent-paragraph)
-  (define-key ess-mode-map "\M-\C-i" 'ess-edit-indent-call-sophisticatedly)
-  (define-key ess-mode-map "\M-l" 'mark-line)
-  (define-key ess-mode-map "\M-k" 'eg-switch-to-R)
-  ;; (define-key ess-mode-map "\M-h" 'eg/ess-get-help-R-object)
-  (define-key ess-mode-map "\C-\M-y" 'eg/ess-duplicate-line)  
-  (define-key ess-mode-map "\C-cf" 'ess-edit-insert-call)
-  (define-key ess-mode-map "\C-cv" 'ess-edit-insert-vector)
-  (define-key ess-mode-map "\C-cp" 'ess-edit-insert-path)
-  (define-key ess-mode-map "_" 'eg/ess-smart-underscore)
-  (define-key ess-mode-map "\C-ch" 'ess-edit-mark-call)
-  (define-key ess-mode-map "\M-H" 'eg/ess-get-help-R-object)
-  (define-key ess-mode-map "\C-cF" 'ess-edit-insert-file-name)
-  (define-key ess-mode-map "\C-\M-k" #'(lambda () (interactive)(eg-switch-to-R 't)))
-  (define-key ess-mode-map [(backspace)] 'delete-backward-char)
-  (define-key ess-mode-map [(meta backspace)] 'backward-kill-word)
-  ;; (setcdr (assoc 'ess-indent-with-fancy-comments (cdr (assoc 'RRR ess-style-alist))) nil)
-  )
-
-(add-hook 'ess-mode-hook 'eg/R-keybindings)
+(add-hook 'ess-mode-hook
+	  '(lambda () 
+	     (ess-edit-default-keybindings)
+	     (define-key ess-mode-map "\M-j" 'ess-eval-region-and-go)
+	     (define-key ess-mode-map "\M-r" 'copy-region-as-kill)
+	     (define-key ess-mode-map "\M-q" 'eg/indent-paragraph)
+	     (define-key ess-mode-map "\M-l" 'mark-line)
+	     (define-key ess-mode-map "\M-k" 'eg-switch-to-R)
+	     (define-key ess-mode-map "\C-z" 'fold-dwim-toggle)
+	     (define-key ess-mode-map [(meta return)] '(lambda () (interactive) (ess-eval-line)(forward-line 1)))
+	     (define-key ess-mode-map "\C-\M-y" 'eg/ess-duplicate-line)  
+	     (define-key ess-mode-map "_" 'eg/ess-smart-underscore)
+	     (define-key ess-mode-map "\M-H" 'eg/ess-get-help-R-object)
+	     (define-key ess-mode-map "\C-\M-k" #'(lambda () (interactive)(eg-switch-to-R 't)))
+	     (define-key ess-mode-map [(backspace)] 'delete-backward-char)
+	     (define-key ess-mode-map [(meta backspace)] 'backward-kill-word)
+	     ))
 
 ;;}}}
 ;;{{{ expanding objects
@@ -96,15 +88,6 @@
 	     (add-to-list 'hippie-expand-try-functions-list (lambda (old) (ess-complete-object-name)))))
 ;;}}}
 ;;{{{ R mode
-(defun eg/ess-eval-and-go ()
-  (interactive)
-  (if (region-active-p)
-      (let* ((start (region-beginning))
-	     (end (region-end))
-	     (visibly (< (length (buffer-substring-no-properties start end)) 300)))
-	;;	(ess-eval-region-and-go start end visibly))
-	(ess-eval-region-and-go start end (not visibly)))
-    (ess-eval-line-and-step)))
 
 (defun r (arg)
   (interactive "P")
@@ -113,14 +96,6 @@
 	(t (split-window-vertically)))
   (other-window 1)
   (R))
-
-(defun eg/ess-get-help-R-object ()
-  "Open the help file of the R object at the cursor point from a script in an external buffer."
-  (interactive)
-  (let ((fun (ess-symbol-at-point)))
-    (ess-switch-to-end-of-ESS)
-    (insert (concat "help(" (symbol-name fun) ")"))
-    (inferior-ess-send-input)))
 
 ;; allow to duplicate a line - from http://stackoverflow.com/questions/88399/how-do-i-duplicate-a-whole-line-in-emacs
 (defun eg/ess-duplicate-line (arg)
@@ -174,8 +149,6 @@
 (add-hook 'ess-mode-hook 'dont-like-fancy)
 (add-hook 'ess-r-mode-hook 'dont-like-fancy)
 
-
-
 ;;}}}
 ;;{{{ scrolling iess window on output
 (setq comint-scroll-to-bottom-on-output 'this)
@@ -201,8 +174,6 @@
 ;comint-add-to-input-history with the command.
 
 ;Something like (untested) should do what you want.
-
-
 ;; (defadvice ess-eval-linewise (before smart-toggle-visibly first activate)
   ;; (and (not (eq major-mode 'inferior-ess-mode)) (< (length text-withtabs) 300))
       ;; (setq invisibly nil)
@@ -297,15 +268,6 @@ See `ess-switch-to-ESS' and `ess-show-buffer' for buffer behaviour.
 	(switch-to-buffer rmd-buf)
 	(ess-show-buffer (buffer-name sbuffer) nil)))))
 ;;}}}
-
-;; (defun insert-c-calls-package ()
-;; (let* ((dir (read-directory-name "Path to R-package: "))
-;; (c-files (directory-files (concat dir "/src/" )
-;; ".c$"))
-;; (current-buffer (current-buffer)))
-;; (while c-files
-;; (find-file (car c-files))
-;; (setq c-files (cdr c-files)))))
 
   
 (provide 'ess-R-snps)

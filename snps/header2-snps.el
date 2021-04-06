@@ -1,6 +1,6 @@
 ;;; header2-snps.el --- 
 
-;; Copyright (C) 2015  Thomas Alexander Gerds
+;; Copyright (C) 2015-2021  Thomas Alexander Gerds
 
 ;; Author: Thomas Alexander Gerds <tag@biostat.ku.dk>
 ;; Keywords: 
@@ -23,6 +23,7 @@
 ;; 
 
 ;;; Code:
+(use-package header2)
 (autoload 'auto-update-file-header "header2")
 (add-hook 'write-file-hooks 'auto-update-file-header)
 (autoload 'auto-make-header "header2")
@@ -30,7 +31,6 @@
 (add-hook 'R-mode-hook 'auto-make-header)
 ;;(add-hook 'org-mode-hook 'auto-make-header)
 (setq header-date-format  "%b %e %Y (%R) ")
-
 
 (defsubst header-end-line ()
   "Insert a divider line."
@@ -84,8 +84,5 @@
                          header-code
                          header-eof
                          ))
-
-
-
 (provide 'header2-snps)
 ;;; header2-snps.el ends here

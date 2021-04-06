@@ -1852,7 +1852,7 @@ When ARGS is given it should have the same format as the result of `query-replac
 (define-key file-list-mode-map "7" 'file-list-remove-filter-7)
 
 (defun file-list-default-keybindings ()
-  "Set up default keybindings'."
+  "Set up default keybindings for file-list'."
   (interactive)
   (global-unset-key "\C-xf")
   (global-set-key (read-kbd-macro "C-x f f")  'file-list-iswitchf-file)

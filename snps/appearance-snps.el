@@ -1,6 +1,6 @@
 ;;; appearance-snps.el --- emacs-genome flavor
 
-;; Copyright (C) 2012  Thomas Alexander Gerds
+;; Copyright (C) 2012-2021  Thomas Alexander Gerds
 
 ;; Author: Thomas Alexander Gerds<tag@biostat.ku.dk>
 ;; Keywords: convenience
@@ -105,13 +105,6 @@
       make-backup-files t
       kept-new-versions 6
       kept-old-versions 2)
-;; (require 'auto-save)
-;; (setq auto-save-directory (expand-file-name "~/autosave/")
-      ;; auto-save-directory-fallback auto-save-directory
-      ;; auto-save-hash-p nil
-      ;; efs-auto-save t
-      ;; efs-auto-save-remotely nil
-      ;; auto-save-interval 2000)
 ;;}}}
 ;;{{{ save minibuffer history
 (savehist-mode 1)
@@ -127,12 +120,8 @@
     (paren-activate)
   (show-paren-mode 1))
 
-;; (require 'scroll-in-place)
-;; (setq scroll-in-place t)
 (require 'uniquify nil t)       
-
 (setq uniquify-buffer-name-style 'post-forward)
-;; (require 'default-dir)
 ;;}}}
 ;;{{{ time
 (require 'time nil t)

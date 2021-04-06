@@ -731,6 +731,17 @@ Quotes are single and double."
      (+ (point) (skip-chars-forward "a-zA-Z0-9._")))))
        
 ;;}}}
-
+;;{{{ keybindings
+(defun ess-edit-default-keybindings ()
+  "Set up default keybindings for ess-edit'."
+  (define-key ess-mode-map "\C-cf" 'ess-edit-insert-call)
+  (define-key ess-mode-map "\C-cv" 'ess-edit-insert-vector)
+  (define-key ess-mode-map "\C-cp" 'ess-edit-insert-path)
+  (define-key ess-mode-map "\C-ch" 'ess-edit-mark-call)
+  (define-key ess-mode-map "\C-cF" 'ess-edit-insert-file-name)
+  (define-key ess-mode-map "\M-\t" 'ess-edit-indent-call-sophisticatedly)
+  (define-key ess-mode-map "\M-\C-i" 'ess-edit-indent-call-sophisticatedly)
+  )
+;;}}}
 (provide 'ess-edit)
 ;;; ess-edit.el ends here

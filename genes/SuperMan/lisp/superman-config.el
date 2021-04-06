@@ -425,7 +425,7 @@ given in superman notation."
 ;;}}}
 ;;{{{ superman-shell
 (defun superman-goto-shell ()
-  "Switches to *shell* buffer and. "
+  "Switches to *shell* buffer. "
   (interactive)
   (let ((sbuf (get-buffer "*shell*"))
 	(cmd (concat "cd " default-directory))
