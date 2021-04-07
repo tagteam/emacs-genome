@@ -1,6 +1,6 @@
 ;;; emacs-genome.el --- loading snps and genes from the emacs-genome
 
-;; Copyright (C) 2014 -- 2020  Thomas Alexander Gerds
+;; Copyright (C) 2014 -- 2021  Thomas Alexander Gerds
 
 ;; Author: Thomas Alexander Gerds <tag@biostat.ku.dk>
 ;; Keywords: convenience
@@ -55,8 +55,11 @@
 			("gnu" . "https://elpa.gnu.org/packages/")
 			("org" . "https://orgmode.org/elpa/")
 			("melpa" . "https://melpa.org/packages/")
-			;;("melpa-stable" . "https://stable.melpa.org/packages/")
-			("marmalade" . "https://marmalade-repo.org/packages/")))
+			("melpa-stable" . "https://stable.melpa.org/packages/")
+			("marmalade" . "https://marmalade-repo.org/packages/")
+			))
+;; (setq package-archives '(("gnu" . "https://elpa.gnu.org/packages/")
+			 ;; ("org" . "https://orgmode.org/elpa/")))
 (dolist (source eg-elpa-sources) (add-to-list 'package-archives source t))
 (add-to-list 'package-directory-list (expand-file-name "genes/" emacs-genome))
 (add-to-list 'package-directory-list package-user-dir)
@@ -92,20 +95,25 @@
 ;; completion/expansion
 (use-package company
   :ensure t :config)
-;; completion in R 
+
 ;; (use-package ac-R :ensure t)
+
 (use-package hippie-exp
   :commands hippie-expand)
+
 (use-package auto-complete
   :ensure t)
+
 (use-package popup-complete
   :ensure t)
+
 (use-package yasnippet
   :ensure t)
 (setq yas-snippet-dirs `(,(concat emacs-genome "/snps/yasnippets")))
 (yas-global-mode 1)
 (use-package auto-yasnippet
   :ensure t)
+
 ;; auto header for R-files
 (use-package header2 
   :config
@@ -152,6 +160,9 @@
   :ensure t
   :config
   (use-package helm-config))
+
+;; git
+(use-package magit :ensure t)
 
 ;; shell and ssh within emacs
 (use-package shell-snps)
