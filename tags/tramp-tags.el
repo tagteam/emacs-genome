@@ -1,5 +1,3 @@
-;(find-file "/[ssh/gerds@sun22.imbi.uni-freiburg.de]/h/rs/R/work/dynpred/programs/einlesen_prep.R"))
-
 (require 'tramp)
 
 (defun tramp-to-biostatlibrary ()
