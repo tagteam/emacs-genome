@@ -82,7 +82,7 @@
 		(let* ((a (match-string-no-properties 2 g-entry))
 		       (sep (match-string-no-properties 3 g-entry))
 		       (b (match-string-no-properties 4 g-entry))
-		       (d (concat (replace-in-string g-entry (concat sep b) ""))))
+		       (d (concat (replace-regexp-in-string (concat sep b) "" g-entry))))
 		  (string-match org-ts-regexp d)
 		  (match-string-no-properties 1 d))
 	      (string-match org-ts-regexp g-entry)
@@ -147,7 +147,7 @@
 		  (let* ((a (match-string-no-properties 2 g-entry))
 			 (sep (match-string-no-properties 3 g-entry))
 			 (b (match-string-no-properties 4 g-entry))
-			 (d (concat (replace-in-string g-entry (concat sep b) ""))))
+			 (d (concat (replace-regexp-in-string (concat sep b) "" g-entry))))
 		    (string-match org-ts-regexp d)
 		    (match-string-no-properties 1 d))
 		(string-match org-ts-regexp g-entry)
@@ -199,7 +199,7 @@ STRING is an org-date-range such as
 	   (sep (match-string-no-properties 3 string))
 	   (b (match-string-no-properties 4 string))
 	   (range-string
-	    (concat (replace-in-string string (concat sep b) "") sep (replace-in-string string (concat a sep) ""))))
+	    (concat (replace-regexp-in-string (concat sep b) "" string) sep (replace-regexp-in-string (concat a sep) "" string))))
       (setq string range-string)))
   (cond
    ((string-match org-tr-regexp string)
