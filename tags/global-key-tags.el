@@ -9,9 +9,6 @@
 (global-set-key [(meta f4)] 'google-search-prompt)
 ;; (global-set-key [(control v)] 'anything-recoll-search)
 (global-set-key [(control v)] 'helm-recoll-search)
-(global-set-key [(control f8)] 'winner-cycle)
-(global-set-key [(meta f8)] 'winner-cycle-backwards)
-(global-set-key [(f8)] 'winner-undo)
 (global-set-key [f5] 'eg/kill-this-buffer)
 (global-set-key [f10] 'undo)
 (global-set-key "\M-o" 'other-window)
@@ -78,7 +75,7 @@
 ;; (global-set-key "\C-xy" 'insert-register)
 (global-set-key "\C-c\C-f" 'font-lock-fontify-buffer)
 ;; (global-set-key "\C-ct" 'xdict-query)
-(global-set-key "\C-ct" 'helm-dictionary)
+;; (global-set-key "\C-ct" 'helm-dictionary)
 ;; (global-set-key "\C-u\C-ct" 'google-translate-query-translate-reverse)
 
 ; (global-set-key "\C-cT" 'translate)

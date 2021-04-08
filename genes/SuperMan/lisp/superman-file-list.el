@@ -251,9 +251,7 @@ list in completion buffer.")
 ;;{{{ functions that create and modify the file-list-alist 
 
 (defun file-list-replace-in-string (str regexp newtext &optional literal fixedcase)
-  (if (featurep 'xemacs)
-      (replace-in-string str regexp newtext)
-    (replace-regexp-in-string regexp newtext str fixedcase literal)))
+  (replace-regexp-in-string regexp newtext str fixedcase literal))
 
 (defun file-list-list-internal (dir &optional dont-exclude recursive exclude-handler)
   "Lists filenames below DIR and subdirectories of DIR.
@@ -1343,7 +1341,7 @@ Switches to the corresponding directory of each file."
       (let* ((entry (car file-list-intern))
 	     (oldname (file-list-make-file-name entry))
 	     (newcar (if use-path
-			 (concat (replace-in-string (replace-in-string (car (cdr entry)) "^/" "") "/" "_") (car entry))
+			 (concat (replace-in-string "/" "_"  (replace-in-string  "^/" "" (car (cdr entry)))) (car entry))
 		       (car entry)))
 	     (newname (file-list-make-file-name (cons newcar (list target))))
 	     (ilist (mapcar 'car (setq file-list-intern (cdr file-list-intern)))))

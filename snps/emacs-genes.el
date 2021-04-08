@@ -20,9 +20,9 @@
 ;;----------------------------------------------------------------------
 ;; created: Apr 12 2015 (09:51) 
 ;; Version: 
-;; last-updated: Apr  6 2021 (12:32) 
+;; last-updated: Apr  7 2021 (08:37) 
 ;;           By: Thomas Alexander Gerds
-;;     Update #: 71
+;;     Update #: 73
 ;;----------------------------------------------------------------------
 ;; 
 ;;; Commentary: Show important features {genes}. 
@@ -478,9 +478,9 @@ the current line."
   (cond 
    ((eq major-mode 'org-mode)
     (cond ((string= (car (org-babel-get-src-block-info)) "emacs-lisp")
-	   (let* ((info (org-edit-src-find-region-and-lang))
-		  (beg  (nth 0 info))
-		  (end (nth 1 info)))
+	   (let* ((info (org-element-at-point))
+		  (beg (plist-get (cadr info) :begin))
+		  (end (plist-get (cadr info) :end)))
 	     (narrow-to-region beg end)
 	     (emacs-lisp-mode)
 	     (indent-region beg end)
@@ -491,14 +491,6 @@ the current line."
 	     (org-edit-special)
 	     (indent-region (point-min) (point-max))
 	     (org-edit-src-exit)))
-	  ;; (let* ((info (org-edit-src-find-region-and-lang))
-	  ;; (beg  (nth 0 info))
-	  ;; (end (nth 1 info)))
-	  ;; (narrow-to-region beg end)
-	  ;; (R-mode)
-	  ;; (indent-region beg end)
-	  ;; (org-mode)
-	  ;; (widen)))
 	  (t (fill-paragraph))))
    ((eq major-mode 'Rd-mode) nil)
    ((eq major-mode 'c++-mode)
