@@ -20,9 +20,9 @@
 ;;----------------------------------------------------------------------
 ;; created: Apr 12 2015 (09:51) 
 ;; Version: 
-;; last-updated: Apr  7 2021 (08:37) 
+;; last-updated: May  6 2021 (11:35) 
 ;;           By: Thomas Alexander Gerds
-;;     Update #: 73
+;;     Update #: 76
 ;;----------------------------------------------------------------------
 ;; 
 ;;; Commentary: Show important features {genes}. 
@@ -337,6 +337,13 @@ Enabling emacs-genome mode electrifies the emacs-genome buffer for project manag
 
 (define-key emacs-genome-mode-map "R" 'eg-redo)
 (define-key emacs-genome-mode-map [(tab)] 'eg-next)
+(define-key emacs-genome-mode-map [(down)] 'eg-next)
+(define-key emacs-genome-mode-map [(up)] 'eg-previous)
+(define-key emacs-genome-mode-map [(control n)] 'eg-next)
+(define-key emacs-genome-mode-map [(control p)] 'eg-previous)
+(define-key emacs-genome-mode-map "n" 'eg-next)
+(define-key emacs-genome-mode-map "p" 'eg-previous)
+(define-key emacs-genome-mode-map "q" 'quit-window)
 (define-key emacs-genome-mode-map [(backtab)] 'eg-previous)
 
 (defun eg-redo ()
