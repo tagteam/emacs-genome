@@ -214,7 +214,7 @@ write the result to buffer INDEX-BUF."
 	 (type (progn
 		 (goto-char start)
 		 (looking-at bibtex-entry-head)
-		 (setq type (match-string-no-properties 1))))
+		 (match-string-no-properties 1)))
 	 (bibkey (match-string-no-properties 2))
 	 ;; (bib  (buffer-substring start end))
 	 done
@@ -302,9 +302,9 @@ write the result to buffer INDEX-BUF."
   (if (markerp marker)
       (let* ((pdf (superman-get-property marker "pdf"))
 	     (pdf-string (when pdf
-			   (string-match org-bracket-link-regexp pdf)
-			   (org-make-link-string
-			    (org-match-string-no-properties 1 pdf)
+			   (string-match org-link-bracket-re pdf)
+			   (org-link-make-string
+			    (match-string-no-properties 1 pdf)
 			    "pdf")))
 	     (plain (org-with-point-at marker
 		      (save-restriction

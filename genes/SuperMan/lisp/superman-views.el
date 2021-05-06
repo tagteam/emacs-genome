@@ -176,17 +176,17 @@ to an integer then do not trim the string STR."
 
 (defun superman-trim-link (link &rest args)
   ;;  Bracket links
-  (if (string-match org-bracket-link-regexp link)
-      (let* ((rawlink (org-match-string-no-properties 1 link))
+  (if (string-match org-link-bracket-re link)
+      (let* ((rawlink (match-string-no-properties 1 link))
 	     (len (car args))
 	     tlink)
 	(if (match-end 3)
 	    (setq tlink
 		  (replace-match
 		   (superman-trim-string
-		    (org-match-string-no-properties 3 link) len)
+		    (match-string-no-properties 3 link) len)
 		   t t link 3))
-	  (setq tlink (org-make-link-string
+	  (setq tlink (org-link-make-string
 		       rawlink
 		       (superman-trim-string "link" len))))
 	tlink)
@@ -199,11 +199,11 @@ to an integer then do not trim the string STR."
 
 (defun superman-trim-bracketed-filename (file &rest args)
   ;;  Links to files
-  (if (string-match org-bracket-link-regexp file)
-      (let ((filename (org-match-string-no-properties 1 file))
+  (if (string-match org-link-bracket-re file)
+      (let ((filename (match-string-no-properties 1 file))
 	    (len (car args))
 	    (match (match-end 3))
-	    (match-string (org-match-string-no-properties 3 file))
+	    (match-string (match-string-no-properties 3 file))
 	    trimmed-file-name)
 	(if match
 	    (setq trimmed-file-name
@@ -212,7 +212,7 @@ to an integer then do not trim the string STR."
 		    match-string len)
 		   t t file 3))
 	  (setq trimmed-file-name
-		(org-make-link-string
+		(org-link-make-string
 		 filename
 		 (superman-trim-string
 		  (file-name-nondirectory filename) len))))
@@ -220,15 +220,15 @@ to an integer then do not trim the string STR."
     (superman-trim-string file (car args))))
 
 (defun superman-trim-filename (filename &rest args)
-  (if (string-match org-bracket-link-regexp filename)
-      (setq filename (org-match-string-no-properties 1 filename)))
+  (if (string-match org-link-bracket-re filename)
+      (setq filename (match-string-no-properties 1 filename)))
   ;;  raw filenames
   (let ((linkname (file-name-nondirectory filename))
 	(len (car args)))
     (when (string= linkname "") ;; for directories show the mother
       (setq linkname (file-name-nondirectory
 		      (directory-file-name filename))))
-    (org-make-link-string
+    (org-link-make-string
      filename
      (superman-trim-string linkname len))))
 
@@ -757,12 +757,12 @@ for git and other actions like commit, history search and pretty log-view."
       (org-with-point-at m
 	(cond (superman-mode
 	       (superman-return))
-	      ((re-search-forward org-any-link-re nil t)
-	       (re-search-forward org-any-link-re nil t)
+	      ((re-search-forward org-link-any-re nil t)
+	       (re-search-forward org-link-any-re nil t)
 	       (superman-open-at-point))
 	      (t
 	       (widen)
-	       (show-all)
+	       (outline-show-all)
 	       (org-narrow-to-subtree)
 	       (switch-to-buffer (marker-buffer m))))))))
 	      ;; ((superman-view-index)
@@ -1007,12 +1007,12 @@ Enabling superman-unison mode enables the unison keyboard to control single file
 				  ((boundp 'superman-unison-cmd) (eval superman-unison-cmd))
 				  (t "unison"))
 			    " "
-			    (if (string-match org-bracket-link-regexp r1)
-				(org-match-string-no-properties 1 r1)
+			    (if (string-match org-link-bracket-re r1)
+				(match-string-no-properties 1 r1)
 			      r1)
 			    " "
-			    (if (string-match org-bracket-link-regexp r2)
-				(org-match-string-no-properties 1 r2)
+			    (if (string-match org-link-bracket-re r2)
+				(match-string-no-properties 1 r2)
 			      r2)
 			    " "
 			    (if (string= (plist-get unison :switches) "default")
@@ -1150,7 +1150,7 @@ Translate the branch names into buttons."
 	(view-buf (current-buffer)))
     (let* ((branch-list (delq nil (superman-git-list-branches loc)))
 	   (current-branch (car branch-list))
-	   (remote (member-if
+	   (remote (cl-member-if
 		    (lambda (x)
 		      (string-match "^remotes/" x)) branch-list))
 	   (other-branches (cdr branch-list))
@@ -1158,7 +1158,7 @@ Translate the branch names into buttons."
       ;; (when remote 
 	;; (setq other-branches (delete remote other-branches)))
 	;; (setq other-branches
-	      ;; (delete-if
+	      ;; (cl-delete-if
 	       ;; (lambda (x) (string-match "remotes/" x)) other-branches)
 	      ;; ))
       (put-text-property 0 (length title) 'face 'org-level-2 title)
@@ -1213,10 +1213,10 @@ Translate the branch names into buttons."
 			  :help "Merge two branches")))))
       (when remote
 	(let* ((title "Remote:")
-	       (svn-p (member-if
+	       (svn-p (cl-member-if
 		       (lambda (x)
 			 (string-match "remotes/git-svn" x)) remote))
-	       (git-p (member-if
+	       (git-p (cl-member-if
 		       (lambda (x)
 			 (string-match "remotes/origin/master" x)) remote))
 	       (remote-cmd (if git-p
@@ -1481,7 +1481,7 @@ Return the formatted string with text-properties."
 		      :help sort-cmd)))
 	;; replace trim function
 	;; (setcdr (assoc "fun" b) 'superman-trim-string)
-	(setq b (remove-if
+	(setq b (cl-remove-if
 		 #'(lambda(x)
 		     (cond ((not (listp x)) nil)
 			   ((string-match (car x) "fun") t)
@@ -1801,7 +1801,7 @@ which locates the heading in the buffer."
 	(set-buffer buffer)
 	(when (eq major-mode 'org-mode)
 	  (widen)
-	  (show-all)
+	  (outline-show-all)
 	  (goto-char (point-min))
 	  ;; move to first heading
 	  ;; with the correct level
@@ -1874,7 +1874,7 @@ to refresh the view.
 	     (ibuf (or (get-buffer index) ;; new since 11.jan.2014
 		       (get-file-buffer index)
 		       (find-file index)))
-	     (cats (delete-if
+	     (cats (cl-delete-if
 		    #'(lambda (cat)
 			(string= "Configuration" (car cat)))
 		    (superman-parse-cats ibuf 1)))
@@ -1959,7 +1959,7 @@ to refresh the view.
 	;; leave index buffer widened
 	(set-buffer ibuf)
 	(widen)
-	(show-all)
+	(outline-show-all)
 	(switch-to-buffer vbuf))
       (goto-char (point-min))
       ;; facings
@@ -2530,7 +2530,7 @@ by calling `superman-save-balls' subsequently."
   (let* ((dim (superman-ball-dimensions))
 	 (balls (get-text-property (superman-cat-point) 'balls))
 	 (buffer-read-only nil)
-	 (new-balls (remove-if (lambda (x) t) balls :start (nth 2 dim) :count 1)))
+	 (new-balls (cl-remove-if (lambda (x) t) balls :start (nth 2 dim) :count 1)))
     (save-excursion
       (superman-change-balls new-balls)
       (superman-refresh-cat new-balls))))
@@ -2756,7 +2756,7 @@ If BACKWARD is non-nil move backward."
 	  (with-current-buffer
 	      (marker-buffer marker)
 	    (widen)
-	    (show-all)
+	    (outline-show-all)
 	    (goto-char marker)
 	    (org-cut-subtree))))
     (message "can only cut in superman-view-mode")))
@@ -2769,7 +2769,7 @@ If BACKWARD is non-nil move backward."
 	  (with-current-buffer
 	      (marker-buffer marker)
 	    (widen)
-	    (show-all)
+	    (outline-show-all)
 	    (goto-char marker)
 	    (org-paste-subtree)))
 	(superman-redo))
@@ -2821,7 +2821,7 @@ disable editing."
 	    (concat "Superman " (if read-only "view item (read-only)"  "edit") " mode"))
       (goto-char marker)
       (widen)
-      (show-all)
+      (outline-show-all)
       (cond
        ((org-at-heading-p)
 	(org-narrow-to-subtree)
@@ -3050,7 +3050,7 @@ The value is non-nil unless the user regretted and the entry is not deleted.
 	(org-with-point-at (get-text-property cat-point 'org-hd-marker)
 	  (save-restriction
 	    (widen)
-	    (show-all)
+	    (outline-show-all)
 	    (org-narrow-to-subtree)
 	    ;; do not show properties of the section
 	    ;; heading
@@ -3167,7 +3167,7 @@ The value is non-nil unless the user regretted and the entry is not deleted.
 	       (superman-return))
 	      ((org-with-point-at m
 		 (if (re-search-forward
-		      org-any-link-re
+		      org-link-any-re
 		      (save-excursion
 			(widen)
 			(outline-end-of-subtree)
@@ -3180,7 +3180,7 @@ The value is non-nil unless the user regretted and the entry is not deleted.
 	      (t
 	       (switch-to-buffer (marker-buffer m))
 	       (widen)
-	       (show-all)
+	       (outline-show-all)
 	       ;; (org-narrow-to-subtree)
 	       (goto-char (marker-position m))))))))
 
@@ -3225,7 +3225,7 @@ The value is non-nil unless the user regretted and the entry is not deleted.
 	(split-window-vertically)
 	(other-window 1)
 	(switch-to-buffer ibuf))
-      (show-all)
+      (outline-show-all)
       (widen)
       (when pom (goto-char pom)))))
 

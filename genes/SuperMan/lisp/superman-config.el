@@ -52,8 +52,8 @@ Returns the corresponding buffer."
        ((string= (substring thing 0 1) "!")
 	(superman-start-shell (substring thing 1 (length thing))))
        ((file-exists-p thing) (find-file thing))
-       ((string-match org-bracket-link-regexp thing)
-	(find-file (org-match-string-no-properties 1 thing)))
+       ((string-match org-link-bracket-re thing)
+	(find-file (match-string-no-properties 1 thing)))
        ((file-name-directory thing)
 	(find-file
 	 (expand-file-name
@@ -160,14 +160,14 @@ the syntax of superman window configurations."
     (delete-other-windows)
     (setq top-windows (list (selected-window)))
     ;; first create the windows 
-    (loop for c from 1 to (- ncolumns 1) do
+    (cl-loop for c from 1 to (- ncolumns 1) do
 	  (split-window-horizontally)
 	  (other-window 1)
 	  (setq top-windows (append top-windows (list (selected-window)))))
-    (loop for c from 0 to (- ncolumns 1) do
+    (cl-loop for c from 0 to (- ncolumns 1) do
 	  (select-window (nth c top-windows)) ;; switch to the top-window in this column
 	  (let ((nrow (nth c nrows)));; number of rows in this column
-	    (loop for r from 0 to (- nrow 1) do
+	    (cl-loop for r from 0 to (- nrow 1) do
 		  (let ((thing (nth r (nth c window-config)))
 			width height)
 		    (if (string-match ":width[ \t]*\\([0-9]*\\)[ \t]+\\(.*\\)" thing)

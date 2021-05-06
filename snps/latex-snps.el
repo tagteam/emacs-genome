@@ -202,14 +202,14 @@
 ;; (load-file  "~/research/Admin/AnnualReport/lisp/BibtexToWiki.el")
 (defun my-bibtex-autogenerate-keys ()
   (interactive)
-  (save-excursion
+  ;; (save-excursion
     (goto-char (point-min))
     (while (re-search-forward "@\\([a-z]+\\)[ \t]*{" nil t)
       (looking-at ".*$")
       (message (match-string-no-properties 0)) 
       ;; insert new key
       (my-bibtex-clean-entry t)
-      (goto-char (bibtex-end-of-entry)))))
+      (goto-char (bibtex-end-of-entry))))
 ;; (bib2wiki-fix-key name type year pages journal))))
 
 (defun custom-set-difference (a b)
