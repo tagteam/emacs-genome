@@ -39,7 +39,7 @@
 ;; (require 'org-colview)
 (require 'ox-publish)
 (require 'vc)
-(require 'cl)
+(require 'cl-macs)
 
 ;; Loading extensions
 
@@ -271,22 +271,13 @@ and an action a one-optional-argument function which must return a buffer.")
   (interactive)
   (find-file superman-profile))
 
-(defun superman-project-at-point (&optional noerror)
-  "Check if point is at project heading and return the project,
-                      i.e. its entry from the 'superman-project-alist'.
-                      Otherwise return error or nil if NOERROR is non-nil. "
-  (interactive)
-  ;; (org-back-to-heading)
-  (if (or (org-before-first-heading-p)
-	  (not (org-at-heading-p))
-	  (not (= superman-project-level
-		  (- (match-end 0) (match-beginning 0) 1))))
-      (if noerror nil
-	(error "No project at point"))
-    (or (org-entry-get nil "NICKNAME")
-	(progn (superman-set-nickname)
-	       (save-buffer) ;; to update the project-alist
-	       (org-entry-get nil "NICKNAME")))))
+
+(defun superman-project-at-point (&optional pom)
+  "Return project at point."
+  (let* ((pom (or pom (org-get-at-bol 'org-hd-marker)))
+	 (nickname (superman-get-property pom "NickName"))
+	 (pro (assoc nickname superman-project-alist)))
+    pro))
 
 (defun superman-goto-profile (project-or-nickname)
   "Open the file `superman-profile' and leave point at entry of PROJECT-OR-NICKNAME. 
@@ -300,12 +291,7 @@ or the nickname."
     (or (re-search-forward (concat "^[ \t]*:NICKNAME:[ \t]*" nick) nil t)
 	(error (concat "Cannot locate project " nick)))))
 
-(defun superman-project-at-point (&optional pom)
-  "Return project at point."
-  (let* ((pom (or pom (org-get-at-bol 'org-hd-marker)))
-	 (nickname (superman-get-property pom "NickName"))
-	 (pro (assoc nickname superman-project-alist)))
-    pro))
+
 
 (defun superman-forward-project ()
   "Move to next project."
@@ -327,7 +313,7 @@ or the nickname."
   (org-with-point-at pom
     (let* ((case-fold-search t)
 	   (proplist (org-entry-properties nil nil))
-	   (prop (cdr (assoc-if #'(lambda (x) (string-match regexp x)) proplist))))
+	   (prop (cdr (cl-assoc-if #'(lambda (x) (string-match regexp x)) proplist))))
       (if (stringp prop)
 	  (replace-regexp-in-string "[ \t]+$" "" prop)))))
 
@@ -357,12 +343,12 @@ unless LITERAL-NIL is non-nil."
              (save-excursion
                (let ((v (and (re-search-forward
                               (org-re-property property nil t) end t)
-                             (org-match-string-no-properties 3))))
+                             (match-string-no-properties 3))))
                  (list (if literal-nil v (org-not-nil v)))))))
        ;; Find additional values.
        (let* ((property+ (org-re-property (concat property "+") nil t)))
          (while (re-search-forward property+ end t)
-           (push (org-match-string-no-properties 3) value)))
+           (push (match-string-no-properties 3) value)))
        ;; Return final values.
        (and (not (equal value '(nil))) (nreverse value))))))
 
@@ -416,7 +402,7 @@ unless LITERAL-NIL is non-nil."
   (save-excursion
     (setq superman-project-alist nil)
     (set-buffer (find-file-noselect superman-profile))
-    (show-all)
+    (outline-show-all)
     (widen)
     (superman-manager-mode 1)
     (save-buffer)
@@ -426,7 +412,7 @@ unless LITERAL-NIL is non-nil."
       (org-ctrl-c-ctrl-c))
     (goto-char (point-min))
     (let ((error-buf (get-buffer-create "*Superman-parse-errors*")))
-      (save-excursion (set-buffer error-buf) (erase-buffer))
+      (with-current-buffer error-buf (erase-buffer))
       (kill-buffer error-buf))
     (while (superman-forward-project)
       (unless (and (org-get-todo-state) (string-match (org-get-todo-state) "ZOMBI") )
@@ -435,8 +421,7 @@ unless LITERAL-NIL is non-nil."
 	       (loc (let ((loc (superman-get-property nil "location" nil)))
 		      (if (not loc) 
 			  (let ((error-buf (get-buffer-create "*Superman-parse-errors*")))
-			    (save-excursion
-			      (set-buffer error-buf)
+			    (with-current-buffer error-buf
 			      (goto-char (point-max))
 			      (insert
 			       "\n"
@@ -444,8 +429,8 @@ unless LITERAL-NIL is non-nil."
 				(concat "Project " name " does not have a location")
 				`(:fun (lambda () (interactive) (superman-goto-profile ,name)))) "\n"))
 			    (setq loc ""))
-			(if (string-match org-bracket-link-regexp loc)
-			    (setq loc (org-match-string-no-properties 1 loc))
+			(if (string-match org-link-bracket-re loc)
+			    (setq loc (match-string-no-properties 1 loc))
 			  (unless loc
 			    (message (concat 
 				      "project: " name
@@ -470,8 +455,7 @@ unless LITERAL-NIL is non-nil."
 	       (lastvisit (let ((lvisit (superman-get-property nil "LastVisit" nil)))
 			    (if lvisit lvisit
 			      (let ((error-buf (get-buffer-create "*Superman-parse-errors*")))
-				(save-excursion
-				  (set-buffer error-buf)
+				(with-current-buffer error-buf
 				  (goto-char (point-max))
 				  (insert
 				   "\n"
@@ -483,8 +467,8 @@ unless LITERAL-NIL is non-nil."
 	       (todo (or (org-get-todo-state) ""))
 	       (index (or
 		       (let ((link (superman-get-property nil "index" nil)))
-			 (when (and (stringp link) (string-match org-bracket-link-regexp link))
-			   (setq link (org-match-string-no-properties 1 link)))
+			 (when (and (stringp link) (string-match org-link-bracket-re link))
+			   (setq link (match-string-no-properties 1 link)))
 			 link)
 		       ;; loc/name.org
 		       (concat (file-name-as-directory loc)
@@ -547,10 +531,9 @@ unless LITERAL-NIL is non-nil."
     (superman-view-project pro t)
     ;; (assoc name superman-project-alist))
     (if (superman-git-p dir) (superman-git-display)
-      (superman-display-file-list dir (file-list-select nil "." nil nil dir)
+      (superman-display-file-list dir (file-list-select nil "." nil nil dir nil nil nil)
 				  nil nil nil
-				  nil nil
-				  'no-project))))
+				  nil 'no-project))))
 	 
 
 (defun superman-property-values (key)
@@ -592,7 +575,7 @@ and others."
 		  org-property-re
 		  ;; (org-re "^[ \t]*:\\([-[:alnum:]_]+\\):")
 		  (cdr range) t)
-	    (add-to-list 'rtn (org-match-string-no-properties 2)))
+	    (add-to-list 'rtn (match-string-no-properties 2)))
 	  (outline-next-heading))))
     (when include-specials
       (setq rtn (append org-special-properties rtn)))
@@ -637,8 +620,8 @@ and others."
 	;; (append-to-file superman-default-content nil index)
 	(unless (or (not dir) (file-exists-p dir) (not (and ask (y-or-n-p (concat "Create directory (and default sub-directories) " dir "? ")))))
 	  (make-directory dir)
-	  (loop for subdir in superman-project-subdirectories
-		do (unless (file-exists-p subdir) (make-directory (concat path subdir) t))))
+	  (cl-loop for subdir in superman-project-subdirectories
+		do (unless (file-exists-p subdir) (make-directory (concat dir subdir) t))))
 	(find-file superman-profile)
 	(unless (superman-manager-mode 1))
 	(goto-char (point-min))
@@ -744,15 +727,6 @@ project directory tree to the trash."
     (superman-view-edit-item nil marker)))
 
 
-(defun superman-fix-others ()
-  "Update the others property (collaborator names) of all projects in `superman-profile'."
-  (interactive "P")
-  (set-buffer (find-file-noselect superman-profile))
-  (unless (superman-manager-mode 1))
-  (goto-char (point-min))
-  (while (superman-forward-project)
-	(superman-set-others (superman-project-at-point))))
-
 ;;}}}
 ;;{{{ listing projects
 
@@ -806,9 +780,9 @@ Examples:
     (when (and superman-ignore-index-buffers 
 	       (not superman-has-ignored-index-buffers))
       ;; (setq ido-ignore-buffers  '("\\` "))
-      (mapcar #'(lambda (file) (add-to-list 'ido-ignore-buffers
-					    (concat "^" (file-name-nondirectory file))))
-	      index-list))
+      (mapc #'(lambda (file) (add-to-list 'ido-ignore-buffers
+					  (concat "^" (file-name-nondirectory file))))
+	    index-list))
     index-list))
 
 
@@ -1045,7 +1019,7 @@ If NOSELECT is set return the project."
   (find-file superman-profile)
   (goto-char (point-min))
   (let* ((case-fold-search t) 
-	 (regexp (concat ":nickname:[ \t]*" nick-or-heading)))
+	 (regexp (concat ":nickname:[ \t]*" nickname)))
     (re-search-forward regexp nil t)))
   
 

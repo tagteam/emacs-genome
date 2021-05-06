@@ -79,7 +79,7 @@ If JABBER is non-nil (and CREATE is nil) be talkative about non-existing heading
 	     (find-file index)))
 	  (t (error (concat "Project " (car pro) " does not have an index"))))
     (widen)
-    (show-all)
+    (outline-show-all)
     (goto-char (point-min))
     (unless (eq major-mode 'org-mode)
       (org-mode))
@@ -112,7 +112,7 @@ If JABBER is non-nil (and CREATE is nil) be talkative about non-existing heading
 	  (goto-char (point-max)))))
     (unless leave-narrowed
       (widen)
-      (show-all))
+      (outline-show-all))
     value))
 
 ;;}}}
@@ -174,7 +174,7 @@ See also `superman-capture-whatever' for the other arguments."
 			;; append item to the end of index file
 			(find-file (superman-get-index project))
 			(widen)
-			(show-all)
+			(outline-show-all)
 			(goto-char (point-max))
 			(point-marker))))
     (superman-capture-whatever
@@ -234,7 +234,7 @@ See also `superman-capture-whatever' for the other arguments."
     (delete-other-windows)
     (org-mode)
     (font-lock-mode -1) 
-    (show-all)
+    (outline-show-all)
     (when (> level 0) (progn
 			(insert "\n"
 				(make-string level (string-to-char "*"))
@@ -862,7 +862,7 @@ index file as LEVEL headings. Then show the updated project view buffer."
 		      (goto-char heading))))
       (find-file (superman-get-index pro))
       (widen)
-      (show-all)
+      (outline-show-all)
       (goto-char (point-max)))
     (while file-list
       (let* ((el (car file-list))
@@ -1318,7 +1318,7 @@ and MIME parts in sub-directory 'mailAttachments' of the project."
 	 ;; (marker ))
 	 )
       (cond ((or (string-match (regexp-opt thing-at-point-uri-schemes) yank)
-		 (string-match org-bracket-link-regexp yank))
+		 (string-match org-link-bracket-re yank))
 	     (superman-capture-bookmark pro nil nil yank)
 	     (insert yank-text)
 	     (superman-clean-scene))

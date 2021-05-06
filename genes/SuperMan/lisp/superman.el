@@ -163,7 +163,7 @@ the contents of the file `superman-profile'."
     ;; find current set-up
     (find-file superman-profile)
     (widen)
-    (show-all)
+    (outline-show-all)
     (goto-char (point-min))
     (if (re-search-forward "SupermanSetup" nil t)
 	(superman-parse-setup (point) (superman-defaults))
@@ -492,7 +492,7 @@ all dates."
 ;;{{{ Calendar
 
 (defun superman-calendar-list ()
-  (list (car (superman-index-list))))
+  (list "~/Memory/Calendar/org/Calendar.org"))
 
 (defun superman-calendar (&optional project)
   "Show events from all projects in a calendar view."

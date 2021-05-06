@@ -50,20 +50,13 @@
 ;;C-x f L		file-list-by-name-below-directory
 ;;C-x f P		file-list-by-path-below-directory
 ;;C-x f U		file-list-update-below-dir
-;;C-x f d		file-list-iswitchf-below-directory
-;;C-x f f		file-list-iswitchf-file
 ;;C-x f l		file-list-by-name
-;;C-x f m		file-list-iswitchf-magic
 ;;C-x f p		file-list-by-path
 ;;C-x f s		file-list-by-size
 ;;C-x f t		file-list-by-time
 ;;C-x f u		file-list-update
 ;;C-x f 4		<< Prefix Command >>
 ;;C-x f 5		<< Prefix Command >>
-;;C-x f 4 d	file-list-iswitchf-below-directory-other-window
-;;C-x f 4 f	file-list-iswitchf-file-other-window
-;;C-x f 5 d	file-list-iswitchf-below-directory-other-frame
-;;C-x f 5 f	file-list-iswitchf-file-other-frame
 ;;}}}
 ;;{{{ TODO
 ;;
@@ -93,7 +86,7 @@
 
 (defcustom file-list-home-directory
   (file-name-as-directory (getenv "HOME"))
-  "Default directory for all file-list-iswitchf and file-list-list commands."
+  "Default directory for all file-list-list commands."
   :type '(repeat regexp)
   :group 'file-list)
 
@@ -131,10 +124,6 @@
  ;; :type 'alist
  ;; :group 'file-list)
 
-(defcustom file-list-iswitchf-prompt "iswitchf "
-  "Prompt-string for file-list-iswitchf."
-  :type 'string
-  :group 'file-list)
 
 (defcustom file-list-format-time-string "%a %d %b %Y, %T %Z"
   "Format of time string. See format-time-string for details."
@@ -161,7 +150,7 @@
 
 
 (defcustom file-list-update t
-  "If non-nil update file-list-alist just before file-list-iswitchf or file-list-list commands."
+  "If non-nil update file-list-alist just before file-list-list commands."
   :type 'boolean
   :group 'file-list)
 
@@ -196,9 +185,6 @@ The cdr of each entry is the modification time.")
 
 (defvar file-list-file-info-regexp
   "^ +\\(.*\\) : \\(.*\\)$")
-
-(defvar file-list-iswitchf-history nil
-  "History for file-list-iswitchf commands.")
 
 (defvar file-list-regexp-history nil
   "History for regexp used by file-list commands.")
@@ -1669,126 +1655,6 @@ When ARGS is given it should have the same format as the result of `query-replac
 	  ;; (kill-buffer)
 	  )))))
 ;;}}}
-;;{{{ iswitchf
- 
-(defun file-list-iswitchf-internal (&optional dir file-list fun prompt)
-  (let* (
-	 (prompt (or prompt file-list-iswitchf-prompt))
-	 (minibuffer-completion-table file-list)
-	 (fun (or fun 'find-file))
-	 (dir (cond ((and dir
-			  (file-directory-p dir)
-			  (file-name-as-directory
-			   (expand-file-name dir))))
-	      (t file-list-home-directory)))
-	 (file-list
-	  (or file-list
-	      (progn (if file-list-update (file-list-update dir nil))
-		     (file-list-list dir nil nil 'recursive nil))))
-	 (file (completing-read
-		prompt
-		file-list
-		nil
-		t
-		nil
-		'file-list-iswitchf-history))
-	 (duplicates (file-list-extract-sublist 
-		      file-list
-		      (lambda (entry)
-			(when (string= file (car entry))
-			  entry)))))
-    (if (= (length duplicates) 1)
-	(funcall fun (file-list-make-file-name (car duplicates)))
-      (funcall fun 
-	       (completing-read
-		"Duplicate names. Select one: "
-		(mapcar (lambda (entry) (cons
-					 (file-list-make-file-name entry)
-					 ""))
-			duplicates)
-		nil 
-		t
-		dir)))))
-
-
-(defun file-list-iswitchf-file ()
-  "Switch to a file in the file-list of file-list-home-directory."
-  (interactive)
-  (unless file-list-alist
-    (file-list-initialize))
-  (file-list-iswitchf-internal))
-;   (file-list-iswitchf-internal file-list-home-directory))
-
-;; (defun file-list-find-magic (file-name &optional ask-for-prog)
-  ;; "Open a file with the application found in file-list-magic-alist."
-  ;; (let ((prog (if ask-for-prog
-		  ;; (read-shell-command (format "icommand on %s " file-name)
-				      ;; nil nil nil)
-		;; (cdr (assoc-string
-		      ;; (concat "\."
-			      ;; (file-name-extension file-name))
-		      ;; file-list-magic-alist 'case-fold)))))
-    ;; (if prog (start-process-shell-command
-	      ;; "file-list-find-magic"
-	      ;; nil
-	      ;; prog
-	      ;; (file-list-quote-filename file-name))
-      ;; (find-file file-name))))
-
-;; (defun file-list-iswitchf-magic (arg)
-  ;; "Switch to file in file-list of file-list-home-directory."
-  ;; (interactive "P")
-  ;; (file-list-iswitchf-internal
-   ;; file-list-home-directory
-   ;; nil
-   ;; '(lambda (file)
-      ;; (file-list-find-magic
-       ;; file
-       ;; arg))
-       ;; "Find file magic "))
-
-(defun file-list-iswitchf-file-other-window ()
-  "See file-list-iswitchf-file."
-  (interactive)
-  (file-list-iswitchf-internal file-list-home-directory
-		      nil
-		      'find-file-other-window
-		      (concat file-list-iswitchf-prompt "(other window) ")))
-
-(defun file-list-iswitchf-file-other-frame ()
-  "See file-list-iswitchf-file."
-  (interactive)
-  (file-list-iswitchf-internal
-   file-list-home-directory
-   nil
-   'find-file-other-frame
-   (concat file-list-iswitchf-prompt "(other frame) ")))
-
-
-(defun file-list-iswitchf-below-directory (dir)
-  "Like file-list-iswitchf-file but prompts for directory."
-  (interactive "D iswitchf below directory ")
-  (file-list-iswitchf-internal (file-name-as-directory
-		       (expand-file-name dir))))
-
-;; (defun file-list-iswitchf-below-directory-other-window (dir)
-  ;; "See file-list-iswitchf-below-directory."
-  ;; (interactive "D iswitchf below directory ")
-  ;; (file-list-iswitchf-internal (file-name-as-directory
-				;; (expand-file-name dir)
-				;; nil
-				;; 'find-file-other-window
-				;; (concat file-list-iswitchf-prompt "(other window) "))))
-
-;; (defun file-list-iswitchf-below-directory-other-frame (dir)
-  ;; "See file-list-iswitchf-below-directory."
-  ;; (interactive "D iswitchf below directory ")
-  ;; (file-list-iswitchf-internal (file-name-as-directory
-		       ;; (expand-file-name dir)
-		       ;; nil
-		      ;; 'find-file-other-frame
-		      ;; (concat file-list-iswitchf-prompt "(other frame) "))))
-;;}}}
 ;;{{{ keybindings for the file-list-display-buffer
 (define-key file-list-mode-map [(return)] 'file-list-choose-file)
 (define-key file-list-mode-map [(control return)]  'file-list-choose-file-no-visit)
@@ -1819,6 +1685,7 @@ When ARGS is given it should have the same format as the result of `query-replac
 (define-key file-list-mode-map "q" 'file-list-quit)
 (define-key file-list-mode-map "r" 'file-list-rename-file-at-point)
 (define-key file-list-mode-map "R" 'file-list-rename)
+(define-key file-list-mode-map "Q" 'file-list-query-replace)
 (define-key file-list-mode-map "t" 'file-list-toggle-display-mode)
 (define-key file-list-mode-map "u" 'file-list-reload)
 (define-key file-list-mode-map "x" 'file-list-shell-command-at-point)
@@ -1853,19 +1720,8 @@ When ARGS is given it should have the same format as the result of `query-replac
   "Set up default keybindings for file-list'."
   (interactive)
   (global-unset-key "\C-xf")
-  (global-set-key (read-kbd-macro "C-x f f")  'file-list-iswitchf-file)
-  (global-set-key (read-kbd-macro "C-x f m") 'file-list-iswitchf-magic)
-  
-  (global-set-key (read-kbd-macro "C-x f 4 f") 'file-list-iswitchf-file-other-window)
-  (global-set-key (read-kbd-macro "C-x f 5 f") 'file-list-iswitchf-file-other-frame)
-  (global-set-key (read-kbd-macro "C-x f 4 d") 'file-list-iswitchf-below-directory-other-window)
-  (global-set-key (read-kbd-macro "C-x f 5 d") 'file-list-iswitchf-below-directory-other-frame)
-
-  (global-set-key (read-kbd-macro "C-x f d") 'file-list-iswitchf-below-directory)
-
   (global-set-key (read-kbd-macro "C-x f u") 'file-list-update)
   (global-set-key (read-kbd-macro "C-x f U") 'file-list-update-below-dir)
-
   (global-set-key (read-kbd-macro "C-x f s") 'file-list-by-size)
   (global-set-key (read-kbd-macro "C-x f t") 'file-list-by-time)
   (global-set-key (read-kbd-macro "C-x f p") 'file-list-by-path)

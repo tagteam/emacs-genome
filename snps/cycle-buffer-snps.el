@@ -1,6 +1,6 @@
 ;;; cycle-buffer-snps.el --- cycle through buffers by major-mode
 
-;; Copyright (C) 2012  Thomas Alexander Gerds
+;; Copyright (C) 2012-2021  Thomas Alexander Gerds
 
 ;; Author: Thomas Alexander Gerds <tag@biostat.ku.dk>
 ;; Keywords: convenience
@@ -33,7 +33,7 @@
 		      (reverse (buffer-list))
 		    (progn (bury-buffer) (buffer-list)))))
     (switch-to-buffer
-     (find-if #'(lambda (buf)
+     (cl-find-if #'(lambda (buf)
 		  (set-buffer buf)
 		  (and (eq major-mode curr-mode)
 		       (not (string-match "\\` " (buffer-name)))))

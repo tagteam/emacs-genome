@@ -461,6 +461,7 @@
 
 (defun dst-change-password (&optional project new-password click-submit)
   "Change passwords."
+  (interactive)
   (let* ((emacs-window  (dst-current-window))
 	 (log-buf (get-buffer-create "*dst-change-password-log*"))
 	 (this-project (or project

@@ -1,4 +1,4 @@
-;;; tag-utility-tags.el --- utility functions for tagteam
+;;; utility-tags.el --- utility functions for tagteam
 
 ;; Copyright (C) 2012-2021  Thomas Alexander Gerds
 
@@ -202,5 +202,5 @@ has
       (setq truncate-partial-width-windows t))))
 
 
-(provide 'tag-utility-tags)
+(provide 'utility-tags)
 ;;; tag-utility-tags.el ends here

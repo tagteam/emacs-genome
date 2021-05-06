@@ -76,7 +76,7 @@
 		  (list (cons 'danish-mode danish-map)))))
 
 (defun danish-mode (&optional arg)
-  "A minor mode for easy access to æøåØÅÆ"
+  "A minor mode for easy access to Danish characters."
   (interactive "P")
   (setq ispell-local-dictionary "da")
   ;; (flyspell-mode)
@@ -87,7 +87,7 @@
 
 (or (assq 'danish-mode minor-mode-alist)
               (setq minor-mode-alist
-                    (cons '(danish-mode "å") minor-mode-alist)))
+                    (cons '(danish-mode (char-to-string 248)) minor-mode-alist)))
 
 (or (assq 'danish-mode minor-mode-map-alist)
     (setq minor-mode-map-alist
@@ -212,20 +212,20 @@
 
 (defvar german-map (make-sparse-keymap)
   "Keymap used for `german-mode' commands.")
-(defun german-ae () (interactive) (insert "ä"))
-(defun german-Ae () (interactive) (insert "Ä"))
-(defun german-ue () (interactive) (insert "ü"))
-(defun german-Ue () (interactive) (insert "Ü"))
-(defun german-oe () (interactive) (insert "ö"))
+(defun german-ae () (interactive) (insert (char-to-string 228)))
+(defun german-Ae () (interactive) (insert (char-to-string 196)))
+(defun german-ue () (interactive) (insert (char-to-string 252)))
+(defun german-Ue () (interactive) (insert (char-to-string 220)))
+(defun german-oe () (interactive) (insert (char-to-string 246)))
 (defun german-oe-1 () (interactive)
   (if (not (eq last-command
 	       'german-oe-1))
-      (insert "ö")
+      (insert (char-to-string 246))
     (undo)
     (other-window 1)
     ))
-(defun german-Oe () (interactive) (insert "Ö"))
-(defun german-sz () (interactive) (insert "ß"))
+(defun german-Oe () (interactive) (insert (char-to-string 214)))
+(defun german-sz () (interactive) (insert (char-to-string 223)))
 
 (define-key german-map "\C-o" 'other-window)
 (define-key german-map "\M-s" 'german-sz)
@@ -254,7 +254,8 @@
 
 (or (assq 'german-mode minor-mode-alist)
     (setq minor-mode-alist
-	  (cons '(german-mode " ö") minor-mode-alist)))
+	  (cons '(german-mode (concat " " (char-to-string 196)))
+			      minor-mode-alist)))
 
 ;;}}}
 

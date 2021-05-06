@@ -219,7 +219,7 @@ passed to `superman-run-cmd'."
 		  (delete "" (split-string
 			      (shell-command-to-string
 			       (concat "cd " dir "; " superman-cmd-git " branch -a ")) "\n"))))
-	 (current (if branch-list (car (member-if (lambda (x) (string-match "^\\*" x)) branch-list))
+	 (current (if branch-list (car (cl-member-if (lambda (x) (string-match "^\\*" x)) branch-list))
 		    "master"))
 	 (others (when branch-list (delete current branch-list))))
     (cons current others)))
@@ -1281,7 +1281,7 @@ repository of PROJECT which is located at DIR."
 			  (work-tree-status (substring-no-properties x 1 2))
 			  (fname  (substring-no-properties x 3 (length x))))
 		      (list fname index-status work-tree-status)))
-		  (delete-if (lambda (x) (string= x ""))
+		  (cl-delete-if (lambda (x) (string= x ""))
 			     (split-string git-status "\n"))))
 	 (flist))
     (goto-char (point-min))
@@ -1537,7 +1537,7 @@ Enabling superman-git mode enables the git keyboard to control single files."
 ;;{{{ superman-git-keyboard
 
 (defun superman-make-git-keyboard (f &rest args)
-  (if (string-match org-bracket-link-regexp f)
+  (if (string-match org-link-bracket-re f)
       (let ((diff (superman-make-button "d"
 					'(:fun superman-git-diff-file
 					       :face superman-git-keyboard-face-d

@@ -80,7 +80,7 @@
 		    ((file-list-message-buffer-p file-list-reference-buffer))
 		    ((save-excursion (file-list-message-buffer-p (progn (other-window 1) (window-buffer)))))
 		    (t (read-buffer "Attach all these files to buffer " 
-				    (find-if (lambda (b)
+				    (cl-find-if (lambda (b)
 					       (save-excursion (set-buffer b)
 							       (string= "message-mode" (buffer-name b))))
 					     (buffer-list)) t))))
@@ -114,7 +114,7 @@
 	 (buf (cond ((file-list-message-buffer-p file-list-reference-buffer))
 		    ((save-excursion (file-list-message-buffer-p (progn (other-window 1) (window-buffer)))))
 		    (t (read-buffer "attach to buffer "
-				    (find-if (lambda (b)
+				    (cl-find-if (lambda (b)
 					       (save-excursion (set-buffer b)
 							       (string= "message-mode" (buffer-name b))))
 					     (buffer-list))
