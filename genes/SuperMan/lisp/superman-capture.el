@@ -135,8 +135,10 @@ LEVEL can be 0 in which case no heading is created.
 As a special case, this function is used to capture a new project
 for the superman(ager).
 
-If SCENE is a function it is applied by `superman-clean-scene' and
-`superman-quit-scene', i.e., at the end of the capture.
+If SCENE is a function it is applied by `superman-clean-scene'
+at the end of the capture process to write the result at the destination
+and to kill the temporary capture buffer.
+
 If SCENE is nil then the current window configuration is restored.
 If QUIT-SCENE is a function or window configuration then it is handled
 by `superman-quit-scene' instead of SCENE.
@@ -235,15 +237,16 @@ See also `superman-capture-whatever' for the other arguments."
     (org-mode)
     (font-lock-mode -1) 
     (outline-show-all)
-    (when (> level 0) (progn
-			(insert "\n"
-				(make-string level (string-to-char "*"))
-				" NIX \n")
-			(forward-line -1))
-	  (org-narrow-to-subtree)
-	  (unless (= level 0) (progn 
-				(skip-chars-forward "[* ]")
-				(delete-region (point) (point-at-eol)))))
+    (when (> level 0)
+      (progn
+	(insert "\n"
+		(make-string level (string-to-char "*"))
+		" NIX \n")
+	(forward-line -1))
+      (org-narrow-to-subtree)
+      (unless (= level 0) (progn 
+			    (skip-chars-forward "[* ]")
+			    (delete-region (point) (point-at-eol)))))
     ;; stuff point-min with text properties
     (goto-char (point-min))
     (insert "Superman captured: ")
@@ -538,6 +541,9 @@ at the requested destination and then reset the window configuration."
 	(setq catch (buffer-substring (point-at-bol) (point-max)))
 	;; say by by to capture buffer
 	(kill-buffer (current-buffer))
+	;;
+	;; modify destination buffer
+	;;
 	(set-buffer (marker-buffer dest))
 	(goto-char (marker-position dest))
 	(if edit
@@ -546,7 +552,8 @@ at the requested destination and then reset the window configuration."
 		   (delete-region (point-min) (point-max)))
 	  (ignore-errors (org-narrow-to-subtree))
 	  (goto-char (point-max))
-	  (insert "\n"))
+	  (goto-char (point-at-bol))
+	  (unless (looking-at "^$") (goto-char (point-at-eol)) (insert "\n")))
 	(insert catch)
 	(save-buffer)
 	(widen)

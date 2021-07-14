@@ -61,8 +61,11 @@
 (define-key minibuffer-local-filename-completion-map (kbd "SPC")
   'minibuffer-complete-word)
 
-(define-key minibuffer-local-must-match-filename-map (kbd "SPC")
+;; (define-key minibuffer-local-must-match-filename-map (kbd "SPC")
+;; 'minibuffer-complete-word)
+(define-key minibuffer-local-must-match-map (kbd "SPC")
   'minibuffer-complete-word)
+
 ;;}}}
 ;;{{{ case-fold search
 (setq-default case-fold-search t)

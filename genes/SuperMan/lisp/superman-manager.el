@@ -907,7 +907,7 @@ If NOSELECT is set return the project."
       (superman-activate-project pro))
     (if noselect
 	superman-current-project
-      (if stay 
+      (if (and stay (get-text-property (point-min) 'project-view))
 	  (superman-switch-config pro nil)
 	;; the next command 
 	;; re-sets superman-config-cycle-pos 

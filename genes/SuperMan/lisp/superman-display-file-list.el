@@ -606,15 +606,17 @@ file-list display buffers unless DIR matches the directories associated with
 (defun file-list-quit (&optional force)
   "Close file-list window and switch to another buffer."
   (interactive)
-  (let ((pbuf (get-text-property (point-min) 'project-buffer)))
+  (let ((pbuf (get-text-property (point-min) 'project-buffer))
+	(one-window (one-window-p)))
     (if pbuf
 	(progn
 	  (kill-buffer (current-buffer))
 	  (switch-to-buffer pbuf)
 	  (superman-redo))
-      (if (or force (not (one-window-p)))
+      (if (or force (not one-window))
 	  (delete-window))
-      (switch-to-buffer (other-buffer)))))
+      (when one-window
+	(switch-to-buffer (other-buffer))))))
 ;; (file-list-mode
 ;; (superman-view-back))
 ;; (t (error "Not in file-list"))))
