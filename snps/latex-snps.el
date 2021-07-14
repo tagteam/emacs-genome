@@ -265,6 +265,15 @@
   (save-buffer)
   (TeX-command-master))
 ;;}}}
+
+(defun latex-clean-iffalse ()
+  (interactive)
+  (goto-char (point-min))
+  (while (re-search-forward "\\\\iffalse" nil t)
+    (backward-char 8)
+    (delete-region (point)
+      (save-excursion (re-search-forward "\\\\fi" nil t)))))
+
 ;;{{{ latexmk
 (add-hook 'LaTeX-mode-hook
 	  '(lambda ()

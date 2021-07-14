@@ -44,7 +44,7 @@
 (global-set-key "\M-e" 'hippie-expand)
 (global-set-key "\M-i" 'dabbrev-expand)
 ;; searching for anything
-;; (global-set-key "\C-v" 'help-recoll-search)
+;; (global-set-key "\C-v" 'helm-recoll-search)
 ;; copy-and-paste 
 (global-set-key "\M-y" 'yank-or-pop)
 (global-set-key "\M-r" 'copy-region-as-kill)
