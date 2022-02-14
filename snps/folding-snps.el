@@ -1,4 +1,4 @@
-;;{{{ Folding
+;;{{{ Folding 
 (use-package folding :ensure t)
 (use-package fold-dwim :ensure t)
 
