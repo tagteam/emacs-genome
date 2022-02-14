@@ -20,9 +20,9 @@
 ;;----------------------------------------------------------------------
 ;; created: Apr 12 2015 (09:51) 
 ;; Version: 
-;; last-updated: May  6 2021 (11:35) 
+;; last-updated: Oct 10 2021 (18:18) 
 ;;           By: Thomas Alexander Gerds
-;;     Update #: 76
+;;     Update #: 79
 ;;----------------------------------------------------------------------
 ;; 
 ;;; Commentary: Show important features {genes}. 
@@ -516,11 +516,11 @@ the current line."
 	      (re-search-forward "begin{document}" nil t))
       (LaTeX-fill-paragraph))) ;; in the preamble do nothing
    (t (save-excursion
-	(let ((beg (progn (backward-paragraph 1) (point)))
-	      (end (progn (forward-paragraph 1)
+	(let ((beg (if (region-active-p) (region-beginning) (backward-paragraph 1) (point)))
+	      (end (if (region-active-p) (region-end) (forward-paragraph 1)
 			  (point))))
 	  (unless (string-match "ess-\\|c-\\|c++\\|emacs" (symbol-name major-mode))
-	    (fill-region beg end nil nil nil))
+	    (fill-region-as-paragraph beg end nil nil nil))
 	  (when (string-match "ess-\\|c-\||c++\\|emacs" (symbol-name major-mode))
 	    (indent-region beg end nil)))))))
 

@@ -440,8 +440,7 @@ Use this map to set additional keybindings for when superman-export-header-mode 
       ;; (with-temp-buffer (R-mode) (insert code)
       ;; (ess-eval-buffer-and-go 'nowait)))
       ;; (ess-eval-region-and-go start end  'nowait))
-      (save-excursion
-	(ess-eval-line-and-step nil nil t)))))
+	(ess-eval-line-and-step t))))
 
 
 ;; (defun superman-control-export-back-to-org ()

@@ -251,6 +251,14 @@
       (shell-command (concat "xdotool windowraise " cwin
 			     " mousemove --window " (dst-chromium-window) " " (cdr (assoc "srvfsegh4" dst-servers)))))))
 
+(defun dst-show-server-srvfseatru1-pos ()
+  (interactive)
+  (let ((cwin (dst-chromium-window)))
+    (if (not cwin)
+	(message "Cannot see chromium. Use M-x dst-start-browser RET to start it.")
+      (shell-command (concat "xdotool windowraise " cwin
+			     " mousemove --window " (dst-chromium-window) " " (cdr (assoc "srvfseatru1" dst-servers)))))))
+
 (defun dst-show-fse-server-pos ()
   (interactive)
   (let ((cwin (dst-chromium-window)))

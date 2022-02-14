@@ -39,7 +39,11 @@
       "no" "yes"))
 (add-to-list 'superman-org-export-target-list "opgave")
 
+(defvar exercise-with-code nil)
+(defvar exercise-with-solutions nil)
+
 (defun exercise-with-code ()
+  (buffer-name)
   (if exercise-with-code "both" "none"))
 
 (defun exercise-with-solutions ()
@@ -113,8 +117,8 @@ space
     (revert-buffer t t t)
     (find-file (concat (file-name-sans-extension rmd-file) "-with-code.Rmd"))
     (revert-buffer t t t)
-    (copy-file rmd-code-file "~/Desktop/Demografi/" 'yes 'yes)
-    (copy-file rmd-solution-file "~/Desktop/Demografi/" 'yes 'yes)
+    (copy-file rmd-code-file "~/Desktop/Demografi/Opgaver/" 'yes 'yes)
+    (copy-file rmd-solution-file "~/Desktop/Demografi/Opgaver/" 'yes 'yes)
     (superman-set-config (concat (buffer-name org-buf) " | " rmd-code-file " / " rmd-solution-file))))
 
 ;;; org-opgave-tags.el ends here

@@ -94,6 +94,7 @@
   (setq string (replace-regexp-in-string "Ãœ\\|Ü" "Ue" string))
   (setq string (replace-regexp-in-string "ÃŸ\\|ß" "ss" string)))
 
+
 (defun my-bibtex-generate-autokey ()
   (let* ((names (ignore-errors (bibtex-autokey-get-names)))
          (year (bibtex-autokey-get-year))
@@ -104,6 +105,24 @@
                             bibtex-autokey-name-year-separator)
                           names)))
     (fix-umlaute-in-string autokey)))
+
+
+(defun my-bibtex-convert-curis-pure-bibtex ()
+  (while (re-search-forward "@article{")
+    (save-excursion
+      (when (re-search-forward "abstract[ \t]+=[ \t]+" (point-at-eol) t)
+	(backward-word)
+	(let ((start (point))
+	      (end (progn (re-search-forward "[a-zA-Z]+[a-zA-Z]+[a-zA-Z]+[ \t]+=[ \t]+" (point-at-eol) nil 2)
+			  (backward-word) (point))))
+	  (delete-region start end))))
+    (save-excursion
+      (when (re-search-forward "keywords[ \t]+=[ \t]+" (point-at-eol) t)
+	(backward-word)
+	(let ((start (point))
+	      (end (progn (re-search-forward "[a-zA-Z]+[a-zA-Z]+[a-zA-Z]+[ \t]+=[ \t]+" (point-at-eol) nil 2)
+			  (backward-word) (point))))
+	  (delete-region start end))))))
 
 (defun my-bibtex-clean-entry (&optional new-key called-by-reformat)
   "copy of bibtex-clean-entry"
@@ -203,7 +222,7 @@
 (defun my-bibtex-autogenerate-keys ()
   (interactive)
   ;; (save-excursion
-    (goto-char (point-min))
+    ;; (goto-char (point-min))
     (while (re-search-forward "@\\([a-z]+\\)[ \t]*{" nil t)
       (looking-at ".*$")
       (message (match-string-no-properties 0)) 

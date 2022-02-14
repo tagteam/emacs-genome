@@ -126,7 +126,7 @@
       (insert (deft-file-title file))
       (insert (deft-file-contents file))
       (if batch
-	  (if (every (lambda (filter)
+	  (if (cl-every (lambda (filter)
 		       (goto-char (point-min))
 		       (deft-search-forward filter))
 		     deft-filter-regexp)
