@@ -74,9 +74,8 @@
 (setq use-package-ensure-function 'straight-use-package-ensure-function)
 
 ;; locate emacs packages to emacs-genome
-(setq package-enable-at-startup nil)   ; To prevent initialising twice
-(require 'use-package)
-(setq use-package-verbose t)
+(setq user-emacs-directory emacs-genome)
+(setq straight-base-dir emacs-genome)
 
 (add-to-list 'load-path (expand-file-name "snps/" emacs-genome))
 (add-to-list 'load-path (expand-file-name "genes/SuperMan/lisp" emacs-genome))
