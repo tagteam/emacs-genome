@@ -2448,7 +2448,7 @@ movements permant."
 	(first 1)
 	(n (or arg 1)))
     (if (not (or catp marker))
-	(error "Point is not on an item  or a category" )
+	(error "Point has to be on an item or a subtree/category." )
       (with-current-buffer (marker-buffer marker)
 	(widen)
 	(goto-char marker)
