@@ -49,27 +49,32 @@
       (error mess))
   (message (concat "Reading genes and snps from: " emacs-genome)))
 
+;; since 2022 we are using the git based straight-package-manager
+;; instead of emacs' build-in package-manager
+;; https://jeffkreeftmeijer.com/emacs-straight-use-package/
+(defvar bootstrap-version)
+(let ((bootstrap-file
+       (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
+      (bootstrap-version 5))
+  (unless (file-exists-p bootstrap-file)
+    (with-current-buffer
+        (url-retrieve-synchronously
+         "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
+         'silent 'inhibit-cookies)
+      (goto-char (point-max))
+      (eval-print-last-sexp)))
+  (load bootstrap-file nil 'nomessage))
+;;; https://github.com/raxod502/straight.el/blob/develop/README.md#integration-with-use-package
+(setq package-enable-at-startup nil
+      straight-use-package-by-default t
+      straight-vc-git-default-protocol 'ssh)
+(straight-use-package 'use-package)
+(require 'use-package)
+(setq use-package-enable-imenu-support t)
+(setq use-package-ensure-function 'straight-use-package-ensure-function)
+
 ;; locate emacs packages to emacs-genome
-(require 'package)
-(setq eg-elpa-sources '(("elpa" . "https://tromey.com/elpa/")
-			("gnu" . "https://elpa.gnu.org/packages/")
-			("org" . "https://orgmode.org/elpa/")
-			("melpa" . "https://melpa.org/packages/")
-			("melpa-stable" . "https://stable.melpa.org/packages/")
-			("marmalade" . "https://marmalade-repo.org/packages/")
-			))
-;; (setq package-archives '(("gnu" . "https://elpa.gnu.org/packages/")
-			 ;; ("org" . "https://orgmode.org/elpa/")))
-(dolist (source eg-elpa-sources) (add-to-list 'package-archives source t))
-(add-to-list 'package-directory-list (expand-file-name "genes/" emacs-genome))
-(add-to-list 'package-directory-list package-user-dir)
-(setq orig-package-user-dir package-user-dir)
-(setq package-user-dir (expand-file-name "genes/" emacs-genome))
 (setq package-enable-at-startup nil)   ; To prevent initialising twice
-(package-initialize)
-(unless (package-installed-p 'use-package)
-  (package-refresh-contents)
-  (package-install 'use-package))
 (require 'use-package)
 (setq use-package-verbose t)
 
@@ -77,54 +82,45 @@
 (add-to-list 'load-path (expand-file-name "genes/SuperMan/lisp" emacs-genome))
 
 ;; look, feel and behaviour
-(use-package appearance-snps)
+(require 'appearance-snps)
 ;; keybindings
-(use-package global-key-snps)
+(require 'global-key-snps)
 ;; org mode
-(use-package org
-  :ensure org-plus-contrib ;; ensure org's devel
-  :pin org
-  :config
-  (use-package org-snps))
+(use-package org)
+(require 'org-snps)
+
+;;  :straight org-plus-contrib 
 
 ;; folding
-(use-package folding)
-(use-package fold-dwim)
-(use-package folding-snps)
+(require 'folding-snps)
 
 ;; completion/expansion
-(use-package company
-  :ensure t :config)
+(use-package company)
 
-;; (use-package ac-R :ensure t)
+;; (use-package ac-R)
 
 (use-package hippie-exp
   :commands hippie-expand)
 
-(use-package auto-complete
-  :ensure t)
+(use-package auto-complete)
 
-(use-package popup-complete
-  :ensure t)
+(use-package popup-complete)
 
-(use-package yasnippet
-  :ensure t)
+(use-package yasnippet)
 (setq yas-snippet-dirs `(,(concat emacs-genome "/snps/yasnippets")))
 (yas-global-mode 1)
-(use-package auto-yasnippet
-  :ensure t)
+(use-package auto-yasnippet)
 
 ;; auto header for R-files
 (use-package header2 
   :config
-  (use-package header2-snps))
+  (require 'header2-snps))
 
 ;; header buttons
-(use-package header-button)
+;; (use-package header-button)
 
 ;; iedit mode 
 (use-package iedit
-  :ensure t
   :commands iedit-mode)
 
 ;; buffer and window cycling
@@ -140,66 +136,66 @@
   (setq ido-default-buffer-method 'selected-window)
   ;; Last visited files appear in ido-switch-buffer C-x b
   (setq ido-use-virtual-buffers t))
-(use-package ido-completing-read+ :ensure t)
+(use-package ido-completing-read+)
 ;; buffer cycling
-(use-package cycle-buffer-snps)
+(require 'cycle-buffer-snps)
 ;; window cycling
 (use-package winner
   :config
   (winner-mode))
 
 ;; browse url
-(use-package browse-url-snps
-  :commands (browse-url google-search-prompt))
+(require 'browse-url-snps)
+;;  :commands (browse-url google-search-prompt))
 
 ;; deft
-(use-package deft :ensure t)
+(use-package deft)
 
 ;; anything/helm
-(use-package helm
-  :ensure t
-  :config
-  (use-package helm-config))
+(use-package helm)
+;;  :config
+;;  (use-package helm-config))
 
 ;; git
-(use-package magit :ensure t)
+(use-package magit)
 
 ;; shell and ssh within emacs
-(use-package shell-snps)
-(use-package ssh
-  :ensure t)
+(require 'shell-snps)
+(use-package ssh)
 
 ;; pandoc: converting code and documents
-(use-package pandoc-mode
-  :ensure t)
+(use-package pandoc-mode)
 
 ;; markdown
-(use-package  markdown-mode :ensure t)
+(use-package  markdown-mode)
 
 ;; Emacs speaks statistics: mostly R
-(use-package ess-site
- :ensure ess)
-(use-package ess-edit)
-(use-package ess-R-snps)
+(use-package ess-site                   ; ESS - Emacs Speaks Statistics
+  :straight ess
+  :commands R
+  :hook (ess-mode . subword-mode))
+
+(require 'ess-edit)
+(require 'ess-R-snps)
 ;; (setq ess-use-auto-complete 'script-only)
 
 ;; LaTeX
 (use-package tex-site
-  :ensure auctex)
-(use-package latex-snps)
+  :straight auctex)
+(require 'latex-snps)
 
 ;; superman
-(use-package superman-manager
-  :config
+(require 'superman-manager)
+
   ;; project profile
   (unless (file-exists-p superman-profile)
     (setq superman-profile "~/.SuperMan.org"))
   (superman-parse-projects)
   ;; header buttons
-  (use-package header-button)
-  (add-hook 'org-mode-hook #'(lambda ()
-			       (when (buffer-file-name)
-				 (superman-org-headline-mode)))))
+;;  (use-package header-button)
+;;  (add-hook 'org-mode-hook #'(lambda ()
+;;			       (when (buffer-file-name)
+;;				 (superman-org-headline-mode)))))
 
 (global-set-key [(f2)] 'superman-switch-to-project)
 (add-to-list 'file-list-directory-filter "^\\\.[a-zA-Z]+/")
@@ -208,11 +204,11 @@
 ;; start-up behaviour
 (setq inhibit-startup-screen 'yes-please)
 
-(use-package emacs-genes)
+(require 'emacs-genes)
 (eg)
 
 ;; backtransform to original package location
-(setq package-user-dir orig-package-user-dir)
+;(setq package-user-dir orig-package-user-dir)
 
 (provide 'emacs-genome)
 ;;; emacs-genome.el ends here

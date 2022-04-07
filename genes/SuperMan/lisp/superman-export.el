@@ -129,7 +129,7 @@ This function works outside R src blocks. Inside R src block
       (if debug ;; run latex to identify problems
 	  (progn
 	    (find-file tex-file)
-	    (superman-export-header-mode)
+	    ;; (superman-export-header-mode)
 	    (TeX-command "LaTeX" 'TeX-master-file nil))
 	(TeX-run-TeX "make-pdf" (concat "latexmk -pvc -pdf -f " tex-file) tex-file)))
     ;; (message "process")
@@ -143,12 +143,6 @@ This function works outside R src blocks. Inside R src block
 
 ;;{{{ superman org headline buttons
 
-(defvar superman-org-headline-map (make-sparse-keymap)
-  "Keymap for `superman-org-headline-mode', a minor mode.
-Use this map to set additional keybindings for when Org-mode is used.")
-
-(defvar superman-org-headline-mode-hook nil
-  "Hook for the minor `superman-org-headline-mode'.")
 
 (defvar superman-org-export-target-list '("pdf" "html" "docx")
   "Export targets.")
@@ -161,13 +155,13 @@ Use this map to set additional keybindings for when Org-mode is used.")
 
 (defun superman-org-export-change-target ()
   (interactive)
+  (message (cadr superman-org-export-target-list))
   (setq
    superman-org-export-target
    (cadr superman-org-export-target-list)
    superman-org-export-target-list
    (append (cdr superman-org-export-target-list)
-	   (list (car superman-org-export-target-list))))
-  (superman-org-headline-mode))
+	   (list (car superman-org-export-target-list)))))
 
 
 (defun superman-babel-change-target ()
@@ -178,7 +172,7 @@ Use this map to set additional keybindings for when Org-mode is used.")
    superman-babel-target-list
    (append (cdr superman-babel-target-list)
 	   (list (car superman-babel-target-list))))
-  (superman-org-headline-mode))
+  )
 
 
 (defun superman-org-export-as (&optional target arg)
@@ -194,114 +188,6 @@ is either called superman-export-as-TARGET or org-export-to-TARGET."
 	   (funcall org-candidate arg))
 	  (t (message (concat "Don't know how to export to " target))))))
 
-(define-minor-mode superman-org-headline-mode
-  "Minor mode for headline buttons in header line in org buffers."
-  nil "" superman-org-headline-map
-  (make-local-variable 'superman-org-export-target)
-  (make-local-variable 'superman-babel-target)
-  (make-local-variable 'superman-org-export-target-list)
-  (make-local-variable 'superman-babel-target-list)
-  (save-excursion
-    (goto-char (point-min))
-    (when (re-search-forward "^\\#\\+superman-export-target:[ \t]*" nil t)
-      (let ((this (buffer-substring-no-properties
-		   (point)
-		   (progn (skip-chars-forward "[a-zA-z/]")
-			  (point)))))
-	(setq superman-org-export-target this))))
-  (setq-local
-   header-line-format
-   (concat (header-button-format (concat "M-J:" (or superman-org-export-target "not set")) :action
-				 #'(lambda (&optional arg) (interactive)
-				     (superman-org-export-change-target)))
-	   " "
-	   (header-button-format "export" :action
-				 #'(lambda (&optional arg) (interactive)
-				     (superman-org-export-as nil)))
-	   (when (string= superman-org-export-target "pdf")
-	     (concat
-	      " "
-	      (header-button-format "debug" :action
-				    #'(lambda (&optional arg) (interactive)
-					(superman-export-as-latex t)))))
-	   " "
-	   (header-button-format "view" :action
-				 #'(lambda (&optional arg) (interactive)
-				     (let* ((ext (or superman-org-export-target "pdf"))
-					    (target (concat (file-name-sans-extension (buffer-file-name)) "." ext)))
-				       (if (file-exists-p target)
-					   (org-open-file target)
-					 (message (concat "No such file: " target))))))
-	   " | "
-	   (header-button-format (concat "R:" superman-babel-target) :action
-				 #'(lambda (&optional arg) (interactive)
-				     (superman-babel-change-target)))
-	   " "
-	   (header-button-format "run" :action
-				 #'(lambda (&optional arg) (interactive)
-				     (cond ((string= superman-babel-target "this-block")
-					    (beginning-of-line)
-					    ;; (if (string= (car (org-babel-get-src-block-info)) "R")
-					    (if (org-babel-get-src-block-info)
-						(org-babel-execute-src-block)
-					      ;; (superman-ess-eval-and-go)
-					      (message "Cursor is not in src-block")))
-					   ((string= superman-babel-target "all-blocks")
-					    (org-babel-execute-buffer)))))
-	   " "
-	   (header-button-format "clear"  :action
-				 #'(lambda (&optional arg) (interactive)
-				     (cond ((string= superman-babel-target "all-blocks")
-					    (org-babel-clear-all-results))
-					   ((string= superman-babel-target "this-block")
-					    (if (org-babel-get-src-block-info)
-						(org-babel-remove-result)
-					      ;; (superman-ess-eval-and-go)
-					      (message "Cursor is not in src-block"))))))
-
-	       " "
-	       (header-button-format "new" :action
-				     #'(lambda (&optional arg) (interactive)
-					 (beginning-of-line)
-					 (let ((buf  (buffer-name)))
-					   (if (org-babel-get-src-block-info)
-					       (progn (org-babel-goto-src-block-head)
-						      (re-search-forward org-babel-src-block-regexp nil t)
-						      (insert "\n"))
-					     (unless (looking-at "^[ \t\n]*$")
-					       (insert "\n")
-					       (forward-line -1)))
-					   (insert "<Rr")
-					   (org-cycle))))
-	       ;; (superman-create-R-block-help-buffer)
-	       ;; (superman-set-config (concat buf " / *Superman:R-block help*")))))
-	       " "
-	       (header-button-format "graph" :action
-				     #'(lambda (&optional arg) (interactive)
-					 (beginning-of-line)
-					 (let ((buf  (buffer-name)))
-					   (if (org-babel-get-src-block-info)
-					       (progn (org-babel-goto-src-block-head)
-						      (re-search-forward org-babel-src-block-regexp nil t)
-						      (insert "\n"))
-					     (unless (looking-at "^[ \t\n]*$")
-					       (insert "\n")
-					       (forward-line -1)))
-					   (insert "<Rg")
-					   (org-cycle))))
-	       ;; (superman-create-R-block-help-buffer)
-	       ;; (superman-set-config (concat buf " / *Superman:R-block help*")))))
-	       ;; " "
-	       ;; (header-button-format "clear-all" :action
-	       ;; #'(lambda (&optional arg) (interactive)
-	       ;; (org-babel-clear-all-results)))
-	       ;; " "
-	       ;; (header-button-format "run-all" :action
-	       ;; #'(lambda (&optional arg) (interactive)
-	       ;; (beginning-of-line)
-	       ;; (org-babel-execute-buffer)))
-	       ;; " "
-	       )))
 
 (defun superman-create-R-block-help-buffer ()
   (unless (get-buffer "*Superman:R-block help*")
@@ -372,49 +258,7 @@ Use this map to set additional keybindings for when superman-export-header-mode 
 ;; (defvar superman-export-header-mode-hook nil
 ;; "Hook for the minor `superman-export-header-mode'.")
 
-(define-minor-mode superman-export-header-mode
-  "Minor mode which shows export and evaluation header buttons in org buffers."
-  nil "" superman-export-header-map
-  (setq-local
-   header-line-format
-   (concat "Run: "
-	   (header-button-format "LaTeX" :action 
-				 #'(lambda (&optional arg) (interactive) 
-				     (TeX-command "LaTeX" 'TeX-master-file nil)))
-	   " "
-	   (header-button-format "BibTeX" :action
-				 #'(lambda (&optional arg) (interactive)
-				     (TeX-command "BibTeX" 'TeX-master-file nil)))
-	   " "
-	   (header-button-format "Make-pdf" :action
-				 #'(lambda (&optional arg) (interactive)
-				     ;; (TeX-run-TeX "make-pdf" (concat "latexmk -pvc -pdf -f " tex-file) tex-file)))
-				     (TeX-command "make-pdf" 'TeX-master-file nil)))
-	   " Error: "
-	   (header-button-format "next" :action
-				 #'(lambda (&optional arg) (interactive)
-				     (superman-next-latex-error)))
-	   " "
-	   (header-button-format "first" :action 
-				 #'(lambda (&optional arg) (interactive)
-				     (superman-next-latex-error 1)))
-	   " "
-	   (header-button-format "find-sec" :action 
-				 #'(lambda (&optional arg) (interactive)
-				     (superman-find-latex-error)))
-	   " "
-	   (header-button-format "find-frame" :action 
-				 #'(lambda (&optional arg) (interactive)
-				     (superman-find-latex-error 'frame)))
-	   " View: "
-	   (header-button-format "Start viewer" :action 
-				 #'(lambda (&optional arg) (interactive)
-				     (let ((pdf (concat (file-name-sans-extension (buffer-file-name)) ".pdf")))
-				       (if (file-exists-p pdf)
-					   (org-open-file pdf)
-					 (message (concat "No such file: " pdf))))))
-	   ;; (TeX-command "View" 'TeX-master-file nil)))
-	   )))
+
 
 
 ;; (add-hook 'LaTeX-mode-hook #'(lambda ()

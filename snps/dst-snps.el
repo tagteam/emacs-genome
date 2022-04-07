@@ -179,7 +179,7 @@
    Step 3: choose project, download launcher and start session."
   (interactive)
   (save-window-excursion
-  (if (string= "running" (dst-start-browser))
+  (if (string= "running" (ignore-errors (save-window-excursion (dst-start-browser))))
       (if (dst-open-firewall)
 	  (let* ((project (let* ((p (ido-completing-read
 				     "Choose DST-project: "
@@ -361,7 +361,7 @@
 			      "xdotool key Return;"))
 	  ;; logout
 	  (setq cmd (concat "xdotool windowraise " cwin " mousemove --sync --window " (dst-chromium-window) " " dst-click-position
-			    " xdotool click 1;"
+			    ";xdotool click 1;"
 			    "sleep " dst-click-delay ";"
 			    "xdotool key Tab;"
 			    "sleep " dst-click-delay ";"

@@ -1,7 +1,5 @@
 (setq org-startup-folded nil)
 
-(require 'org-opgave-tags)
-	 
 ;;{{{
 (defun latex-slides-2-org ()
   (interactive)
@@ -156,7 +154,7 @@
 ;;}}}
 
 (add-hook 'org-mode-hook
-	  '(lambda nil
+	  #'(lambda nil
 	     (setq comment-region-function 'comment-region-default)
 	     (eldoc-mode 0)
 	     (define-key org-mode-map "\C-cf" 'ess-edit-insert-call)
@@ -209,11 +207,13 @@
 	(setq fn (cdr fn))))))
 
 ;; export to Rmd
-(add-to-list 'load-path (expand-file-name "genes/orgmode-accessories/" emacs-genome))
-(require 'ox-extra)
-(require 'ox-md)
-(require 'ox-ravel)
-(ox-extras-activate '(ignore-headlines))
+;;(add-to-list 'load-path (expand-file-name "genes/orgmode-accessories/" emacs-genome))
+;; (use-package orgmode-accessories
+  ;; :straight  (:host github :repo "chasberry/orgmode-accessories" :files (:defaults "lisp/*.el" ("etc/styles/" "etc/styles/*")))
+;; (require 'ox-extra)
+;; (require 'ox-md)
+;; (require 'ox-ravel)
+;; (ox-extras-activate '(ignore-headlines))
 
 (defun never-plain-export ()
   (if (memq org-export-current-backend '(html latex docx))

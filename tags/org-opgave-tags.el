@@ -23,16 +23,12 @@
 ;; 
 
 ;;; Code:
-
-
-
 (provide 'org-opgave-tags)
-
-(add-to-list 'load-path (expand-file-name "genes/orgmode-accessories/" emacs-genome))
-(require 'ox-extra)
-(require 'ox-md)
 (require 'ox-ravel)
-(require 'superman)
+
+;; (add-to-list 'load-path (expand-file-name "genes/orgmode-accessories/" emacs-genome))
+;; (require 'ox-extra)
+(require 'ox-md)
 
 (defun never-plain-export ()
   (if (memq org-export-current-backend '(html latex docx))

@@ -54,7 +54,7 @@
 (global-set-key "\C-g" 'keyboard-escape-quit)
 ;(global-set-key "\M-q" 'fill-paragraph-or-region)
 (global-set-key "\M-q" 'eg/indent-paragraph)
-(global-set-key "\M-Q" '(lambda () (interactive) (mark-paragraph) (fill-region-as-paragraph (region-beginning) (region-end))))
+(global-set-key "\M-Q" #'(lambda () (interactive) (mark-paragraph) (fill-region-as-paragraph (region-beginning) (region-end))))
 (global-set-key "\M-l" 'mark-line)
 (global-set-key "\M-\C-l" 'mark-end-of-line)
 (global-set-key "\C-z" 'fold-dwim-toggle)
@@ -84,8 +84,8 @@
 ;; (global-set-key "\C-cu" 'german-mode)
 ;(global-set-key [(meta N)] 'switch-to-next-buffer)
 ;(global-set-key [(meta P)] 'switch-to-previous-buffer)
-;(global-set-key [(meta left)] '(lambda () (interactive) (other-window 1)))
-;(global-set-key [(meta right)] '(lambda () (interactive) (other-window 1)))
+;(global-set-key [(meta left)] #'(lambda () (interactive) (other-window 1)))
+;(global-set-key [(meta right)] #'(lambda () (interactive) (other-window 1)))
 
 ;;}}}
 (provide 'global-key-tags)

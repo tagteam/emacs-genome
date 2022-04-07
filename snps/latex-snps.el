@@ -35,7 +35,7 @@
 ;;}}}
 ;;{{{ LaTeX mode hook
 (add-hook 'LaTeX-mode-hook
-	  '(lambda ()
+	  #'(lambda ()
 	     (LaTeX-math-mode)
 	     (TeX-source-correlate-mode)
 	     (setq TeX-master t)
@@ -44,7 +44,7 @@
 	     (define-key LaTeX-mode-map "\M-k" 'save-buffer)
 	     (define-key LaTeX-mode-map "\M-q" 'eg/indent-paragraph)
 	     (define-key LaTeX-mode-map "\M-j" 'eg/latex-save-and-run)))
-;;}}}
+;;}}} 
 ;;{{{ TeX shell and master and custom 
 (setq TeX-shell "/bin/bash")
 (setq-default TeX-master nil) ; Query for master file.
@@ -295,7 +295,7 @@
 
 ;;{{{ latexmk
 (add-hook 'LaTeX-mode-hook
-	  '(lambda ()
+	  #'(lambda ()
 	     (add-to-list 'TeX-command-list '("make" "latexmk -f %t" TeX-run-TeX  nil "nil") t)
 	     ;; (add-to-list 'TeX-command-list '("make-dvi" "latexmk -pvc -dvi -f %t" TeX-run-TeX  nil "nil") t)
 	     ;; (add-to-list 'TeX-command-list '("make-ps"  "latexmk -cd -pvc -ps -f %t" TeX-run-TeX  nil "nil") t)

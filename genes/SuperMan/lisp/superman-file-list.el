@@ -80,7 +80,8 @@
 
 
 (defcustom file-list-max-length 200000
-  "Maximal number of file-names that can be stored in a single entry of file-list-alist."
+  "Maximal number of file-names that can be stored
+in a single entry of file-list-alist."
   :type 'integer
   :group 'file-list)
 
@@ -92,7 +93,8 @@
 
 (defcustom file-list-default-directories
   (list file-list-home-directory)
-  "List of directories that are initialized by the command file-list-initialize."
+  "List of directories that are initialized by the
+command file-list-initialize."
   :type '(repeat regexp)
   :group 'file-list)
 
@@ -144,7 +146,8 @@
   :group 'file-list)
 
 (defcustom file-list-verbose nil
-  "If non-nil echo names of expanded directories when building/updating of file-lists."
+  "If non-nil echo names of expanded directories when
+building/updating of file-lists."
   :type 'boolean
   :group 'file-list)
 
@@ -196,9 +199,11 @@ The cdr of each entry is the modification time.")
   "History for matching file-list.")
 
 (defvar file-list-display-level 1
-  "In file-list-display-buffer:\n\n0 - display non-absolute file names (i.e. without path)\n
+  "In file-list-display-buffer:\n\n0 - display non-absolute
+ file names (i.e. without path)\n
 1 - display absolute file names\n
-2 - display absolute file names and extra information for file (ie the result file-list-grep or file-list-attributes)")
+2 - display absolute file names and extra information for file
+   (ie the result file-list-grep or file-list-attributes)")
 
 (defvar file-list-display-hook nil
   "Normal hook run at the end of setting up text in file-list-display-buffer.
@@ -225,7 +230,8 @@ Good for binding keys.")
     (".xpm"      . "geeqie")
     (".jpg"      . "geeqie")
     (".jpeg"     . "geeqie"))
-  "*An assoc list of file extensions and the program called by the choose magic function.")
+  "*An assoc list of file extensions and the program
+called by the choose magic function.")
 
 (defvar file-list-mode-map
   (let ((map (make-sparse-keymap 'file-list-mode-map)))
@@ -241,16 +247,18 @@ list in completion buffer.")
 
 (defun file-list-list-internal (dir &optional dont-exclude recursive exclude-handler)
   "Lists filenames below DIR and subdirectories of DIR.
-The value is an alist of file-names where each entry has the form (filename . path-to-filename).
+The value is an alist of file-names where each entry has the form
+ (filename . path-to-filename).
 
-The directory DIR and its subdirectories with their last modification time are added 
-to the variable file-list-dir-list in order to be able later to test if updating is necessary.
+The directory DIR and its subdirectories with their last
+modification time are added to the variable file-list-dir-list
+ in order to be able later to test if updating is necessary.
 
 If DONT-EXCLUDE is nil, then the function EXCLUDE-HANDLER is called to decide
 if the directory should be listed. If EXCLUDE-HANDLER is nil
-then the build-in function file-list-exclude-p is used. If RECURSIVE is nil, then
-subdirectories of DIR are not listed. If MATCH is non-nil, then only those subdirectories
-of DIR are listed that match the regular expression MATCH."
+then the build-in function file-list-exclude-p is used. If RECURSIVE is nil,
+then subdirectories of DIR are not listed. If MATCH is non-nil, then only those
+subdirectories of DIR are listed that match the regular expression MATCH."
   (let ((dir-list (directory-files dir t  "^.*[^\.]+$" t)) ;; don't match ../ and ./
 	file-list
 	(exclude-handler (or exclude-handler 'file-list-exclude-p)) 
@@ -331,7 +339,8 @@ of DIR are listed that match the regular expression MATCH."
   "Builds and updates the variable file-list-alist entry for directory DIR.
 
 If UPDATE is nil, then existing list is returned. If DONT-EXCLUDE is nil then
-subdirectories below DIR are excluded depending on what file-list-exclude-p returns."
+subdirectories below DIR are excluded depending on what file-list-exclude-p
+returns."
   ;; check if dir is assessable 
   (when (not (and (file-readable-p dir)
 		  (file-accessible-directory-p dir)))
@@ -442,7 +451,8 @@ subdirectories below DIR are excluded depending on what file-list-exclude-p retu
 
 (defun file-list-remove-dir (entry)
   "Argument ENTRY is an element of file-list-dir-list.
-Remove all filenames below dir (car entry) from file-list-alist and ENTRY from file-list-dir-list."
+Remove all filenames below dir (car entry) from file-list-alist and
+ENTRY from file-list-dir-list."
   (let* ((dir (car entry))
 	 (dir-list (file-list-assoc-dir dir file-list-alist)))
     ;; remove dir from file-list-dir-list
@@ -575,11 +585,13 @@ Remove all filenames below dir (car entry) from file-list-alist and ENTRY from f
     (delete nil (mapcar test file-list))))
 
 (defun file-list-filter-file-list (file-list filter &optional dont-match)
-  "Split FILE-LIST according to FILTER into matching files and non-matching files. Return a plist
-with elements :yin and :yang. :yin is the list of matching files and :yang the filter which also is
- a plist now enlarged with a new property :filtered-files, the list of not matching files.
+  "Split FILE-LIST according to FILTER into matching files and non-matching
+files. Return a plist with elements :yin and :yang. :yin is the list of
+ matching files and :yang the filter which also is a plist now enlarged with
+a new property  :filtered-files, the list of not matching files.
 
-If DONT-MATCH is non-nil do the inverse operation, i.e., split into non-matching and matching files."
+If DONT-MATCH is non-nil do the inverse operation, i.e., split into non-matching
+and matching files."
   (let* (yin
 	 yang
 	 fl-result
@@ -633,7 +645,8 @@ and the cdr is the directory of filename."
 
 
 (defun file-list-concat-file-names (file-list)
-  "Returns a string consisting of all absolut filenames in file-list separated by blanks."
+  "Returns a string consisting of all absolut filenames in file-list
+separated by blanks."
   (let (file-names-as-string)
     (dolist (file file-list file-names-as-string)
       (setq file-names-as-string
@@ -663,14 +676,15 @@ Return  the sublist of the existing files. Does not re-display selected list."
 
 
 (defun file-list-select (file-list regexp by inverse dir display-buffer dont-display &optional force-update)
-  "Returns sublist of filenames in FILE-LIST matched by REGEXP according to BY. BY is either
-of file-name, path, ext, time, or size. If INVERSE is
+  "Returns sublist of filenames in FILE-LIST matched by REGEXP according to BY.
+BY is either of file-name, path, ext, time, or size. If INVERSE is
 non-nil return the sublist which does not match.
 
 DISPLAY-BUFFER should be the buffer in which the result should appear. 
 This happens unless DONT-DISPLAY is non nil. 
 If FILE-LIST is nil, the buffer local value
-of the variable `file-list-current-file-list' will be used as input, unless FORCE-UPDATE is non nil, in which
+of the variable `file-list-current-file-list' will be used as input,
+unless FORCE-UPDATE is non nil, in which
 case the file list is updated according to the current directory and filters.
 
 This function sets the variable `file-list-current-file-list'. 
@@ -812,31 +826,34 @@ See also `file-list-add'.
 		      inverse dir dbuf nil)))
 
 (defun file-list-by-name (&optional arg file-list dir)
-  "Return sublist of filenames (in displayed file-list) whose path is matched by regexp."
+  "Return sublist of filenames (in displayed file-list) whose path is
+matched by regexp."
   (interactive "P")
   (file-list-select file-list nil nil arg dir (current-buffer) nil))
 
 (defun file-list-by-path (&optional arg file-list dir)
- "Returns sublist of filenames (in file-list) whose path-name is matched by regexp.
-This changes the value of file-list-current-file-list."
+  "Returns sublist of filenames (in file-list) whose path-name is matched
+by regexp. This changes the value of file-list-current-file-list."
   (interactive "P")
     (file-list-select file-list nil "path" arg dir (current-buffer) nil))
 
 (defun file-list-by-time (&optional arg file-list dir)
-  "Returns sublist of filenames (in file-list) whose size is lower than a given value.
-This changes the value of file-list-current-file-list."
+  "Returns sublist of filenames (in file-list) whose size is lower
+than a given value. This changes the value of
+ `file-list-current-file-list'."
   (interactive "P")
   (file-list-select file-list nil "time" arg  dir (current-buffer) nil))
 
 (defun file-list-by-size (&optional arg file-list dir)
- "Returns sublist of filenames (in file-list) whose size is lower than a given value.
-This changes the value of file-list-current-file-list."
+  "Returns sublist of filenames (in file-list) whose size is lower than
+a given value. This changes the value of `file-list-current-file-list'."
   (interactive "P")
   (file-list-select file-list nil "size" arg  dir (current-buffer) nil))
 
 (defun file-list-by-ext (&optional arg file-list dir)
-  "Returns sublist of filenames (in file-list) whose path is matched by regexp.
-This changes the value of file-list-current-file-list."
+  "Returns sublist of filenames (in file-list) whose path is
+matched by regexp. This changes the value of
+`file-list-current-file-list'."
   (interactive "P")
   (file-list-select file-list nil "ext" arg dir (current-buffer) nil))
 
@@ -849,8 +866,8 @@ If such a buffer exists already, kill it first and return a fresh one."
     (get-buffer-create fl-buf-name)))
 
 (defun file-list-by-name-below-directory (&optional arg file-list)
-  "Read a directory name and return sublist of filenames below the  directory whose
-file-name (without directory) matches a regexp."
+  "Read a directory name and return sublist of filenames below the
+directory whose file-name (without directory) matches a regexp."
   (interactive "P")
   (let ((dir (read-directory-name (format
 				   "%s of files by name below directory: "
@@ -868,8 +885,8 @@ file-name extension matches a regexp."
 
 
 (defun file-list-by-path-below-directory (&optional arg file-list)
- "Read a directory name and return sublist of filenames (in file-list) whose path
-is matched by a regexp."
+  "Read a directory name and return sublist of filenames (in file-list) whose
+path is matched by a regexp."
   (interactive "P")
   (let ((dir (read-directory-name (format
 				   "%s of files by pathname below directory: "
@@ -878,8 +895,8 @@ is matched by a regexp."
 
 
 (defun file-list-by-time-below-directory (&optional arg file-list)
-  "Read a directory name and return sublist of filenames (in file-list) whose age
-is less or greater than a number of days which also has to be specified."
+  "Read a directory name and return sublist of filenames (in file-list) whose
+age is less or greater than a number of days which also has to be specified."
   (interactive "P")
   (let ((dir (read-directory-name (format
 				   "%s of files by age below directory: "
@@ -887,8 +904,8 @@ is less or greater than a number of days which also has to be specified."
   (file-list-select file-list nil "time" arg dir (file-list-fresh-buffer dir) nil)))
 
 (defun file-list-by-size-below-directory (&optional arg file-list)
-  "Read a directory name and return sublist of filenames (in file-list) whose size
-is less or greater than a number in bytes which also has to be specified."
+  "Read a directory name and return sublist of filenames (in file-list) whose
+size is less or greater than a number in bytes which also has to be specified."
   (interactive "P")
   (let ((dir (read-directory-name (format
 				   "%s of files by size below directory: "
@@ -1708,6 +1725,14 @@ When ARGS is given it should have the same format as the result of `query-replac
 (define-key file-list-mode-map "/e" 'file-list-by-ext)
 (define-key file-list-mode-map "/p" 'file-list-by-path)
 (define-key file-list-mode-map "/a" 'file-list-add)
+
+(define-key file-list-mode-map "-s" 'file-list-by-size)
+(define-key file-list-mode-map "-t" 'file-list-by-time)
+(define-key file-list-mode-map "-f" 'file-list-by-name)
+(define-key file-list-mode-map "-e" 'file-list-by-ext)
+(define-key file-list-mode-map "-p" 'file-list-by-path)
+(define-key file-list-mode-map "-a" 'file-list-add)
+
 (define-key file-list-mode-map "1" 'file-list-remove-filter-1)
 (define-key file-list-mode-map "2" 'file-list-remove-filter-2)
 (define-key file-list-mode-map "3" 'file-list-remove-filter-3)
@@ -1790,7 +1815,7 @@ When ARGS is given it should have the same format as the result of `query-replac
   "Attach file at point to the outgoing MIME message."
   (interactive)
   (let* ((fatpoint (file-list-file-at-point))
-	 (type (mm-default-file-encoding fatpoint))
+	 (type (mm-default-file-type fatpoint))
 	 (description nil)
 	 (buf (if (with-current-buffer file-list-reference-buffer
 		    (string-match "message" (symbol-name
@@ -1833,7 +1858,7 @@ When ARGS is given it should have the same format as the result of `query-replac
     (switch-to-buffer buf)
     (while flist
       (setq file (car flist)
-	    type (mm-default-file-encoding file)
+	    type (mm-default-file-type file)
 	    description nil)
       (mml-insert-empty-tag 'part
 			    'type type

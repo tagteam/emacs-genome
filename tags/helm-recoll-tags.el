@@ -1,6 +1,6 @@
 ;;; helm-recoll-tags.el --- combine helm with recoll
 
-;; Copyright (C) 2012-2021  Thomas Alexander Gerds
+;; Copyright (C) 2012-2022  Thomas Alexander Gerds
 
 ;; Author: Thomas Alexander Gerds <tag@biostat.ku.dk> 
 ;; Keywords: convenience
