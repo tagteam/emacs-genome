@@ -1,6 +1,6 @@
 ;;; emacs-genome.el --- loading snps and genes from the emacs-genome
 
-;; Copyright (C) 2014 -- 2021  Thomas Alexander Gerds
+;; Copyright (C) 2014 -- 2022  Thomas Alexander Gerds
 
 ;; Author: Thomas Alexander Gerds <tag@biostat.ku.dk>
 ;; Keywords: convenience
@@ -34,51 +34,22 @@
 ;;; Code:
 
 ;; check if emacs-genome is bound 
-(if (not (and (boundp 'emacs-genome) 
-	      (file-directory-p emacs-genome)))
-    (let ((mess (concat "Cannot load emacs-genome: Variable emacs-genome does not specify a directory file."
-			"\nTo investigate the problem you could start an interactive lisp session via M-x ielm RET,"
-			"\nand then evaluate the variable\n\nELISP> emacs-genome\n\n and the test\n\nELISP> (file-directory-p emacs-genome)\n\nat the prompt."
-			"\n\nIf you have downloaded the emacs-genome in the folder\n\n" 
-			(expand-file-name "~" nil)
-			"\n\nThen, the value of the variable emacs-genome should be\n\n" (expand-file-name "~/emacs-genome/" nil)
-			"\n\nThat is, you should have a line\n\n(setq emacs-genome '~/emacs-genome/')\n\n in your init file (e.g., ~/.emacs or ~/.emacs.d/init.el).")))
-      (pop-to-buffer "*EG load error*")
-      (erase-buffer)
-      (insert mess) 
-      (error mess))
+(if (not (and (boundp 'emacs-genome) (file-directory-p emacs-genome)))
+    (error "The variable `emacs-genome' is either not set or its value is not a directory.")
   (message (concat "Reading genes and snps from: " emacs-genome)))
 
-;; since 2022 we are using the git based straight-package-manager
-;; instead of emacs' build-in package-manager
-;; https://jeffkreeftmeijer.com/emacs-straight-use-package/
-(defvar bootstrap-version)
-(let ((bootstrap-file
-       (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
-      (bootstrap-version 5))
-  (unless (file-exists-p bootstrap-file)
-    (with-current-buffer
-        (url-retrieve-synchronously
-         "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
-         'silent 'inhibit-cookies)
-      (goto-char (point-max))
-      (eval-print-last-sexp)))
-  (load bootstrap-file nil 'nomessage))
-;;; https://github.com/raxod502/straight.el/blob/develop/README.md#integration-with-use-package
-(setq package-enable-at-startup nil
-      straight-use-package-by-default t
-      straight-vc-git-default-protocol 'ssh)
-(straight-use-package 'use-package)
-(require 'use-package)
-(setq use-package-enable-imenu-support t)
-(setq use-package-ensure-function 'straight-use-package-ensure-function)
-
-;; locate emacs packages to emacs-genome
-(setq user-emacs-directory emacs-genome)
-(setq straight-base-dir emacs-genome)
-
+;; snps are small modifications of the emacs genome which
+;; intend to have nice effects on the emacs phenotype
 (add-to-list 'load-path (expand-file-name "snps/" emacs-genome))
-(add-to-list 'load-path (expand-file-name "genes/SuperMan/lisp" emacs-genome))
+;; tags are personal user specific modifications
+;; put your personal emacs configurations in this folder and
+;; call from .emacs
+(add-to-list 'load-path (expand-file-name "tags/" emacs-genome))
+
+;; package manager
+;; straight is were the genes are
+(add-to-list 'load-path (expand-file-name "straight/" emacs-genome))
+(require 'straight-snps)
 
 ;; look, feel and behaviour
 (require 'appearance-snps)
@@ -174,6 +145,11 @@
   :commands R
   :hook (ess-mode . subword-mode))
 
+;; smart equal assign
+(straight-use-package
+ '(ess-smart-equal :type git :host github :repo "genovese/ess-smart-equals"))
+(ess-smart-equals-activate)
+
 (require 'ess-edit)
 (require 'ess-R-snps)
 ;; (setq ess-use-auto-complete 'script-only)
@@ -184,6 +160,7 @@
 (require 'latex-snps)
 
 ;; superman
+(add-to-list 'load-path (expand-file-name "genes/SuperMan/lisp" emacs-genome))
 (require 'superman-manager)
 
   ;; project profile

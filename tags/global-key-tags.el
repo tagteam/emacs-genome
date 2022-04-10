@@ -1,4 +1,9 @@
 ; -------------------------global keybindings-------------------------
+
+;; start/end of buffer
+(global-set-key (kbd "C-<prior>") #'(lambda () (interactive) (goto-char (point-min))))
+(global-set-key (kbd "C-<next>") #'(lambda () (interactive) (goto-char (point-max))))
+
 ;; {{{ howto
 (global-set-key "\C-hh" 'howto)
 ;; }}}

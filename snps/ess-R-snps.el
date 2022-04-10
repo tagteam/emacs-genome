@@ -1,6 +1,6 @@
 ;;; ess-R-snps.el --- ess setup file for statistical software R
 
-;; Copyright (C) 2012-2018  Thomas Alexander Gerds
+;; Copyright (C) 2012-2022  Thomas Alexander Gerds
 
 ;; Author: Thomas Alexander Gerds <tag@biostat.ku.dk>
 ;; Keywords: convenience, tools
@@ -60,7 +60,7 @@
 
 (require 'ess-edit)
 (add-hook 'ess-mode-hook
-	  '(lambda () 
+	  #'(lambda () 
 	     (ess-edit-default-keybindings)
 	     (define-key ess-mode-map "\M-j" 'ess-eval-region-and-go)
 	     (define-key ess-mode-map "\M-r" 'copy-region-as-kill)
@@ -68,9 +68,10 @@
 	     (define-key ess-mode-map "\M-l" 'mark-line)
 	     (define-key ess-mode-map "\M-k" 'eg-switch-to-R)
 	     (define-key ess-mode-map "\C-z" 'fold-dwim-toggle)
-	     (define-key ess-mode-map [(meta return)] '(lambda () (interactive) (ess-eval-line)(forward-line 1)))
+	     (define-key ess-mode-map [(meta return)] #'(lambda () (interactive) (ess-eval-line)(forward-line 1)))
 	     (define-key ess-mode-map "\C-\M-y" 'eg/ess-duplicate-line)  
-	     (define-key ess-mode-map "_" 'eg/ess-smart-underscore)
+	     ;; smart underscore is obsolete, see ess-insert-assign
+	     ;; (define-key ess-mode-map "_" 'eg/ess-smart-underscore)
 	     (define-key ess-mode-map "\M-H" 'eg/ess-get-help-R-object)
 	     (define-key ess-mode-map "\C-\M-k" #'(lambda () (interactive)(eg-switch-to-R 't)))
 	     (define-key ess-mode-map [(backspace)] 'delete-backward-char)
@@ -83,7 +84,7 @@
 (setq ess-tab-complete-in-script t)
 (setq ess-first-tab-never-complete nil)
 (add-hook 'ess-mode-hook
-	  '(lambda ()
+	  #'(lambda ()
 	     ;; (make-variable-buffer-local 'hippie-expand-try-functions-list)
 	     (add-to-list 'hippie-expand-try-functions-list (lambda (old) (ess-complete-object-name)))))
 ;;}}}
@@ -157,7 +158,7 @@
 ;;{{{ command history
 (setq comint-input-ring-size 5000)
 ;;(add-hook 'ess-send-input-hook
-;;	  '(lambda nil
+;;	  #'(lambda nil
 ;;	     (if (>= (point) (marker-position
 ;;			      (process-mark
 ;;			       (get-buffer-process (current-buffer)))))
@@ -226,14 +227,14 @@
       ;; (ring-insert comint-input-ring cmd)))
 
 ;;}}}
-;;{{{ smart underscore
+;;{{{ smart underscore is obsolete, see ess-insert-assign
 
-(defun eg/ess-smart-underscore ()
-  (interactive)
-  (if (not (eq last-command 'eg/ess-smart-underscore))
-      (insert " <- ")
-    (undo)
-    (insert "_")))
+;; (defun eg/ess-smart-underscore ()
+  ;; (interactive)
+  ;; (if (not (eq last-command 'eg/ess-smart-underscore))
+      ;; (insert " <- ")
+    ;; (undo)
+    ;; (insert "_")))
 ;;}}}
 ;;{{{ clearing the inferior window
 (defun eg-switch-to-R (&optional arg)

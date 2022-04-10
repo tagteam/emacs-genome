@@ -110,7 +110,7 @@
     TeX-command-list)))
 
 (add-hook 'LaTeX-mode-hook
-	  '(lambda ()
+	  #'(lambda ()
 	     (add-to-list 'TeX-command-list '("make" "latexmk -f %t" TeX-run-command nil "nil") t)
 	     (add-to-list 'TeX-command-list '("make-dvi" "latexmk -pvc -dvi -f %t" TeX-run-command nil "nil") t)
 	     (add-to-list 'TeX-command-list '("make-ps"  "latexmk -pvc -ps -f %t" TeX-run-command nil "nil") t)
@@ -122,7 +122,7 @@
 	     (add-to-list 'TeX-command-list '("make-ps2pdf-landscape" "latexmk -pvc -l -pdfps -f %t" TeX-run-command nil "nil") t)))
 
 (setq-default TeX-master nil)
-(add-hook 'LaTeX-mode-hook '(lambda ()
+(add-hook 'LaTeX-mode-hook #'(lambda ()
 					;math-mode
 			      (LaTeX-math-mode)
 			      (TeX-source-specials-mode)

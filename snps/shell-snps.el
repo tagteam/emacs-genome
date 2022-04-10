@@ -37,7 +37,7 @@
 (add-to-list 'debug-ignored-errors "^Marker does not point anywhere$")
 
 (add-hook 'shell-mode-hook
-	  '(lambda ()
+	  #'(lambda ()
 	     (ansi-color-for-comint-mode-on)
 	     (setq comint-scroll-to-bottom-on-input 'all)
 	     (define-key shell-mode-map [f6] 'delete-window)
@@ -49,12 +49,12 @@
 	     (define-key shell-mode-map "\M-e" 'comint-dynamic-complete)))
 
 
-(add-hook 'eshell-mode-hook '(lambda ()
+(add-hook 'eshell-mode-hook #'(lambda ()
 			       ;; (define-key eshell-mode-map [(control f6)] 'delete-window)
 			       (define-key eshell-mode-map [(control f6)] 'shell-toggle)
 			       (define-key eshell-mode-map "\M-k" 'clear-eshell)
 			       (define-key eshell-mode-map "\M-e" 'pcomplete)))
-(add-hook 'ielm-mode-hook '(lambda ()
+(add-hook 'ielm-mode-hook #'(lambda ()
 			     (local-set-key [(delete)] 'delete-char)
 			     (local-set-key [f7] 'delete-window)))
 
