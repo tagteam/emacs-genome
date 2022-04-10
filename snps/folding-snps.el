@@ -36,7 +36,7 @@
 (remove-hook 'find-file-hooks 'folding-mode-find-file)
 
 (add-hook 'folding-mode-hook
-	  '(lambda nil
+	  #'(lambda nil
 	     (font-lock-default-fontify-buffer)
 	     (local-set-key "\C-z" 'fold-dwim-toggle)))
 

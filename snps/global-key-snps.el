@@ -36,7 +36,7 @@
 (global-set-key "\M-;" 'comment-or-uncomment-line-or-region)
 ;; major-mode specific indentation
 (global-set-key "\M-q" 'eg/indent-paragraph) 
-(global-set-key "\M-Q" '(lambda () (interactive) (mark-paragraph) (fill-region-as-paragraph (region-beginning) (region-end))))
+(global-set-key "\M-Q" #'(lambda () (interactive) (mark-paragraph) (fill-region-as-paragraph (region-beginning) (region-end))))
 ;; marking text
 (global-set-key "\M-l" 'mark-line)
 (global-set-key "\M-\C-l" 'mark-end-of-line)
@@ -53,7 +53,7 @@
 (global-set-key [(meta f8)] 'winner-cycle)
 (global-set-key [(shift f8)] 'winner-cycle-backwards)
 (global-set-key "\M-o" 'other-window)          ; move to next window clockwise
-(global-set-key "\M-O" '(lambda ()(interactive) (other-window -1))) ; move to next window anti-clockwise
+(global-set-key "\M-O" #'(lambda ()(interactive) (other-window -1))) ; move to next window anti-clockwise
 ;; (global-set-key [M-left] 'windmove-left)          ; move to left windnow
 ;; (global-set-key [M-right] 'windmove-right)        ; move to right window
 ;; (global-set-key [M-up] 'windmove-up)              ; move to upper window
