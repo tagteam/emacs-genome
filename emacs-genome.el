@@ -66,7 +66,6 @@
 
 ;; completion/expansion
 (use-package company)
-
 ;; (use-package ac-R)
 
 (use-package hippie-exp
@@ -144,6 +143,10 @@
   :straight ess
   :commands R
   :hook (ess-mode . subword-mode))
+
+;; completion
+(add-hook 'ess-r-mode #'(lambda () (company-mode)))
+(add-hook  'inferior-ess-r-mode #'(lambda () (company-mode)))
 
 ;; smart equal assign
 (straight-use-package

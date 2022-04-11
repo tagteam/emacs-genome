@@ -44,8 +44,8 @@
 
 ;; (setq ess-long+replacement "")
 (setq-default ess-ask-for-ess-directory nil)
-(setq-default ess-directory (concat (getenv "HOME") "/R/"))
-(setq-default ess-history-directory (concat (getenv "HOME") "/R/"))
+;; (setq-default ess-directory (concat (getenv "HOME") "/R/"))
+;; (setq-default ess-history-directory (concat (getenv "HOME") "/R/"))
 (setq-default ess-language "R")
 (setq-default ess-dialect "R")
 (setq inferior-ess-font-lock-keywords nil)
