@@ -162,7 +162,7 @@
   :straight auctex)
 (require 'latex-snps)
 
-;; superman
+
 (add-to-list 'load-path (expand-file-name "genes/SuperMan/lisp" emacs-genome))
 (require 'superman-manager)
 
