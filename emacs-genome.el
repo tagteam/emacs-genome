@@ -151,6 +151,7 @@
 ;; smart equal assign
 (straight-use-package
  '(ess-smart-equal :type git :host github :repo "genovese/ess-smart-equals"))
+
 (ess-smart-equals-activate)
 
 (require 'ess-edit)
@@ -163,8 +164,11 @@
 (require 'latex-snps)
 
 
-(add-to-list 'load-path (expand-file-name "genes/SuperMan/lisp" emacs-genome))
+;; (add-to-list 'load-path (expand-file-name "genes/SuperMan/lisp" emacs-genome))
+(straight-use-package
+ '(superman :type git :host github :repo "tagteam/superman"))
 (require 'superman-manager)
+
 
   ;; project profile
   (unless (file-exists-p superman-profile)
