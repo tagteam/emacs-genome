@@ -34,13 +34,19 @@
   "Return t if position POS is inside brackets.
 POS defaults to point if no value is given."
   (save-excursion
-    (let ((ppss (syntax-ppss pos))
+    (let ((here (point))
+	  (ppss (syntax-ppss pos))
           (r nil))
       (while (and (> (nth 0 ppss) 0)
                   (not r))
         (goto-char (nth 1 ppss))
         (cond
-	 ((char-equal ?\[ (char-after)) (setq r 'conditional))
+	 ((char-equal ?\[ (char-after))
+	  ;; sitting at opening [ now check if there
+	  ;; is a ',' before current point
+	  (if (re-search-forward "," here t)
+	      (setq r 'arglist)
+	    (setq r 'conditional)))
 	 ((char-equal ?\( (char-after)) (setq r 'arglist))
 	 ((char-equal ?\, (char-after)) (setq r 'arglist)))
         (setq ppss (syntax-ppss)))
