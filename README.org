@@ -52,6 +52,14 @@ Relaunch emacs and wait for packages to be installed.
 
 # read the [[file:emacs-genome-manual.org][manual]]. 
 
+* Trouble shooting
+
+** Use-package git setup
+
+ssh key og certificates:
+
+https://stackoverflow.com/questions/35821245/github-server-certificate-verification-failed/35824116#35824116
+
 * Project management
 #+BEGIN_SRC  emacs-lisp :export code
 (make-directory "~/metropolis")

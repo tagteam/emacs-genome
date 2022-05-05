@@ -124,8 +124,6 @@
 	      (define-key org-mode-map [(control e)] 'end-of-line)
 	      (define-key org-mode-map [(control z)] 'org-shifttab)
 	      (define-key org-mode-map [(control meta j)] 'org-babel-execute-src-block-by-name)
-	      (define-key org-mode-map "\C-xpd" 'superman-view-documents)
-	      (define-key org-mode-map "\C-c\C-v" 'superman-browse-this-file)
 	      (define-key org-mode-map [(meta up)] 'backward-paragraph)
 	      (define-key org-mode-map [(meta down)] 'forward-paragraph)))
 

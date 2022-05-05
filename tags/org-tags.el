@@ -157,6 +157,7 @@
 	  #'(lambda nil
 	     (setq comment-region-function 'comment-region-default)
 	     (eldoc-mode 0)
+	     (define-key org-mode-map "\C-c\C-v" 'superman-browse-this-file)
 	     (define-key org-mode-map "\C-cf" 'ess-edit-insert-call)
 	     (define-key org-mode-map "\C-cv" 'ess-edit-insert-vector)
 	     (define-key org-mode-map "\C-cp" 'ess-edit-insert-path)

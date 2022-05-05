@@ -25,7 +25,12 @@
 	    "\n" "root = ssh://" remote-mother
 	    "\npath=" (file-name-nondirectory dirname) "\nignore = Name .*\nignore=Name *.o\nignore=Name *.so")
     (save-buffer)
-    (async-shell-command "unison-gtk2 sync-with-work.prf")))
+    ;; (async-shell-command "unison-gtk2 sync-with-work.prf")
+    ;; (switch-to-buffer (get-buffer-create "*sync-with-work*"))
+    (superman-goto-shell)
+    (comint-send-input)
+    (insert "~/bin/sync-with-work")
+     (comint-send-input)))
     ;; (insert (concat
 	     ;; "rsync -e ssh -avzAHX --delete-after " dir-name " " remote-dir-name))))
 
