@@ -41,7 +41,8 @@ POS defaults to point if no value is given."
         (goto-char (nth 1 ppss))
         (cond
 	 ((char-equal ?\[ (char-after)) (setq r 'conditional))
-	 ((char-equal ?\( (char-after)) (setq r 'arglist)))
+	 ((char-equal ?\( (char-after)) (setq r 'arglist))
+	 ((char-equal ?\, (char-after)) (setq r 'arglist)))
         (setq ppss (syntax-ppss)))
       r)))
 
