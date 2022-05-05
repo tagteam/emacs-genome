@@ -151,8 +151,8 @@
 ;; smart equal assign
 (straight-use-package
  '(ess-smart-equal :type git :host github :repo "genovese/ess-smart-equals"))
-
 (ess-smart-equals-activate)
+(require 'ess-smart-equals-snps)
 
 (require 'ess-edit)
 (require 'ess-R-snps)
