@@ -26,7 +26,7 @@
 
 ;;;   LaTeX, bibtex, reftex, bibcite, latexmk
 (require 'tex-site)
-(require 'tex-buf)
+(require 'tex)
 (setq TeX-parse-self t) 
 (setq TeX-auto-save t) 
 (add-to-list 'auto-mode-alist (cons "\\.tex\\'" 'latex-mode))
