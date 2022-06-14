@@ -1,5 +1,5 @@
 (setq org-startup-folded nil)
-
+(setq org-src-preserve-indentation t)
 ;;{{{
 (defun latex-slides-2-org ()
   (interactive)
@@ -153,6 +153,31 @@
 (setq org-directory "~/metropolis")
 ;;}}}
 
+(defun superman-org-meta-return (&optional arg)
+  (interactive)
+  (if (and (string= (car (org-babel-get-src-block-info)) "R")
+	     (not (or (and (looking-at "[ \t]*$")
+			   (save-excursion (forward-line -1)
+					   (beginning-of-line)
+					   (looking-at "#\\+END_SRC")))
+		      (save-excursion (beginning-of-line)
+				      (looking-at "#\\+END_SRC")))))
+      (superman-ess-eval-and-go nil)
+    (org-meta-return arg)))
+
+(defun superman-org-control-return (&optional invisible-ok)
+  (interactive)
+  (if (and (string= (car (org-babel-get-src-block-info)) "R")
+	     (not (or (and (looking-at "[ \t]*$")
+			   (save-excursion (forward-line -1)
+					   (beginning-of-line)
+					   (looking-at "#\\+END_SRC")))
+		      (save-excursion (beginning-of-line)
+				      (looking-at "#\\+END_SRC")))))
+      (superman-ess-eval-and-go nil)
+    (org-insert-heading-respect-content invisible-ok)))
+
+
 (add-hook 'org-mode-hook
 	  #'(lambda nil
 	     (setq comment-region-function 'comment-region-default)
@@ -164,6 +189,8 @@
 	     (define-key org-mode-map "\C-ch" 'ess-edit-mark-call)
 	     (define-key org-mode-map "\C-cF" 'ess-edit-insert-file-name)
 	     (define-key org-mode-map "\M-\t" 'ess-edit-indent-call-sophisticatedly)
+	     (define-key org-mode-map [(meta return)] 'superman-org-meta-return)
+	     (define-key org-mode-map [(control return)] 'superman-org-control-return)
 	     (define-key org-mode-map [(meta h)] 'eg/mark-paragraph)))
 
 (global-set-key [f9] 'org)

@@ -159,7 +159,8 @@
 ;; (setq ess-use-auto-complete 'script-only)
 
 ;; LaTeX
-(use-package tex-site
+;; (use-package tex-site)
+(use-package tex
   :straight auctex)
 (require 'latex-snps)
 

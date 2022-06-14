@@ -105,10 +105,10 @@
 	(auto-revert-mode)))))
 
 
-(defun borel ()
+(defun cox ()
   (interactive)
-  (shell "*ess-borel*")
-  (insert "borel")
+  (shell "*ess-cox*")
+  (insert "cox")
   ;; -X R --no-save")
   (comint-send-input)
   (sit-for 5)
@@ -116,7 +116,20 @@
   (comint-send-input)
   (sit-for 5)
   (set-buffer-process-coding-system 'utf-8 'utf-8)
-  (ess-remote "*ess-borel*" "R"))
+  (ess-remote "*ess-cox*" "R"))
+
+(defun rao ()
+  (interactive)
+  (shell "*ess-rao*")
+  (insert "rao")
+  ;; -X R --no-save")
+  (comint-send-input)
+  (sit-for 5)
+  (insert "R")
+  (comint-send-input)
+  (sit-for 5)
+  (set-buffer-process-coding-system 'utf-8 'utf-8)
+  (ess-remote "*ess-rao*" "R"))
 
 
 (defun gauss ()

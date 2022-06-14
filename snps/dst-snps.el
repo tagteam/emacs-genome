@@ -179,39 +179,42 @@
    Step 3: choose project, download launcher and start session."
   (interactive)
   (save-window-excursion
-  (if (string= "running" (ignore-errors (save-window-excursion (dst-start-browser))))
-      (if (dst-open-firewall)
-	  (let* ((project (let* ((p (ido-completing-read
-				     "Choose DST-project: "
-				     dst-login-list
-				     nil nil nil dst-login-history dst-last-project)))
-			    (setq dst-last-project p)
-			    (assoc p dst-login-list)))
-		 (server (or (nth 3 project)
-			     (completing-read "Server: " dst-servers)))
-		 (user (concat dst-ident (nth 1 project) "@dstfse.local"))
-		 (pss (nth 2 project))
-		 (pos (cdr (assoc server dst-servers)))
-		 pro-cmd cmd project rdp-buffer
-		 (launcher (dst-download-launcher pos))
-		 (cmd  (concat "xfreerdp " launcher " /size:"
-			       (nth 0 dst-window-size)
-			       "x" (nth 1 dst-window-size) 
-			       " /u:" user " /p:" pss))
-		 (async-shell-command-buffer 'new-buffer))
+    (let* ((browser (ignore-errors (dst-start-browser)))
+	   (open (if (and (stringp browser) (string= browser "running"))
+		     (ignore-errors (dst-open-firewall))
+		   (sit-for 5) (ignore-errors (dst-open-firewall)))))
+      (when (and (stringp browser) (stringp open))
+	(let* ((project (let* ((p (ido-completing-read
+				   "Choose DST-project: "
+				   dst-login-list
+				   nil nil nil dst-login-history dst-last-project)))
+			  (setq dst-last-project p)
+			  (assoc p dst-login-list)))
+	       (server (or (nth 3 project)
+			   (completing-read "Server: " dst-servers)))
+	       (user (concat dst-ident (nth 1 project) "@dstfse.local"))
+	       (pss (nth 2 project))
+	       (pos (cdr (assoc server dst-servers)))
+	       pro-cmd cmd project rdp-buffer
+	       (launcher (dst-download-launcher pos))
+	       (cmd  (concat "xfreerdp " launcher " /size:"
+			     (nth 0 dst-window-size)
+			     "x" (nth 1 dst-window-size) 
+			     " /u:" user " /p:" pss))
+	       (async-shell-command-buffer 'new-buffer))
+	  (setq rdp-buffer (generate-new-buffer "*rdp-response*"))
+	  (message cmd)
+	  (async-shell-command cmd rdp-buffer)
+	  (sleep-for 1)
+	  (if (process-live-p (get-buffer-process rdp-buffer))
+	      (message "First attempt succeeded")
+	    (message "Second attempt  ...")
+	    (setq launcher (dst-download-launcher pos))
 	    (setq rdp-buffer (generate-new-buffer "*rdp-response*"))
+	    (setq proc-cmd  (dst-select launcher project)
+		  cmd (plist-get pro-cmd :cmd))
 	    (message cmd)
-	    (async-shell-command cmd rdp-buffer)
-	    (sleep-for 1)
-	    (if (process-live-p (get-buffer-process rdp-buffer))
-		(message "First attempt succeeded")
-	      (message "Second attempt  ...")
-	      (setq launcher (dst-download-launcher pos))
-	      (setq rdp-buffer (generate-new-buffer "*rdp-response*"))
-	      (setq proc-cmd  (dst-select launcher project)
-		    cmd (plist-get pro-cmd :cmd))
-	      (message cmd)
-	      (async-shell-command cmd rdp-buffer)))))))
+	    (async-shell-command cmd rdp-buffer)))))))
   
   
 
@@ -344,8 +347,8 @@
 	   cmd)
       (unless cwin
 	(error "Cannot see chromium. Use M-x dst-start-browser RET to start it."))
-      (if	(string= status "running")
-	  'running;; (message "Nothing to do. Firewall is already open.")
+      (if (string= status "running")
+	  "open" ;; (message "Nothing to do. Firewall is already open.")
 	(if (string= status "waiting")
 	    (setq cmd (concat "xdotool windowraise " cwin " mousemove --sync --window " (dst-chromium-window) " " dst-click-position
 			      ";xdotool click 1;"

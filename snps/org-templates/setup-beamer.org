@@ -27,3 +27,5 @@
 #+LaTeX_HEADER:\makeatletter\def\blfootnote{\xdef\@thefnmark{}\@footnotetext}\makeatother
 #+LATEX_HEADER: \newcommand{\E}{\ensuremath{\mathrm{E}}}
 #+LATEX_HEADER: \renewcommand{\P}{\ensuremath{\mathrm{P}}}
+#+LATEX_HEADER: \renewcommand{\d}{\ensuremath{\mathrm{d}}}
+#+LATEX_HEADER: \setbeamertemplate{caption}{\raggedright\insertcaption\par}

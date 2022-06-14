@@ -10,15 +10,32 @@
   ;; (find-file
    ;; "/ssh:grb615@doob:/projects/biostat01/people/grb615/"))
 
-(defun sync-with-work ()
+(defun cox ()
+  (interactive)
+  (let ((PW (save-excursion
+	      (find-file "~/.authinfo")
+	      (goto-char (point-min))
+	      (re-search-forward "exchange.ku.dk login grb615 port 587 password ")
+	      (replace-regexp-in-string "[ \t\n]+" ""
+					(buffer-substring-no-properties (point) (point-at-eol)))))
+	(cox-buffer (get-buffer-create "*ess-cox*")))
+    (shell cox-buffer)
+    (goto-char (point-max))
+    (insert "ssh grb615@cox")
+    (comint-send-input)
+    (sit-for 1)
+    (insert PW)
+    (comint-send-input)))
+
+(defun sync-with-work (&optional dir)
   (interactive)
   (save-some-buffers)
-  (let* ((dirname (directory-file-name (expand-file-name (read-directory-name "Directory to synchronize with grb615@doob: "))))
+  (let* ((dirname (or dir (directory-file-name (expand-file-name (read-directory-name "Directory to synchronize with grb615@doob: ")))))
 	 (mother (file-name-directory  dirname))
 	 (remote-mother (replace-regexp-in-string
-			   (expand-file-name "~")
-			   "grb615@doob//projects/biostat01/people/grb615/"
-			   mother)))
+			 (expand-file-name "~")
+			 "grb615@doob//projects/biostat01/people/grb615/"
+			 mother)))
     (find-file "~/.unison/sync-with-work.prf")
     (erase-buffer)
     (insert "root = " mother
@@ -28,11 +45,12 @@
     ;; (async-shell-command "unison-gtk2 sync-with-work.prf")
     ;; (switch-to-buffer (get-buffer-create "*sync-with-work*"))
     (superman-goto-shell)
+    (goto-char (point-max))
     (comint-send-input)
     (insert "~/bin/sync-with-work")
-     (comint-send-input)))
-    ;; (insert (concat
-	     ;; "rsync -e ssh -avzAHX --delete-after " dir-name " " remote-dir-name))))
+    (comint-send-input)))
+;; (insert (concat
+;; "rsync -e ssh -avzAHX --delete-after " dir-name " " remote-dir-name))))
 
 (defun copy-from-work (&optional arg)
   (interactive "p")
