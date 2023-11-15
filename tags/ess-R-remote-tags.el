@@ -128,6 +128,7 @@
   (insert "R")
   (comint-send-input)
   (sit-for 5)
+  (company-mode nil)
   (set-buffer-process-coding-system 'utf-8 'utf-8)
   (ess-remote "*ess-rao*" "R"))
 

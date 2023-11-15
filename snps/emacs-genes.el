@@ -20,9 +20,9 @@
 ;;----------------------------------------------------------------------
 ;; created: Apr 12 2015 (09:51) 
 ;; Version: 
-;; last-updated: Oct 10 2021 (18:18) 
+;; last-updated: May 26 2023 (07:00) 
 ;;           By: Thomas Alexander Gerds
-;;     Update #: 79
+;;     Update #: 80
 ;;----------------------------------------------------------------------
 ;; 
 ;;; Commentary: Show important features {genes}. 
@@ -403,6 +403,12 @@ move to with the same argument."
      (end-of-line arg)
      (point))
    nil t))
+
+(defun delete-white-lines ()
+  "Delete all empty white lines below point."
+  (interactive)
+  (while (re-search-forward "^\n" nil t)
+    (replace-match "")))
 
 (defun winner-cycle (&optional backward)
   (interactive)

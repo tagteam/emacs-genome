@@ -52,14 +52,14 @@
 (defun danish-Ue () (interactive) (insert (char-to-string 197)))
 (defun danish-Oe () (interactive) (insert (char-to-string 216)))
 (defun danish-oe-1 () (interactive)
-       (if (eq last-command 'other-window)
-	   (other-window 1)
-	 (if (not (eq last-command
-		      'danish-oe-1))
-	     (insert (char-to-string 248))
-	   (undo)
-	   (other-window 1)
-	   )))
+       ;; (if (eq last-command 'other-window)
+	   ;; (other-window 1)
+	 ;; (if (not (eq last-command
+		      ;; 'danish-oe-1))
+	     (insert (char-to-string 248)))
+	   ;; (undo)
+	   ;; (other-window 1)
+	   ;; )))
 
 (define-key danish-map "\C-o" 'other-window)
 (define-key danish-map "\M-a" 'danish-ae)
@@ -67,8 +67,8 @@
 (define-key danish-map "\M-u" 'danish-ue)
 (define-key danish-map "\M-U" 'danish-Ue)
 ;(define-key danish-map "\M-o" 'danish-oe)
-(define-key danish-map "\M-o" 'danish-oe-1)
-(define-key danish-map "\M-O" 'danish-Oe)
+(define-key danish-map "\M-'" 'danish-oe-1)
+(define-key danish-map "\M-\"" 'danish-Oe)
 
 (or (assq 'danish-mode minor-mode-map-alist)
     (setq minor-mode-map-alist
@@ -260,7 +260,7 @@
 ;;}}}
 
 ;;{{{ fix umlaute
-(defun fix-danish-characters ()
+(defun Fix-danish-characters ()
   (interactive)
   (let ((clist
 	 '(("æ" "ae")
@@ -268,7 +268,23 @@
 	   ("ø" "oe")
 	   ("Ø" "Oe")
 	   ("å" "aa")
-	   ("Å" "Aa;"))))
+	   ("Å" "Aa"))))
+    (while clist
+      (save-excursion
+	(goto-char (point-min))
+	(while (re-search-forward (caar clist) nil t)
+	  (replace-match  (cadr (car clist))))
+	)
+      (setq clist (cdr clist)))))
+(defun fix-danish-characters ()
+  (interactive)
+  (let ((clist
+	 '(("æ" "æ")
+	   ("Æ" "Æ")
+	   ("ø" "ø")
+	   ("Ø" "Ø")
+	   ("å" "å")
+	   ("Å" "Å"))))
     (while clist
       (save-excursion
 	(goto-char (point-min))

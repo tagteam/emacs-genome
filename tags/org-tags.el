@@ -1,5 +1,35 @@
 (setq org-startup-folded nil)
 (setq org-src-preserve-indentation t)
+
+(defun register-targets-add-footer ()
+  (interactive)
+  (let ((orgs (file-list-select nil "\\.org$"
+				nil nil  "~/metropolis/Teaching/targetedRegisterAnalysis/" nil t)))
+    (while orgs
+      (find-file (file-list-make-file-name (car orgs)))
+      (goto-char (point-min))      
+      (re-search-forward "# Footer:")
+      (delete-region (point-at-bol) (point-max))
+      (save-buffer)
+      (goto-char (point-max))
+      (unless (re-search-backward "# Footer: " nil t)
+	(goto-char (point-at-eol))
+	(insert "\n------------------------------------------------------------------------------------------------------\n")
+	(insert "\n# Footer:\n"
+		"**** Navigation\n"
+		"- [[https://github.com/tagteam/registerTargets/blob/main/exercises/targeted-exercises-day1.org][targeted exercises day 1]]\n"
+		"- [[https://github.com/tagteam/registerTargets/blob/main/exercises/targeted-exercises-day2.org][targeted exercises day 2]]\n"
+		"- [[https://github.com/tagteam/registerTargets/blob/main/exercises/targeted-exercises-day3.org][targeted exercises day 3]]\n"
+		"- [[https://github.com/tagteam/registerTargets/blob/main/exercises/targeted-exercises-day4.org][targeted exercises day 4]]\n"
+		"- [[https://github.com/tagteam/registerTargets/blob/main/lecturenotes][lecture notes]]\n"
+		"- [[https://github.com/tagteam/registerTargets/blob/main/exercises/goodies][goodies]]\n"		
+		))
+      (setq orgs (cdr orgs))
+      ;; (setq orgs nil)
+      (save-buffer)
+      )))
+
+
 ;;{{{
 (defun latex-slides-2-org ()
   (interactive)
@@ -544,7 +574,7 @@ in order to be exported to Rmd.
 ;;}}}
 
 
-(defun org-clean-results-markup-garbage ()
+(defun superman-org-clean-results-markup-garbage ()
   (interactive)
   (visible-mode 1)
   (goto-char (point-min))

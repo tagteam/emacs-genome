@@ -233,7 +233,7 @@
       (message "Launching chromium-browser. You have to manually go back to emacs to open the firewall via M-x dst-open-firewall.")
       (sit-for 1)
       (async-shell-command
-        "chromium-browser --disable-infobars -new-instance -new-window http://remote.dst.dk/vdesk/hangup.php3"
+        "chromium --disable-infobars -new-instance -new-window http://remote.dst.dk/vdesk/hangup.php3"
 	       ;; (if dst-use-wmctrl
 	 ;; "wmctrl -a " emacs-window-name)
 		   ;; "xdotool windowraise " ewin))
@@ -468,7 +468,7 @@
       (dst-change-password this-project new 'submit)
       (setq ddlist (cdr ddlist)))))
 
-;;(dst-change-password (car dst-login-list) "bla" nil)
+;; (dst-change-password (car dst-login-list) "bla" nil)
 
 (defun dst-change-password (&optional project new-password click-submit)
   "Change passwords."

@@ -28,7 +28,36 @@
 
 (provide 'ess-smart-equals-snps)
 
-(setq ess-smart-equals-context-function 'essmeq--context-data-table-appropriate)
+(setq ess-smart-equals-context-function
+      'essmeq--context-data-table-appropriate)
+
+(setq ess-smart-equals-contexts
+      '((t (comment)
+	   (string)
+	   ;; tagteam:
+	   ;; do not put duplicated entries in these lists!
+	   ;;
+	   (arglist "=" "<-" "==" "!=" "<=" ">=" "<<-" "%>%")
+	   (index "==" "!=" "%in%" "<" "<=" ">" ">=" "=")
+	   ;; This order of inequalities makes cycling align with completion
+	   (conditional "==" "!=" "<" "<=" ">" ">=" "%in%")
+	   ;; base holds all operators that are assignment or complete with '='
+	   (base "<-" "<<-" "=" "==" "!=" "<=" ">=" "->" "->>" ":=")
+	   ;; Used for smart %-completion and cycling
+	   (% "%*%" "%%" "%/%" "%in%" "%>%" "%<>%" "%o%" "%x%")
+	   ;; Used for removal in ess-smart-equals-percent
+	   (not-% "<-" "<<-" "=" "->" "->>"
+		  "==" "!=" "<" "<=" ">" ">="
+		  "+" "-" "*" "**" "/" "^" "&" "&&" "|" "||")
+	   ;; All the principal binary operators
+	   (all "<-" "<<-" "=" "->" "->>"
+		"==" "!=" "<" "<=" ">" ">="
+		"%*%" "%%" "%/%" "%in%" "%x%" "%o%"
+		"%<>%" "%>%" ; not builtin but common (dynamic?)
+		"+" "-" "*" "**" "/" "^" "&" "&&" "|" "||")
+	   (t "<-" "<<-" "=" "==" "->" "->>" "%<>%"))
+	(ess-roxy-mode
+	 (comment "<-" "=" "==" "<<-" "->" "->>" "%<>%"))))
 
 (defun essmeq-inside-brackets-p (&optional pos)
   "Return t if position POS is inside brackets.

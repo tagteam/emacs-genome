@@ -8,7 +8,7 @@
 ;; (defun tramp ()
   ;; (interactive)
   ;; (find-file
-   ;; "/ssh:grb615@doob:/projects/biostat01/people/grb615/"))
+   ;; "/ssh:grb615@rao:/maps/projects/biostat01/people/grb615/"))
 
 (defun cox ()
   (interactive)
@@ -30,11 +30,11 @@
 (defun sync-with-work (&optional dir)
   (interactive)
   (save-some-buffers)
-  (let* ((dirname (or dir (directory-file-name (expand-file-name (read-directory-name "Directory to synchronize with grb615@doob: ")))))
+  (let* ((dirname (or dir (directory-file-name (expand-file-name (read-directory-name "Directory to synchronize with grb615@rao: ")))))
 	 (mother (file-name-directory  dirname))
 	 (remote-mother (replace-regexp-in-string
 			 (expand-file-name "~")
-			 "grb615@doob//projects/biostat01/people/grb615/"
+			 "grb615@rao//maps/projects/biostat01/people/grb615/"
 			 mother)))
     (find-file "~/.unison/sync-with-work.prf")
     (erase-buffer)
@@ -54,14 +54,14 @@
 
 (defun copy-from-work (&optional arg)
   (interactive "p")
-  (let ((remote (read-file-name "Copy remote file: " "/grb615@doob:/projects/biostat01/people/grb615/"))
+  (let ((remote (read-file-name "Copy remote file: " "/ssh:grb615@rao:/maps/projects/biostat01/people/grb615/"))
 	(local  (read-file-name "Destination:")))
     (copy-file remote local arg)))
 
 (defun copy-to-work ()
   (interactive)
   (let* ((local  (read-file-name "Copy file:"))
-	 (remote (read-directory-name "To remote directory: " "/grb615@doob:/projects/biostat01/people/grb615/")))
+	 (remote (read-directory-name "To remote directory: " "/ssh:grb615@rao:/maps/projects/biostat01/people/grb615/")))
     (copy-file local remote)))
 
 (defun save-at-work ()
@@ -69,20 +69,20 @@
   (let* ((file-name (buffer-file-name))
 	 (remote-file-name  (replace-regexp-in-string
 			     (expand-file-name "~")
-			     "/grb615@doob:/projects/biostat01/people/grb615/"
+			     "/ssh:grb615@rao:/maps/projects/biostat01/people/grb615/"
 			     file-name)))
     ;; (if (y-or-n-p (concat "save file as " remote-file-name "? "))
     (write-file (replace-regexp-in-string
 		 (expand-file-name "~")
-		 "/grb615@doob:/projects/biostat01/people/grb615/"
+		 "/ssh:grb615@rao:/maps/projects/biostat01/people/grb615/"
 		 file-name))))
 (defun get-from-work ()
   (interactive)
   (let* ((file-name (read-file-name "Get file: "
-				    "/grb615@doob:/projects/biostat01/people/grb615/" nil t))
+				    "/ssh:grb615@rao:/maps/projects/biostat01/people/grb615/" nil t))
 	 (target (read-file-name (concat "Copy " file-name " to: ")
 				 (replace-regexp-in-string
-				  "/grb615@doob:/projects/biostat01/people/grb615/"
+				  "/ssh:grb615@rao:/maps/projects/biostat01/people/grb615/"
 				  "~/"
 				  file-name))))
     ;; (if (y-or-n-p (concat "save file as " remote-file-name "? "))
@@ -94,7 +94,7 @@
 		      (buffer-file-name)))
 	 (remote-file-name (replace-regexp-in-string
 			    (expand-file-name "~")
-			    "/grb615@doob:/projects/biostat01/people/grb615/"
+			    "/ssh:grb615@rao:/maps/projects/biostat01/people/grb615/"
 			    (expand-file-name file-name))))
     (if (y-or-n-p (concat "save file as " remote-file-name "? "))
 	(write-file remote-file-name))))
@@ -106,9 +106,9 @@
 	  (if file-name
 	      (replace-regexp-in-string
 	       (expand-file-name "~")
-	       "/ssh:grb615@doob:/projects/biostat01/people/grb615/"
+	       "/ssh:grb615@rao:/maps/projects/biostat01/people/grb615/"
 	       file-name)
-	    "/ssh:grb615@doob:/projects/biostat01/people/grb615/")))
+	    "/ssh:grb615@rao:/maps/projects/biostat01/people/grb615/")))
     (find-file remote-file-name)))
 
 
