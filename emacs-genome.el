@@ -120,7 +120,11 @@
 ;; deft
 (use-package deft)
 
+
 ;; anything/helm
+(straight-use-package
+ '(wfnames :type git :host github :repo "thierryvolpiatto/wfnames"))
+
 (use-package helm)
 ;;  :config
 ;;  (use-package helm-config))
@@ -130,7 +134,7 @@
 
 ;; shell and ssh within emacs
 (require 'shell-snps)
-(use-package ssh)
+;;(use-package ssh)
 
 ;; pandoc: converting code and documents
 (use-package pandoc-mode)
@@ -141,7 +145,6 @@
 ;; Emacs speaks statistics: mostly R
 (use-package ess-site                   ; ESS - Emacs Speaks Statistics
   :straight ess
-  :commands R
   :hook (ess-mode . subword-mode))
 
 ;; completion

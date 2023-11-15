@@ -35,6 +35,7 @@
 ;;}}}
 ;;{{{ babel settings
 (setq org-babel-hash-show-time t)
+(setq org-latex-src-block-backend 'listings)
 ;; it is most transparent and convenient 
 ;; if export actions *never* evaluate code:
 (setq org-export-use-babel t)
@@ -169,6 +170,7 @@
 ;; see superman-export.el
 
 ;;}}}
+
 ;;{{{ latex export
 ;; There are at least 3 different places/ways to control
 ;;  the latex header when exporting an org-document:
@@ -209,6 +211,31 @@
 	      "numbersep=10pt,\n"
 	      "backgroundcolor=\\color{white},\n"
 	      "tabsize=4,\n"
+              "keepspaces=true,\n"
+	      "showspaces=false,\n"
+	      "showstringspaces=false,\n"
+	      "xleftmargin=.23in,\n"
+	      "frame=single,\n"
+	      "basewidth={0.5em,0.4em},\n"
+	      "}\n"))
+
+(setq eg/org-danish-latex-listing-options-string
+      (concat "\\lstset{\n"
+	      "keywordstyle=\\color{blue},\n"
+	      "commentstyle=\\color{red},"
+	      "stringstyle=\\color[rgb]{0,.5,0},\n"
+              "literate={~}{$\\sim$}{1},\n"
+	      "basicstyle=\\ttfamily\\small,\n"
+	      "columns=fullflexible,\n"
+	      "breaklines=true,\n"        
+	      "breakatwhitespace=false,\n"
+	      "numbers=left,\n"
+	      "numberstyle=\\ttfamily\\tiny\\color{gray},\n"
+	      "stepnumber=1,\n"
+	      "numbersep=10pt,\n"
+	      "backgroundcolor=\\color{white},\n"
+	      "tabsize=4,\n"
+	      "literate={ø}{{\\o}}1{æ}{{\\ae}}1{å}{{\\aa}}1{Ø}{{\\OE}}1{Æ}{{\\AE}}1{Å}{{\\AA}}1,\n"
               "keepspaces=true,\n"
 	      "showspaces=false,\n"
 	      "showstringspaces=false,\n"
@@ -281,15 +308,40 @@
 	;; ("basewidth" "{0.5em,0.4em}")))
 
 ;; [NO-DEFAULT-PACKAGES]
-;;(setq org-latex-classes nil)
+;; (setq org-latex-classes nil)
 (add-to-list 'org-latex-classes
 	     `("org-article"
 	       ,(concat "\\documentclass{article}
                [PACKAGES]
                [EXTRA]"
 			eg/org-latex-common-header-string
-			 ;;"\\renewcommand*\\familydefault{\\sfdefault}\n\\itemsep2pt"
-			 )
+			;;"\\renewcommand*\\familydefault{\\sfdefault}\n\\itemsep2pt"
+			)
+	       ("\\section{%s}" . "\\section*{%s}")
+	       ("\\subsection{%s}" . "\\subsection*{%s}")
+	       ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+	       ("\\paragraph{%s}" . "\\paragraph*{%s}")
+	       ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
+(add-to-list 'org-latex-classes
+	     `("org-article-no-packages"
+	       ,(concat "\\documentclass{article}
+               [NO-DEFAULT-PACKAGES]
+               [EXTRA]"
+			eg/org-latex-common-header-string
+			;;"\\renewcommand*\\familydefault{\\sfdefault}\n\\itemsep2pt"
+			)
+	       ("\\section{%s}" . "\\section*{%s}")
+	       ("\\subsection{%s}" . "\\subsection*{%s}")
+	       ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+	       ("\\paragraph{%s}" . "\\paragraph*{%s}")
+	       ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
+(add-to-list 'org-latex-classes
+	     `("danish-article"
+	       ,(concat "\\documentclass{article}
+               [NO-DEFAULT-PACKAGES]
+               [EXTRA]"
+			eg/org-danish-latex-listing-options-string
+			)
 	       ("\\section{%s}" . "\\section*{%s}")
 	       ("\\subsection{%s}" . "\\subsection*{%s}")
 	       ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
@@ -301,7 +353,47 @@
                [PACKAGES]
                [EXTRA]"
 			eg/org-latex-common-header-string
-			 )
+			)
+	       ("\\section{%s}" . "\\section*{%s}")
+	       ("\\subsection{%s}" . "\\subsection*{%s}")
+	       ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+	       ("\\paragraph{%s}" . "\\paragraph*{%s}")
+	       ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
+
+;; (setq org-latex-classes nil)
+(add-to-list 'org-latex-classes
+	     `("lids-news"
+	       ,(concat "\\documentclass{report}"
+			"\n[NO-DEFAULT-PACKAGES]"
+			"\n[NO-PACKAGES]"
+			"\n\\twocolumn"
+			"\n\\usepackage{hyperref}"
+			"\n\\usepackage{listings}"
+			"\n\\usepackage{natbib}
+                        \n\\RequirePackage{tcolorbox}
+			\\usepackage[margin=1cm]{geometry}"
+			"\\lstset{\n"
+			"keywordstyle=\\color{blue},\n"
+			"commentstyle=\\color{red},"
+			"stringstyle=\\color[rgb]{0,.5,0},\n"
+			"literate={~}{$\\sim$}{1},\n"
+			"basicstyle=\\ttfamily\\small,\n"
+			"columns=fullflexible,\n"
+			"breaklines=true,\n"        
+			"breakatwhitespace=false,\n"
+			"numbers=left,\n"
+			"numberstyle=\\ttfamily\\tiny\\color{gray},\n"
+			"stepnumber=1,\n"
+			"numbersep=10pt,\n"
+			"backgroundcolor=\\color{shadecolor},\n"
+			"tabsize=4,\n"
+			"keepspaces=true,\n"
+			"showspaces=false,\n"
+			"showstringspaces=false,\n"
+			"xleftmargin=0in,\n"
+			"frame=0,\n"
+			"basewidth={0.5em,0.4em},\n"
+			"}\n")
 	       ("\\section{%s}" . "\\section*{%s}")
 	       ("\\subsection{%s}" . "\\subsection*{%s}")
 	       ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
@@ -756,13 +848,15 @@
 (setq org-cycle-emulate-tab nil)
 (defun eg/org-tab ()
   (interactive)
-  (if (string= (car (org-babel-get-src-block-info)) "R")
-      (eg/indent-paragraph)
-    (org-cycle)))
+  (cond ((string= (car (org-babel-get-src-block-info)) "R")
+	 (eg/indent-paragraph))
+	((yas-expand))
+	(t (org-cycle))))
 
 (add-hook 'org-mode-hook
 	  #'(lambda nil
 	      (require 'superman-export)
+	      (setq org-latex-src-block-backend 'listings)
 	      (define-key org-mode-map [(f12)] 'org-shifttab)
 	      (define-key org-mode-map [(tab)] 'eg/org-tab)	      
 	      (define-key org-mode-map [(meta k)] 'superman-control-export)
