@@ -21,7 +21,8 @@
 ;; (global-set-key [(f6)] 'shell-toggle-cd)
 (global-set-key [(f6)] 'superman-goto-shell)
 (global-set-key [(control f6)] 'eshell-window)
-(global-set-key [(f7)] 'ielm-window);; (global-set-key [(f2)] 'select-project)
+(global-set-key [(f7)] 'ielm-window)
+;; (global-set-key [(f2)] 'select-project)
 ;;}}}
 
 ;;{{{ moving around 
@@ -61,7 +62,7 @@
 (global-set-key "\M-q" 'eg/indent-paragraph)
 (global-set-key "\M-Q" #'(lambda () (interactive) (mark-paragraph) (fill-region-as-paragraph (region-beginning) (region-end))))
 (global-set-key "\M-l" 'mark-line)
-(global-set-key "\M-\C-l" 'mark-end-of-line)
+;; (global-set-key "\M-\C-l" 'mark-end-of-line)
 (global-set-key "\C-z" 'fold-dwim-toggle)
 ;(define-key global-window-system-map "\C-z" 'fold-dwim-toggle)
 ;;}}}
@@ -75,6 +76,7 @@
 (global-set-key "\M-9" 'geschweifte-klammer-island)
 (global-set-key "\M-'" 'string-island)
 (global-set-key "\M-4" 'dollar-island)
+(global-set-key "\M-5" 'lige-island)
 (global-set-key "\C-cr" 'rebox-comment-or-region)
 ;; (global-set-key "\C-xp" 'point-to-register)
 ;; (global-set-key "\C-xy" 'insert-register)

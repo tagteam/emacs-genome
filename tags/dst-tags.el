@@ -20,6 +20,7 @@
       dst-new-password-pos "975 408"
       dst-confirm-password-pos "975 433"
       dst-submit-button-pos "1061 477")
+
 ;; (setq dst-domain-user-pos "1021 318"
       ;; dst-current-password-pos "1021 344"
       ;; dst-new-password-pos "1021 375"
@@ -27,53 +28,70 @@
       ;; dst-submit-button-pos "1063 444")
 
 ;; (shell-command (concat "xdotool mousemove " dst-change-password-pos))
-(setq dst-change-password-pos "1242 332")
+(setq dst-change-password-pos "943 346")
 ;;(setq dst-change-password-pos "750 240")
-(setq dst-servers '(("FSE Windows" . "668 319")
-		    ("srvfseatru1" .  "134 300")
+(setq dst-servers '(("FSE Windows" . "1508 319")
+		    ("srvfseatru1" .  "134 495")
 		    ("srvfsecancer1" .  "424 478")
 		    ("srvfsecancer2" .  "685 478")
 		    ;; ("srvfsegh4" .  "1224 466")
 		    ;; ("srvfsegh5" .  "1500 466")
-		    ;; ("srvfsegh6" .  "150 607")		    
-		    ("srvfsegh4" .  "948 466")
+		    ;; ("srvfsegh6" .  "150 607")
+		    ("srvfsegh4" .  "1217 466")
 		    ("srvfsegh5" .  "1224 466")
 		    ("srvfsegh6" .  "1500 466")
-		    ))
+		    "srvfseatru1" . "145 495"))
 
 ;; for RWAS project where screen is double locked
+(defun dst-type-password-twice ()
+  (interactive)
+  (shell-command-to-string
+   (concat "xdotool windowraise " (dst-xfree-window) " mousemove --sync --window " (dst-xfree-window) " 941 449" 
+	   ";xdotool click 1;sleep 2;"
+	   "xdotool type " dst-pw ";xdotool key Return;"
+	   "sleep 1;"
+	   "xdotool type " dst-pw ";xdotool key Return;")))
+
+;; to unlock the dst windows server
 (defun dst-type-password ()
   (interactive)
-  (let ((xfree-win (shell-command-to-string "xdotool search --onlyvisible --name 'FreeRDP'")))
-  (shell-command
-   (concat
-   "xdotool windowraise " xfree-win " mousemove --sync --window " xfree-win " " 
-   "xdotool type yuo111YUO!!!;"
-   "xdotool key Return;"
-))))
-
+  (shell-command-to-string
+   (concat "xdotool windowraise " (dst-xfree-window) " mousemove --sync --window " (dst-xfree-window) " 941 449" 
+	   ";xdotool click 1;sleep 2;xdotool type " dst-pw ";xdotool key Return;")))
 
 ;; WJA: 6632
 ;; WJAxxxx@dstfse.local
-;;(setq dst-pw "iMt777!!!ImT")
-(setq dst-pw "hYn999!!!HyN")
+(setq dst-pw "Kohl17MAISE!")
+              
 ;; ("3573 Overall meta project" "3573"  ,dst-pw "srvfsegh4")
 (setq dst-login-list
-      `(("6582 Corona, Covid, Mavish, Grimur" "6582" ,dst-pw "srvfsegh5")
+      `(
+	("707655 Steno Main" "707655" ,dst-pw "FSE Windows")
+	("709873 DMreg-projekt" "709873" ,dst-pw "FSE Windows")
+	("3740 Diabetes" "3740" ,dst-pw "srvfsegh5")
+	("3740 Diabetes server 4" "3740" ,dst-pw "srvfsegh4")
+	("6582 Corona, Covid, Mavish, Grimur" "706582" ,dst-pw "srvfsegh5")
 	("6220 RWAS" "6220" ,dst-pw "FSE Windows")
-	("3775 Marcella, Regitze" "3775"  ,dst-pw "srvfsegh4")
-	("6818 Alexander Falkentoft, deepthi, novo, Jarl, Jannik, Caroline, Christina Lee" "6818" ,dst-pw "srvfsegh4")
-	("3826 Liv" "3826"  ,dst-pw "srvfsegh4")
-	("3661 Sidsel, Daniel, Carolina, Steen, Kristian, Shahzleen, Carlo" "3661" ,dst-pw "srvfsegh4")
-	("3662 Mitroflow" "3662" ,dst-pw "srvfsegh4")
-	("3657 Louise" "3657" ,dst-pw "srvfsegh4")
-	("6130 Maria D'Souza" "6130" ,dst-pw "srvfsegh4")
-	("6322 Julie Andersen" "6322" ,dst-pw "srvfsegh4")
-	("6734 Genetics Maria" "6734" ,dst-pw "srvfsegh4")
-	("3740 Mariam, Henrik, Laura, Morten Malmborg" "3740" ,dst-pw "srvfsegh4")
- 	("3607 Jonas L. Isaksen, Jonas Bille Nielsen, Morten Wagner" "3607" ,dst-pw "FSE Windows")
+	;; ("3775 Marcella, Regitze" "3775"  ,dst-pw "srvfsegh4")
+	("706818 Alexander Falkentoft, deepthi, novo, Jarl, Jannik, Caroline, Christina Lee" "706818" ,dst-pw "srvfsegh4")
+	;; ("3826 Liv" "3826"  ,dst-pw "srvfsegh4")
+	;; ("3661 Sidsel, Daniel, Carolina, Steen, Kristian, Shahzleen, Carlo" "3661" ,dst-pw "srvfsegh4")
+	;; ("3662 Mitroflow" "3662" ,dst-pw "srvfsegh4")
+	;; ("3657 Louise" "3657" ,dst-pw "srvfsegh4")
+	;; ("6130 Maria D'Souza" "6130" ,dst-pw "srvfsegh4")
+	("6322 Marianna Hjertetal" "6322" ,dst-pw "srvfsegh4")
+	;; ("6734 Genetics Maria" "6734" ,dst-pw "srvfsegh4")
+	("9200 Statins" "9200" ,dst-pw "srvfsegh4")
+ 	;; ("3607 Jonas L. Isaksen, Jonas Bille Nielsen, Morten Wagner" "3607" ,dst-pw "FSE Windows")
 	("4265 Kessing" "4265" ,dst-pw "FSE Windows")
-	("7352 Simon-Kessing" "7352" ,dst-pw "FSE Windows")))
+	("7535 Mie Balling" "707535" ,dst-pw "FSE Windows")
+	("706338 Mathias" "706338" ,dst-pw "srvfsegh4")
+	("9200 Daniel, Alex, statins, forkalkning" "709200" ,dst-pw "FSE Windows")
+	("7352 Simon-Kessing" "707352" ,dst-pw "FSE Windows")
+	("9281 Dea Rasmus-Steno CKD" "709281" ,dst-pw  "srvfsegh4")
+	("707089 Deepthi" "707089" ,dst-pw "srvfsegh4")
+	("709924 Steno NF report" "709924" ,dst-pw "FSE Windows")
+	))
 
 
 (defun dst-open-x56 ()

@@ -264,13 +264,17 @@
 	(superman-control-export)
 	(setq fn (cdr fn))))))
 
-;; export to Rmd
+;; extract ox-ravel.el and load it
+;; These two lines should do the trick:
+;; (org-babel-tangle)
+;; (load-file "ox-ravel.el")
 ;;(add-to-list 'load-path (expand-file-name "genes/orgmode-accessories/" emacs-genome))
 ;; (use-package orgmode-accessories
-  ;; :straight  (:host github :repo "chasberry/orgmode-accessories" :files (:defaults "lisp/*.el" ("etc/styles/" "etc/styles/*")))
+  ;; :straight  (:host github :repo "chasberry/orgmode-accessories" :files (:defaults "lisp/*.el" ("etc/styles/" "etc/styles/*"))))
 ;; (require 'ox-extra)
 ;; (require 'ox-md)
-;; (require 'ox-ravel)
+(add-to-list 'load-path (expand-file-name "genes/orgmode-accessories/" emacs-genome))
+(require 'ox-ravel)
 ;; (ox-extras-activate '(ignore-headlines))
 
 (defun never-plain-export ()
@@ -290,6 +294,7 @@
 (add-to-list 'superman-org-export-target-list "exercise")
 (add-to-list 'superman-org-export-target-list "opgave")
 
+
 (defun superman-ravel-export-to-Rmd (&optional async subtreep visible-only body-only ext-plist)
   (interactive)
   (let* ((extension ".Rmd")
@@ -299,15 +304,11 @@
     (org-export-to-file 'ravel-markdown file
       async subtreep visible-only body-only ext-plist)))
 
-(fset 'Rmd-export
-      (lambda (&optional arg) "Keyboard macro."
-	(interactive "p")
-	(kmacro-exec-ring-item (quote ("rm" 0 "%d")) arg)))
-
-;; (defun Rmd-export (&optional arg) "Keyboard macro."
-       ;; (interactive "p")
-       ;; (message (if exercise-with-code "Ueja" "Uejb"))
-       ;; (kmacro-exec-ring-item (quote ("rm" 0 "%d")) arg))
+(defun Rmd-export (exercise-with-code exercise-with-solutions)
+  "Export to Rmd."
+  (interactive "p")
+  ;; (org-ravel-export-to-file 'ravel-markdown nil a s v b nil nil nil "md"))
+  (org-ravel-export-to-file 'ravel-markdown nil nil nil nil nil nil nil nil "md"))
 
 (setq exercise-without-code nil)
 (setq exercise-with-code nil)
@@ -510,7 +511,7 @@ in order to be exported to Rmd.
       ;; to avoid pop-up 
       (kill-buffer))
     (setq org-export-with-toc nil)
-    (Rmd-export)
+    (superman-Rmd-export nil nil)
     (save-window-excursion
       (find-file (org-export-output-file-name ".Rmd"))
       (revert-buffer t t t))))

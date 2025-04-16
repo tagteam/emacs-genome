@@ -172,6 +172,13 @@ has
   (insert "\\)")
   (backward-char 2))
 
+(defun lige-island ()
+  (interactive)
+  (insert "=")
+  (re-search-forward "[^ ,\.\t\n]*" nil t)
+  (insert "=")
+  (backward-char 1))
+
 (defun insert-date (&optional format-string)
   "Inserts the current date at the point."
   (interactive)

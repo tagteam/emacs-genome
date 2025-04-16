@@ -27,14 +27,15 @@
 (require 'ox-ravel)
 
 ;; (add-to-list 'load-path (expand-file-name "genes/orgmode-accessories/" emacs-genome))
-;; (require 'ox-extra)
+;; https://github.com/Fuco1/org-mode/blob/master/contrib/lisp/ox-extra.el
+(require 'ox-extra)
 (require 'ox-md)
+(ox-extras-activate '(ignore-headlines))
 
 (defun never-plain-export ()
   (if (memq org-export-current-backend '(html latex docx))
       "no" "yes"))
 (add-to-list 'superman-org-export-target-list "opgave")
-
 (defvar exercise-with-code nil)
 (defvar exercise-with-solutions nil)
 
@@ -45,15 +46,24 @@
 (defun exercise-with-solutions ()
   (if exercise-with-solutions "both" "none"))
 
-(defun superman-Rmd-export (exercise-with-code exercise-with-solutions) "Keyboard macro."
-       (interactive "p")
-       (kmacro-exec-ring-item (quote ("rm" 0 "%d")) 1))
+(defun superman-Rmd-export (exercise-with-code exercise-with-solutions)
+  "Export to Rmd."
+  (interactive "p")
+  ;; (org-ravel-export-to-file 'ravel-markdown nil a s v b nil nil nil "md"))
+  (org-ravel-export-to-file 'ravel-markdown nil nil nil nil nil nil nil nil "md"))
+       ;; (kmacro-exec-ring-item (("rm" 0 "%d")) 1))
+
+;; since :with-auto-yaml-header does not work we overwrite this
+(defun org-ravel--yaml-header (info)
+  (let ((rmd_yaml (plist-get info :with-auto-yaml-header)))
+    (cons rmd_yaml "")))
 
 (defun superman-export-as-opgave (&optional arg)
-  "Export orgmode R-exercise to 3 different targets:
+  "Export orgmode R-exercise to 4 different targets:
    Rmd without code
    Rmd with code
-   html with solutions
+   pdf with opgave text 
+   pdf with solutions
 
 here is how to mark the solution sections
 
@@ -77,44 +87,69 @@ space
 "
   (interactive)
   (let* ((org-buf (current-buffer))
-	 (rmd-file (org-export-output-file-name ".Rmd"))
-	 (rmd-code-file (concat (file-name-sans-extension rmd-file) "-with-code.Rmd"))
-	 (rmd-solution-file (concat (file-name-sans-extension rmd-file) "-with-solution.Rmd"))
+	 (fname (file-name-sans-extension (file-name-nondirectory (buffer-file-name org-buf))))
+	 (dir  "~/metropolis/Teaching/demogRafi/exercises/")
+	 ;; (rmd-file (org-export-output-file-name ".Rmd"))
+	 (rmd-file (concat dir fname ".Rmd"))
+	 (rmd-opgave-file (concat dir fname "-opgave.Rmd"))
+	 (rmd-solution-file (concat dir fname "-with-solution.Rmd"))
+	 (latex-junk (mapcar #'(lambda(x) (concat dir fname x))
+			     '(".tex" ".toc" ".synctex.gz" ".fdb_latexmk" ".aux" ".out" ".log")))
 	 (org-export-exclude-tags (list "noexport"))
 	 (org-export-with-toc t)
 	 (exercise-with-code t)
 	 (exercise-with-solutions t))
     ;; 
-    ;; export to Rmd with code without toc (first without solutions)
+    ;; export to pdf without code without solutions without rmd sections with toc
     ;;
     (save-buffer)
-    ;; to avoid pop-up 
-    ;; (save-window-excursion
-    ;; (find-file rmd-file)
-    ;; (kill-buffer))
+    (setq exercise-with-code nil  ;; evaluate blocks/chunks when :exports (exercise-with-code)
+	  org-export-exclude-tags (list "noexport" "rmd" "RMD" "Rmd" "solution" "solutions") ;; ignore these sections
+	  org-export-with-toc t)
+    ;; (superman-export-as-latex)
+    ;; (org-latex-export-to-pdf)
+    (superman-org-export-as "pdf")
+    ;; 
+    ;; export to Rmd with code without toc (first without solutions)
+    ;;
+    (switch-to-buffer org-buf)
     (setq exercise-with-code t  ;; evaluate blocks/chunks when :exports (exercise-with-code)
-	  org-export-exclude-tags (list "noexport" "solution" "solutions") ;; ignore these sections
+	  org-export-exclude-tags (list "opgave" "noexport" "solution" "solutions") ;; ignore these sections
 	  org-export-with-toc nil)
-    (Rmd-export)
-    (copy-file rmd-file (concat (file-name-sans-extension rmd-file) "-with-code.Rmd") 'ok)
+    (superman-Rmd-export t nil)
+    (copy-file rmd-file rmd-opgave-file 'ok)
     (setq exercise-with-code nil)
     ;; 
     ;; export to Rmd with code without toc (now with solutions)
     ;;
     (setq exercise-with-solutions t ;; evaluate 
-	  org-export-exclude-tags (list "noexport" "instruks");; now include solution sections
+	  org-export-exclude-tags (list "opgave" "noexport" "instruks");; now include solution sections
 	  org-export-with-toc nil)
-    (Rmd-export)
-    (copy-file rmd-file (concat (file-name-sans-extension rmd-file) "-with-solution.Rmd") 'ok)
+    (superman-Rmd-export t t)
+    (copy-file rmd-file rmd-solution-file 'ok)
     (setq exercise-with-solutions nil)
     (save-buffer)
+    ;; delete the now obsolete rmd file
+    ;; (delete-file rmd-file nil)
     ;; revert rmd buffer
-    (find-file (concat (file-name-sans-extension rmd-file) "-with-solution.Rmd"))
+    (find-file rmd-solution-file)
     (revert-buffer t t t)
-    (find-file (concat (file-name-sans-extension rmd-file) "-with-code.Rmd"))
+    (save-excursion (goto-char (point-min))
+		    (while 
+			(re-search-forward ":[a-zA-Z]+:ignore:" nil t)
+		      (replace-match "")))
+    (save-buffer)
+    (find-file rmd-opgave-file)
+    (save-excursion (goto-char (point-min))
+		    (while 
+			(re-search-forward ":[a-zA-Z]+:ignore:" nil t)
+		      (replace-match "")))
+    (save-buffer)
+    (copy-file rmd-opgave-file rmd-file 'ok)
+    (find-file rmd-file)
     (revert-buffer t t t)
-    (copy-file rmd-code-file "~/Desktop/Demografi/Opgaver/" 'yes 'yes)
-    (copy-file rmd-solution-file "~/Desktop/Demografi/Opgaver/" 'yes 'yes)
-    (superman-set-config (concat (buffer-name org-buf) " | " rmd-code-file " / " rmd-solution-file))))
+    (mapcar 'delete-file latex-junk)
+    (delete-file rmd-opgave-file)
+    (superman-set-config (concat (buffer-name org-buf) " | " rmd-file " / " rmd-solution-file))))
 
 ;;; org-opgave-tags.el ends here

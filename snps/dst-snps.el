@@ -143,9 +143,9 @@
 (defun dst-chromium-window ()
   (let ((cwin (shell-command-to-string
 	       "xdotool search --onlyvisible --class 'chromium'")))
-    
     (if (string= cwin "") nil
       (replace-regexp-in-string "\n" "" cwin))))
+
 
 (defun dst-chromium-status ()
   (let* ((chromium-window (dst-chromium-window))
@@ -458,14 +458,84 @@
 (defun dst5 () (interactive) (dst-connect "srvfsegh5"))
 
 
+(defun dst-xfree-window ()
+  (let ((cwin (shell-command-to-string "xdotool search --class 'xfreerdp'")))
+    (if (string= cwin "") nil
+      (replace-regexp-in-string "\n" "" cwin))))
+(defun dst-raise-dst ()
+  (interactive)
+  (shell-command-to-string (concat "xdotool windowraise " (dst-xfree-window) " mousemove --sync --window " (dst-xfree-window) " " dst-click-position
+				     ";xdotool click 1;")))
+
+
+
+
+(defun dst-type-buffer ()
+  (interactive)
+  (let ((sbuf
+	 (replace-regexp-in-string
+	  "_" "UNDERSCORE"
+	  (replace-regexp-in-string
+	  "~" "TILDE"
+	  (replace-regexp-in-string
+	  "\\^" "POTENZ"
+	  (replace-regexp-in-string
+	  ">" "GREATER"
+	  (replace-regexp-in-string
+	   "<" "SMALLER"
+	   (replace-regexp-in-string
+	   "'" "SINGLEQUOTE" 
+	   (replace-regexp-in-string "\n" "\r" (buffer-substring (point-min) (point-max)))))))))))
+    (shell-command-to-string (concat "xdotool windowraise " (dst-xfree-window) " mousemove --sync --window " (dst-xfree-window) " " dst-click-position
+				     ";xdotool click 1;sleep 2;"
+				     "xdotool type '" sbuf "';"
+				     "xdotool key Return;"))))
+
+(defun dst-clean-incoming ()
+  (interactive)
+  (goto-char (point-min))
+  (while (re-search-forward "UNDERSCORE" nil t)
+    (replace-match "_"))
+  (goto-char (point-min))
+  (while (re-search-forward "TILDE" nil t)
+    (replace-match "~"))
+  (goto-char (point-min))
+  (while (re-search-forward "POTENZ" nil t)
+    (replace-match "^"))
+  (goto-char (point-min))
+  (while (re-search-forward "GREATER" nil t)
+    (replace-match ">"))
+  (goto-char (point-min))
+  (while (re-search-forward "SMALLER" nil t)
+    (replace-match "<"))
+  (goto-char (point-min))
+  (while (re-search-forward "SINGLEQUOTE" nil t)
+    (replace-match "'")))
+
+(defun dst-type-file ()
+  (interactive)
+  (let* ((sbuf (read-file-name "file: "))
+	(cmd (concat "xdotool windowraise " (dst-xfree-window) " mousemove --sync --window " (dst-xfree-window) " " dst-click-position
+				     ";xdotool click 1;"
+				     "xdotool type $(cat " sbuf ");"
+				     "xdotool key Return;")))
+    (message cmd)
+    (shell-command-to-string cmd)))
+
+  
+
 (defun dst-change-all-passwords ()
   "Go through the list of projects and change the passwords."
   (interactive)
   (let ((ddlist dst-login-list)
+	projects
 	(new (read-string (concat "New password: "))))
     (while ddlist
       (setq this-project (car ddlist))
-      (dst-change-password this-project new 'submit)
+      (if (member (cadr this-project) projects)
+	  (message "Already changed this project")
+	(setq projects (append (list (cadr this-project)) projects))
+	(dst-change-password this-project new 'submit))
       (setq ddlist (cdr ddlist)))))
 
 ;; (dst-change-password (car dst-login-list) "bla" nil)
@@ -496,6 +566,7 @@
 		 "sleep 1;"
 		 "xdotool mousemove --window " (dst-chromium-window) " " dst-domain-user-pos " click 1;"  ;; domain user field
 		 "sleep 1;"
+		 ;;"xdotool type " dst-ident "70" (nth 1 this-project) "@dstfse.local;"
 		 "xdotool type " dst-ident (nth 1 this-project) "@dstfse.local;"
 		 "sleep 1;"
 		 "xdotool mousemove --window " (dst-chromium-window) " " dst-current-password-pos " click 1;"  ;; current password

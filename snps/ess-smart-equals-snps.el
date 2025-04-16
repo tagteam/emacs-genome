@@ -25,7 +25,6 @@
 ;;; Code:
 
 
-
 (provide 'ess-smart-equals-snps)
 
 (setq ess-smart-equals-context-function

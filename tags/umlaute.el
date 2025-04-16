@@ -276,6 +276,23 @@
 	  (replace-match  (cadr (car clist))))
 	)
       (setq clist (cdr clist)))))
+
+(defun fix-danish-characters ()
+  (interactive)
+  (let ((clist
+	 '(("æ" "æ")
+	   ("Æ" "Æ")
+	   ("ø" "ø")
+	   ("Ø" "Ø")
+	   ("å" "å")
+	   ("Å" "Å"))))
+    (while clist
+      (save-excursion
+	(goto-char (point-min))
+	(while (re-search-forward (caar clist) nil t)
+	  (replace-match  (cadr (car clist))))
+	)
+      (setq clist (cdr clist)))))
 (defun fix-danish-characters ()
   (interactive)
   (let ((clist
