@@ -55,6 +55,14 @@
 (setq ess-eval-visibly 'nowait)
 (setq ess-eval-visibly-p 'nowait)
 ;;}}}
+;;{{{ R History
+(defun ess-comint-history-ignore (str)
+  (and (comint-nonblank-p str)
+       (not (string-match "^base::as.environment" str))))
+(setq comint-input-ignoredups t)
+(setq comint-input-filter #'ess-comint-history-ignore)
+
+;;}}}
 ;;{{{ key bindings
 
 
@@ -90,13 +98,20 @@
 ;;}}}
 ;;{{{ R mode
 
-(defun r (arg)
+(defun R (&optional start-args)
   (interactive "P")
-  (cond ((not (one-window-p)) nil)
-	(arg (split-window-horizontally))
-	(t (split-window-vertically)))
-  (other-window 1)
-  (R))
+  (delete-other-windows)
+  (split-window-vertically)
+  ;; (other-window 1)
+  (set-buffer (run-ess-r start-args)))
+
+;; (cond ((not (one-window-p)) nil)
+(defun r (start-args)
+  (interactive "P")
+  (delete-other-windows)
+  (split-window-vertically)
+  ;; (other-window 1)
+  (set-buffer (run-ess-r start-args)))
 
 ;; allow to duplicate a line - from http://stackoverflow.com/questions/88399/how-do-i-duplicate-a-whole-line-in-emacs
 (defun eg/ess-duplicate-line (arg)

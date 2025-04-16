@@ -60,6 +60,8 @@
 (require 'org-snps)
 
 ;;  :straight org-plus-contrib 
+;; (straight-use-package
+;; '(org-contrib :type git :host github :repo "Fuco1/org-mode"))
 
 ;; folding
 (require 'folding-snps)

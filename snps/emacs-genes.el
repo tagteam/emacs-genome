@@ -20,9 +20,9 @@
 ;;----------------------------------------------------------------------
 ;; created: Apr 12 2015 (09:51) 
 ;; Version: 
-;; last-updated: May 26 2023 (07:00) 
+;; last-updated: Apr 22 2024 (08:05) 
 ;;           By: Thomas Alexander Gerds
-;;     Update #: 80
+;;     Update #: 81
 ;;----------------------------------------------------------------------
 ;; 
 ;;; Commentary: Show important features {genes}. 
@@ -139,9 +139,8 @@ yet non-functional emacs-genes."
 		     `(:fun ,fun
 			    :face eg-default-genes-button-face :width ,button-width)) "\n\n") 
 	    (setq emacs-genes (cdr emacs-genes))))
-	
-(goto-char (point-min))
-(re-search-forward "Projects")
+	(goto-char (point-min))
+	(re-search-forward "Projects")
 	(setq buffer-read-only t)))
     (superman-set-config eg-buf-name)))
 

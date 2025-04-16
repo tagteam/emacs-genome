@@ -200,7 +200,6 @@
 	      "keywordstyle=\\color{blue},\n"
 	      "commentstyle=\\color{red},"
 	      "stringstyle=\\color[rgb]{0,.5,0},\n"
-               "literate={~}{$\\sim$}{1},\n"
 	      "basicstyle=\\ttfamily\\small,\n"
 	      "columns=fullflexible,\n"
 	      "breaklines=true,\n"        
@@ -211,6 +210,7 @@
 	      "numbersep=10pt,\n"
 	      "backgroundcolor=\\color{white},\n"
 	      "tabsize=4,\n"
+	      "literate={~}{$\\sim$}{1}{ø}{{\\o}}1{æ}{{\\ae}}1{å}{{\\aa}}1{Ø}{{\\OE}}1{Æ}{{\\AE}}1{Å}{{\\AA}}1,"
               "keepspaces=true,\n"
 	      "showspaces=false,\n"
 	      "showstringspaces=false,\n"
@@ -224,7 +224,6 @@
 	      "keywordstyle=\\color{blue},\n"
 	      "commentstyle=\\color{red},"
 	      "stringstyle=\\color[rgb]{0,.5,0},\n"
-              "literate={~}{$\\sim$}{1},\n"
 	      "basicstyle=\\ttfamily\\small,\n"
 	      "columns=fullflexible,\n"
 	      "breaklines=true,\n"        
@@ -235,7 +234,7 @@
 	      "numbersep=10pt,\n"
 	      "backgroundcolor=\\color{white},\n"
 	      "tabsize=4,\n"
-	      "literate={ø}{{\\o}}1{æ}{{\\ae}}1{å}{{\\aa}}1{Ø}{{\\OE}}1{Æ}{{\\AE}}1{Å}{{\\AA}}1,\n"
+	      "literate={~}{$\\sim$}{1}{ø}{{\\o}}1{æ}{{\\ae}}1{å}{{\\aa}}1{Ø}{{\\OE}}1{Æ}{{\\AE}}1{Å}{{\\AA}}1,\n"
               "keepspaces=true,\n"
 	      "showspaces=false,\n"
 	      "showstringspaces=false,\n"
@@ -716,21 +715,20 @@
   (if (string= (car (org-babel-get-src-block-info)) "R")
         (ess-eval-function-and-go)))
 
-;; see also eg/ess-smart-underscore in ess-R-snps.el 
-(setq ess-assign-list '(" <- " "_" ":="))
-(defun eg/org-smart-underscore ()
-  "Smart \"_\" key: insert <- if in SRC R block unless in string/comment."
-  (interactive)
-  (if (and
-       (string= (car (org-babel-get-src-block-info)) "R")
-       (not (save-restriction (org-narrow-to-block) (ess-inside-string-or-comment-p (point)))))
-      (if (not (eq last-command 'eg/org-smart-underscore))
-	  (insert " <- ")
-	(undo)
-	(insert "_"))
-    ;;      (ess-cycle-assign)
-    ;; (ess-insert-assign)
-    (insert "_")))
+;; see also eg/ess-smart-underscore in ess-R-snps.el
+;; obsolete use ess-smart-equal instead
+;; (setq ess-assign-list '(" <- " "_" ":="))
+;; (defun eg/org-smart-underscore ()
+  ;; "Smart \"_\" key: insert <- if in SRC R block unless in string/comment."
+  ;; (interactive)
+  ;; (if (and
+       ;; (string= (car (org-babel-get-src-block-info)) "R")
+       ;; (not (save-restriction (org-narrow-to-block) (ess-inside-string-or-comment-p (point)))))
+      ;; (if (not (eq last-command 'eg/org-smart-underscore))
+	  ;; (insert " <- ")
+	;; (undo)
+	;; (insert "_"))
+    ;; (insert "_")))
 
 ;;}}}
 ;;{{{ bibtex
@@ -871,7 +869,9 @@
 	      (define-key org-mode-map [(control xx)] 'eg/org-lazy-load)
 	      (define-key org-mode-map "\M-F" 'ess-eval-function-and-go)
 	      (define-key org-mode-map [(meta control i)] 'eg/org-indent)
-	      (define-key org-mode-map "_" 'eg/org-smart-underscore)))
+              (define-key org-mode-map "=" 'ess-smart-equals)
+	      (define-key org-mode-map "_" #'(lambda nil (interactive) (insert "_")))
+	      ))
 
 ;;}}}
 ;;{{{ list documents

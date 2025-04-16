@@ -27,6 +27,8 @@
 (global-set-key [f10] 'undo)
 (global-set-key [f2] 'superman-switch-to-project)
 (global-set-key [f3] 'superman-switch-config)
+(global-set-key "\M-1" 'iedit-mode)
+(global-set-key "\M-2" 'save-some-buffers)
 ;; buffer switching/cycling
 (global-set-key "\M-p" 'next-mode-buffer-backward)
 (global-set-key "\M-n" 'next-mode-buffer)
