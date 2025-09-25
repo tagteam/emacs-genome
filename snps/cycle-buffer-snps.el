@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*- 
 ;;; cycle-buffer-snps.el --- cycle through buffers by major-mode
 
 ;; Copyright (C) 2012-2021  Thomas Alexander Gerds

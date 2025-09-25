@@ -1,4 +1,4 @@
-;;; latex-tags.el --- custom latex for emacs-genome 
+;;; latex-tags.el --- custom latex for emacs-genome   -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2012  Thomas Alexander Gerds
 
@@ -30,6 +30,12 @@
 (setq TeX-parse-self t) 
 (setq TeX-auto-save t) 
 (add-to-list 'auto-mode-alist (cons "\\.tex\\'" 'latex-mode))
+
+(setq TeX-view-program-selection '((output-pdf "Zathura")))
+(setq TeX-source-correlate-mode t)
+(setq TeX-source-correlate-start-server t)
+;; (setq TeX-command-extra-options "-shell-escape -synctex=1")
+
 
 (setq LaTeX-using-Biber nil)
 ;;{{{ count words

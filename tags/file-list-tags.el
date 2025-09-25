@@ -1,4 +1,4 @@
-;;; file-list 
+;;; file-list  -*- lexical-binding: t; -*- 
 ;;; ------------------------------------------------------------
 
 ;; (add-to-list 'load-path

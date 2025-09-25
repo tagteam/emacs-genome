@@ -1,4 +1,4 @@
-;; rs-gnus-summary.el -- Auxiliary summary mode commands for Gnus
+;; rs-gnus-summary.el -- Auxiliary summary mode commands for Gnus   -*- lexical-binding: t; -*-
 ;; $Id: rs-gnus-summary.el,v 1.28 2006/09/14 10:30:05 ste Exp $
 
 ;; Author: Reiner Steib <Reiner.Steib@gmx.de>

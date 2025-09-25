@@ -1,4 +1,4 @@
-;;; ess-R-remote-tags.el --- R on ssh servers
+;;; ess-R-remote-tags.el --- R on ssh servers  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2013-2021  Thomas Alexander Gerds
 
@@ -108,7 +108,7 @@
 (defun cox ()
   (interactive)
   (shell "*ess-cox*")
-  (insert "cox")
+  (insert "cox.unicph.domain")
   ;; -X R --no-save")
   (comint-send-input)
   (sit-for 5)
@@ -121,7 +121,7 @@
 (defun rao ()
   (interactive)
   (shell "*ess-rao*")
-  (insert "rao")
+  (insert "rao.unicph.domain")
   ;; -X R --no-save")
   (comint-send-input)
   (sit-for 5)
@@ -136,7 +136,7 @@
 (defun gauss ()
   (interactive)
   (shell "*ess-gauss*")
-  (insert "gauss")
+  (insert "gauss.unicph.domain")
   ;; -X R --no-save")
   (comint-send-input)
   (sit-for 5)
@@ -149,7 +149,7 @@
 (defun doob ()
   (interactive)
   (shell "*ess-doob*")
-  (insert "doob")
+  (insert "doob.unicph.domain")
   ;; -X R --no-save")
   (comint-send-input)
   (sit-for 2)

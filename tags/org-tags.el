@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 (setq org-startup-folded nil)
 (setq org-src-preserve-indentation t)
 
@@ -161,7 +162,7 @@
 (eval-after-load "org"
   '(progn
      ;; Change .pdf association directly within the alist
-     (setcdr (assoc "\\.pdf\\'" org-file-apps) "evince %s")))
+     (setcdr (assoc "\\.pdf\\'" org-file-apps) "zathura %s")))
 ;; NOTE: when the exporter is opening the exported file,
 ;;       the following maybe overwritten by a mailcap entry
 (add-to-list 'org-file-apps '("\\.xls[x]?" . "soffice %s"))
@@ -170,7 +171,7 @@
 (add-to-list 'org-file-apps '("\\.odt" . "soffice %s"))
 (add-to-list 'org-file-apps '("\\.ppt[x]?" . "soffice %s"))
 (add-to-list 'org-file-apps '("\\.png" . "geeqie %s"))
-(add-to-list 'org-file-apps '("\\.ps" . "evince %s"))
+(add-to-list 'org-file-apps '("\\.ps" . "zathura %s"))
 (add-to-list 'org-file-apps '("\\.eps" . "gv %s"))
 
 (setq org-odt-preferred-output-format "docx")
@@ -304,7 +305,7 @@
     (org-export-to-file 'ravel-markdown file
       async subtreep visible-only body-only ext-plist)))
 
-(defun Rmd-export (exercise-with-code exercise-with-solutions)
+(defun Rmd-export (&optional exercise-with-code exercise-with-solutions)
   "Export to Rmd."
   (interactive "p")
   ;; (org-ravel-export-to-file 'ravel-markdown nil a s v b nil nil nil "md"))
@@ -495,6 +496,7 @@ in order to be exported to Rmd.
     (save-window-excursion
       (find-file (org-export-output-file-name ".Rmd"))
       (revert-buffer t t t))))
+
 (defun superman-export-as-rmd (&optional arg)
   "Export as html and as rmd. R-chunks should have 
  :eval (never-plain-export)

@@ -20,9 +20,9 @@
 ;;----------------------------------------------------------------------
 ;; created: Apr 12 2015 (09:51) 
 ;; Version: 
-;; last-updated: Apr 22 2024 (08:05) 
+;; last-updated: Jul 25 2025 (10:44) 
 ;;           By: Thomas Alexander Gerds
-;;     Update #: 81
+;;     Update #: 83
 ;;----------------------------------------------------------------------
 ;; 
 ;;; Commentary: Show important features {genes}. 
@@ -402,6 +402,12 @@ move to with the same argument."
      (end-of-line arg)
      (point))
    nil t))
+
+(defun eg-mark-paragraph ()
+  "Mark the current paragraph and leave point at the end."
+  (interactive)
+  (mark-paragraph)
+  (exchange-point-and-mark))
 
 (defun delete-white-lines ()
   "Delete all empty white lines below point."

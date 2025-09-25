@@ -1,4 +1,4 @@
-;;; helm-recoll-tags.el --- combine helm with recoll
+;;; helm-recoll-tags.el --- combine helm with recoll  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2012-2022  Thomas Alexander Gerds
 

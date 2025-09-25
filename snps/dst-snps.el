@@ -120,6 +120,7 @@
 (defvar dst-screen-setting 'laptop)
 (defvar dst-use-wmctrl t)
 
+
 (defun dst-current-window ()
   "Return currently active window as xdotool number"
   (replace-regexp-in-string
@@ -172,7 +173,39 @@
 	   (error  "Cannot see Chromium. Start it via dst-start-browser."))
 	  )))
 
+
 (defun dst ()
+  "3-in-1 function. 
+   Step 1: open DST in Chromium.
+   Step 2: login-dst
+   Step 3: choose project, download launcher and start xfreerdp session."
+  (interactive)
+    (let* ((p (ido-completing-read
+				   "Choose DST-project: "
+				   dst-login-list
+				   nil nil nil dst-login-history dst-last-project))
+	   (project (let* ()
+		      (setq dst-last-project p)
+		      (assoc p dst-login-list)))
+	   	       (server (or (nth 3 project)
+			   (completing-read "Server: " dst-servers)))
+	   (python-command
+	    (concat 
+             "python3 ~/bin/dst-login.py "
+	     ;; "dst-login "
+	     dst-ident " "
+	     dst-firewall-code " "
+	     (nth 1 project) " "
+	     "--password " (nth 2 project) " "
+	     "--visual "
+	     "--download-button-id /Common/dst-RDP_FSE_" (nth 3 project))))
+      ;; (message python-command)
+      (shell "*dst-remote*")
+      (switch-to-buffer "*dst-remote*")
+      (insert python-command)
+      (comint-send-input)))
+
+(defun dst-old ()
   "3-in-1 function. 
    Step 1: open DST in Chromium.
    Step 2: login-dst
@@ -325,7 +358,6 @@
   (let* ((serv (if (= (length dst-servers) 1) (caar dst-servers)
 		 (completing-read "Server: " dst-servers)))
 	 (pos (cdr (assoc serv dst-servers))))
-    ;; (dst-focus-chromium)
     (shell-command (concat "xdotool mousemove --window " (dst-chromium-window) " " pos ";"))))
 
 (defun dst-current-mouse-position ()
@@ -334,53 +366,49 @@
 	    "xdotool getmouselocation")))
 
 (defun dst-open-firewall ()
-  "Start alternative browser and open firewall at remote.dst.dk."
+  "Start chromium browser and open firewall at remote.dst.dk."
   (interactive)
-  (let ((buffer-read-only t))
-    (unless dst-firewall-code
-      (error "You need to set the variable `dst-firewall-code', i.e., when your code is 1234 add a line (setq dst-firewall-code \"1234\") to your .emacs file"))
-    (unless dst-ident 
-      (error "You need to set the variable `dst-ident', i.e., when your indent is ABCD add a line (setq dst-indent \"ABCD\") to your .emacs file"))
-    (let* ((cwin (dst-chromium-window))
-	   (status (dst-chromium-status))
-	   (buffer-read-only t)
-	   cmd)
-      (unless cwin
-	(error "Cannot see chromium. Use M-x dst-start-browser RET to start it."))
-      (if (string= status "running")
-	  "open" ;; (message "Nothing to do. Firewall is already open.")
-	(if (string= status "waiting")
-	    (setq cmd (concat "xdotool windowraise " cwin " mousemove --sync --window " (dst-chromium-window) " " dst-click-position
-			      ";xdotool click 1;"
-			      "sleep " dst-click-delay ";"
-			      "xdotool key Tab;"
-			      "sleep " dst-click-delay ";"
-			      "xdotool type '" dst-ident "';"
-			      "sleep " dst-click-delay ";"
-			      "xdotool key Tab;"
-			      "sleep " dst-click-delay ";"
-			      "xdotool type '" dst-firewall-code "';"
-			      "sleep " dst-click-delay ";"
-			      "xdotool key Return;"))
-	  ;; logout
-	  (setq cmd (concat "xdotool windowraise " cwin " mousemove --sync --window " (dst-chromium-window) " " dst-click-position
-			    ";xdotool click 1;"
-			    "sleep " dst-click-delay ";"
-			    "xdotool key Tab;"
-			    "sleep " dst-click-delay ";"
-			    "xdotool key Return;"
-			    "sleep " dst-click-delay ";"
-			    "xdotool type '" dst-ident "';"
-			    "sleep " dst-click-delay ";"
-			    "xdotool key Tab;"
-			    "sleep " dst-click-delay ";"
-			    "xdotool type '" dst-firewall-code "';"
-			    "sleep " dst-click-delay ";"
-			    "xdotool key Return;")))
-	(message cmd)
-	(shell-command cmd)
-	nil))))
-     
+  (unless dst-firewall-code
+    (error "You need to set the variable `dst-firewall-code', i.e., when your code is 1234 add a line (setq dst-firewall-code \"1234\") to your .emacs file"))
+  (unless dst-ident 
+    (error "You need to set the variable `dst-ident', i.e., when your indent is ABCD add a line (setq dst-indent \"ABCD\") to your .emacs file"))
+  (let ((buffer-read-only t)
+	(python-command
+	 (concat 
+          "python3 ~/bin/dst-open-firewall.py "
+	  dst-ident " "
+	  dst-firewall-code " "
+	  "--visual ")))
+    (message python-command)
+    ;; (shell-command python-command)))
+    (shell "*dst-remote*")
+    (switch-to-buffer "*dst-remote*")
+    (insert python-command)
+    (comint-send-input)))
+
+(defun dst-change-password ()
+  "Start chromium browser and open firewall at remote.dst.dk."
+  (interactive)
+  (unless dst-firewall-code
+    (error "You need to set the variable `dst-firewall-code', i.e., when your code is 1234 add a line (setq dst-firewall-code \"1234\") to your .emacs file"))
+  (unless dst-ident 
+    (error "You need to set the variable `dst-ident', i.e., when your indent is ABCD add a line (setq dst-indent \"ABCD\") to your .emacs file"))
+  (let ((buffer-read-only t)
+	(python-command
+	 (concat 
+          "python3 ~/bin/dst-open-firewall.py "
+	  dst-ident " "
+	  dst-firewall-code " "
+	  " '707655' " 
+          " 'Kohl17MAISE!' "
+          " '99!dulMEblivGLAD!17' "
+	  "--visual ")))
+    (message python-command)
+    ;; (shell-command python-command)))
+    (shell "*dst-remote*")
+    (switch-to-buffer "*dst-remote*")
+    (insert python-command)
+    (comint-send-input)))
   
 (defun dst-select (launcher &optional project)
   (interactive)
@@ -476,7 +504,9 @@
 	 (replace-regexp-in-string
 	  "_" "UNDERSCORE"
 	  (replace-regexp-in-string
-	  "~" "TILDE"
+	   "~" "TILDE"
+	   (replace-regexp-in-string
+	  "==" "DOBBELEQUAL"
 	  (replace-regexp-in-string
 	  "\\^" "POTENZ"
 	  (replace-regexp-in-string
@@ -485,7 +515,7 @@
 	   "<" "SMALLER"
 	   (replace-regexp-in-string
 	   "'" "SINGLEQUOTE" 
-	   (replace-regexp-in-string "\n" "\r" (buffer-substring (point-min) (point-max)))))))))))
+	   (replace-regexp-in-string "\n" "\r" (buffer-substring (point-min) (point-max))))))))))))
     (shell-command-to-string (concat "xdotool windowraise " (dst-xfree-window) " mousemove --sync --window " (dst-xfree-window) " " dst-click-position
 				     ";xdotool click 1;sleep 2;"
 				     "xdotool type '" sbuf "';"
@@ -594,6 +624,51 @@
 			(goto-char (point-max))
 			(insert "Project: " (nth 1 this-project) "\told: " (nth 2 this-project) "\tnew: " new "\n")
 			)))))
+
+
+;; ------------------------------
+
+(defun dst-downloader-ui (&optional ident pin project password)
+  "Emacs UI wrapper for the Python DST downloader script."
+  (interactive)
+  (let* ((ident (or ident (read-string "DST ident (four letters): ")))
+         (pin (or pin (read-string "DST PIN (four numbers): ")))
+         (project (or project (read-string "DST project (six numbers): ")))
+         (password (or password (read-passwd "DST password: ")))
+         ;; Path to your python script
+         (python-script (expand-file-name "~/bin/dst-downloader.py")))
+
+    (catch 'quit
+      (while t
+        (let ((choice (read-string
+                       (concat "\nAvailable commands:\n"
+                               "  [l] login\n"
+                               "  [d] download\n"
+                               "  [x] run xfreerdp\n"
+                               "  [p] print xfreerdp command\n"
+                               "  [a] automatic\n"
+                               "  [q] quit\n"
+                               "Select option: ")))))
+          (pcase choice
+            ((or "l" "login")
+             (start-process "dst-login" "*DST*" "python3" python-script
+                            ident pin project "--password" password "--raw-init" "1")
+             (message "Started login subprocess…"))
+            ((or "d" "download")
+             (start-process "dst-download" "*DST*" "python3" python-script
+                            ident pin project "--password" password "--raw-init" "1" "d"))
+            ((or "x" "xfreerdp")
+             (start-process "dst-xfreerdp" "*DST*" "python3" python-script
+                            ident pin project "--password" password "--raw-init" "1" "x"))
+            ((or "p" "print")
+             (start-process "dst-print" "*DST*" "python3" python-script
+                            ident pin project "--password" password "--raw-init" "1" "p"))
+            ((or "a" "automatic")
+             (start-process "dst-automatic" "*DST*" "python3" python-script
+                            ident pin project "--password" password))
+            ((or "q" "quit" "exit")
+             (message "Quitting DST UI.") (throw 'quit t))
+            (_ (message "❓ Unknown option: %s" choice)))))))
 
 
 (provide 'dst-snps)

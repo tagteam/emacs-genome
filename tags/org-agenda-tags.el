@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 ;;; org-agenda-tags.el --- org custom commands used by tag
 
 ;; Copyright (C) 2013  Thomas Alexander Gerds

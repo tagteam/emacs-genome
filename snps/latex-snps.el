@@ -1,3 +1,4 @@
+;;-*- lexical-binding: t; -*-
 ;;; latex-snps.el --- custom latex for emacs-genome 
 
 ;; Copyright (C) 2012  Thomas Alexander Gerds

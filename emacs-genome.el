@@ -132,7 +132,7 @@
 ;;  (use-package helm-config))
 
 ;; git
-(use-package magit)
+;(use-package magit)
 
 ;; shell and ssh within emacs
 (require 'shell-snps)

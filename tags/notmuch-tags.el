@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 ;; first time usage needs: notmuch setup
 (setq notmuch-show-elide-non-matching-messages t)
 (setq notmuch-show-only-matching-messages t)

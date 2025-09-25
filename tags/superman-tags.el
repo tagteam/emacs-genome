@@ -1,4 +1,4 @@
-
+;;  -*- lexical-binding: t; -*-
 (defun superman-sync-project-with-work ()
   (interactive)
   (let ((pdir (expand-file-name (get-text-property (point-min) 'dir))))

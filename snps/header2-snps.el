@@ -1,4 +1,4 @@
-;;; header2-snps.el --- 
+;;; header2-snps.el ---  -*- lexical-binding: t; -*- 
 
 ;; Copyright (C) 2015-2021  Thomas Alexander Gerds
 

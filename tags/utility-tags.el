@@ -1,3 +1,4 @@
+;;  -*- lexical-binding: t; -*-
 ;;; utility-tags.el --- utility functions for tagteam
 
 ;; Copyright (C) 2012-2021  Thomas Alexander Gerds
@@ -207,7 +208,6 @@ has
 	(setq truncate-lines nil
 	   truncate-partial-width-windows nil)
       (setq truncate-partial-width-windows t))))
-
 
 (provide 'utility-tags)
 ;;; tag-utility-tags.el ends here

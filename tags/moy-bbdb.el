@@ -1,3 +1,4 @@
+;;  -*- lexical-binding: t; -*-
 ;;; moy-bbdb.el --- This file allows to add recipients of outgoing
 ;; mails in BBDB from gnus (and maybe some other mailers ?).
 

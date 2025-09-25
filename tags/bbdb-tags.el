@@ -1,3 +1,4 @@
+;;  -*- lexical-binding: t; -*-
 ;;{{{load bbdb and define bbdb-field
 (require 'bbdb)
 (require 'bbdb-com)
