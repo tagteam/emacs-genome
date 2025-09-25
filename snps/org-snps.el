@@ -1,6 +1,6 @@
 ;;; org-snps.el --- 
 
-;; Copyright (C) 2012-2018  Thomas Alexander Gerds
+;; Copyright (C) 2012-2025  Thomas Alexander Gerds
 
 ;; Author: Thomas Alexander Gerds <tag@linuxifsv007>
 ;; Keywords: convenience
@@ -114,6 +114,27 @@
 	  (completing-read "Code Block: " (org-babel-src-block-names)))))
     (org-babel-execute-src-block-maybe)))
 
+
+(defun superman-insert-smart-equals (&optional debug)
+  (interactive "P")
+  (let ((case-fold-search t))
+    (if (and (string= (car (org-babel-get-src-block-info)) "R")
+	     (not (or (and (looking-at "[ \t]*$")
+			   (save-excursion (forward-line -1)
+					   (beginning-of-line)
+					   (looking-at "#\\+END_SRC")))
+		      (save-excursion (beginning-of-line)
+				      (looking-at "#\\+END_SRC")))))
+	(ess-smart-equals)
+      (insert "="))))
+
+(defun eg-ess-smart-equals-with-r-syntax-table (orig-fun &rest args)
+  "Advice to force `ess-smart-equals` to use `ess-r-mode-syntax-table`."
+  (with-syntax-table ess-r-mode-syntax-table
+    (apply orig-fun args)))
+
+(advice-add 'ess-smart-equals :around #'eg-ess-smart-equals-with-r-syntax-table)
+
 (add-hook 'org-mode-hook
 	  #'(lambda nil
 	      ;; complete on ess
@@ -124,6 +145,7 @@
 	      (define-key org-mode-map [(f12)] 'visible-mode)
 	      (define-key org-mode-map [(control e)] 'end-of-line)
 	      (define-key org-mode-map [(control z)] 'org-shifttab)
+	      (define-key org-mode-map "=" 'superman-insert-smart-equals)
 	      (define-key org-mode-map [(control meta j)] 'org-babel-execute-src-block-by-name)
 	      (define-key org-mode-map [(meta up)] 'backward-paragraph)
 	      (define-key org-mode-map [(meta down)] 'forward-paragraph)))

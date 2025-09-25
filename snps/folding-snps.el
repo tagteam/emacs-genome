@@ -1,3 +1,4 @@
+;;-*- lexical-binding: t; -*-
 ;;{{{ Folding 
 
 (use-package folding

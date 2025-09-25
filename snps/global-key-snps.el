@@ -1,3 +1,4 @@
+;;-*- lexical-binding: t; -*-
 ;;; global-key-snps.el --- keybindings for emacs-genome
 
 ;; Copyright (C) 2012-2021  Thomas Alexander Gerds

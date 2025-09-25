@@ -54,6 +54,8 @@
 (setq ess-eval-visibly-p 't)
 (setq ess-eval-visibly 'nowait)
 (setq ess-eval-visibly-p 'nowait)
+(setq ess-use-eldoc nil)
+(setq ess-use-flymake nil)
 ;;}}}
 ;;{{{ R History
 (defun ess-comint-history-ignore (str)
@@ -74,6 +76,7 @@
 	     (define-key ess-mode-map "\M-r" 'copy-region-as-kill)
 	     (define-key ess-mode-map "\M-q" 'eg/indent-paragraph)
 	     (define-key ess-mode-map "\M-l" 'mark-line)
+	     (define-key ess-mode-map "\M-h" 'eg-mark-paragraph)
 	     (define-key ess-mode-map "\M-k" 'eg-switch-to-R)
 	     (define-key ess-mode-map "\C-z" 'fold-dwim-toggle)
 	     (define-key ess-mode-map [(meta return)] #'(lambda () (interactive) (ess-eval-line)(forward-line 1)))
