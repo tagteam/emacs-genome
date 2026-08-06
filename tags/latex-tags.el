@@ -31,12 +31,20 @@
 (setq TeX-auto-save t) 
 (add-to-list 'auto-mode-alist (cons "\\.tex\\'" 'latex-mode))
 
-(setq TeX-view-program-selection '((output-pdf "Zathura")))
+;; (setq TeX-view-program-selection '((output-pdf "Zathura")))
+;; (setq TeX-view-program-selection '((output-pdf "evince")))
+;; Tell AUCTeX how to perform the forward search
+;; (add-to-list 'TeX-view-program-list
+             ;; '("Zathura" "zathura --synctex-forward %l:%c:%s %o"))
+;; (add-to-list 'TeX-view-program-list
+             ;; '("Evince" "evince --synctex-forward %l:%c:%s %o"))
+
 (setq TeX-source-correlate-mode t)
 (setq TeX-source-correlate-start-server t)
 ;; (setq TeX-command-extra-options "-shell-escape -synctex=1")
 
-
+;; (require 'org-latex)
+(setq org-latex-pdf-export-to-latex-and-process t)
 (setq LaTeX-using-Biber nil)
 ;;{{{ count words
 
@@ -114,6 +122,9 @@
     '("Latexmk" "latexmk %s" TeX-run-TeX nil t
       :help "Run Latexmk on file")
     TeX-command-list)))
+
+(setq org-latex-pdf-process
+      (list "latexmk -f -pdflatex='pdflatex -interaction=nonstopmode -synctex=1' %s"))
 
 (add-hook 'LaTeX-mode-hook
 	  #'(lambda ()

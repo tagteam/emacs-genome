@@ -56,10 +56,26 @@
    (concat "xdotool windowraise " (dst-xfree-window) " mousemove --sync --window " (dst-xfree-window) " 941 449" 
 	   ";xdotool click 1;sleep 2;xdotool type " dst-pw ";xdotool key Return;")))
 
+
+;; Ident: WJA708406
+;; Navn: Thomas Alexander Gerds
+;; Projekt: 708406
+;; Server: OEBUSH
+;; Password: Ad8vNoZzaeSE
+
+
+;; Ident: WJA710280
+;; Navn: Thomas Alexander Gerds
+;; Projekt: 710280
+;; Server: SDCA
+;; Password: FKaA3ChrxKrz
+
+
 ;; WJA: 6632
 ;; WJAxxxx@dstfse.local
 ;; Kohl17MAISE!
 (setq dst-pw "4b578MiC#17!MacS")
+(setq dst-pw2 "MacS4b578MiC#17!")
 ;; ("3573 Overall meta project" "3573"  ,dst-pw "srvfsegh4")
 (setq dst-login-list
       `(
@@ -78,7 +94,7 @@
 	;; ("6130 Maria D'Souza" "6130" ,dst-pw "srvfsegh4")
 	("6322 Marianna Hjertetal" "6322" ,dst-pw "srvfsegh4")
 	;; ("6734 Genetics Maria" "6734" ,dst-pw "srvfsegh4")
-	("9200 Statins" "9200" ,dst-pw "srvfsegh4")
+	("9200 Statins" "709200" ,dst-pw2 "srvfsegh4")
  	;; ("3607 Jonas L. Isaksen, Jonas Bille Nielsen, Morten Wagner" "3607" ,dst-pw "Windows")
 	("4265 Kessing" "4265" ,dst-pw "Windows")
 	("7535 Mie Balling" "707535" ,dst-pw "Windows")
@@ -88,6 +104,7 @@
 	("9281 Dea Rasmus-Steno CKD" "709281" ,dst-pw  "srvfsegh4")
 	("707089 Deepthi" "707089" ,dst-pw "srvfsegh4")
 	("709924 Steno NF report" "709924" ,dst-pw "Windows")
+	("708406 Oebus" "708406" ,dst-pw "Windows")
 	))
 
 

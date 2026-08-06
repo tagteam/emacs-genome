@@ -33,7 +33,7 @@
 (ox-extras-activate '(ignore-headlines))
 
 (defun never-plain-export ()
-  (if (memq org-export-current-backend '(html latex docx))
+  (if (memq org-export-current-backend '(html latex docx odt))
       "no" "yes"))
 (add-to-list 'superman-org-export-target-list "opgave")
 (defvar exercise-with-code nil)
@@ -122,8 +122,9 @@ space
     ;; 
     ;; export to Rmd with code without toc (now with solutions)
     ;;
-    (setq exercise-with-solutions t ;; evaluate 
-	  org-export-exclude-tags (list "opgave" "noexport" "instruks");; now include solution sections
+    (setq exercise-with-solutions t ;; evaluate
+	  ;; now include solution sections but exclude opgave and instruks sections
+	  org-export-exclude-tags (list "opgave" "noexport" "instruks")
 	  org-export-with-toc nil)
     (superman-Rmd-export t t)
     (copy-file rmd-file rmd-solution-file 'ok)
@@ -152,4 +153,82 @@ space
     (delete-file rmd-opgave-file)
     (superman-set-config (concat (buffer-name org-buf) " | " rmd-file " / " rmd-solution-file))))
 
+
+(defun superman-export-as-demografi-opgave (&optional arg)
+  (interactive)
+  (let* ((org-buf (current-buffer))
+	 (fname (file-name-sans-extension (file-name-nondirectory (buffer-file-name org-buf))))
+	 (dir  "~/metropolis/Teaching/demogRafi/holdundervisning/")
+	 ;; word opgave med loesningsforslag  
+	 (loesningsforslag-file (concat dir fname "-loesningsforslag.docx"))
+	 ;; word kun opgave  
+	 (opgave-file (concat dir fname ".docx"))
+	 ;; Rmd fil med nogen koder
+	 (rmd-file (concat dir fname ".Rmd"))
+	 (rmd-opgave-file (concat dir fname "-koder.Rmd"))
+	 ;; Rmd fil med alle koder
+	 (rmd-alle-koder-file (concat dir fname "-alle-koder.Rmd"))
+	 (org-export-with-toc nil))
+    ;; preparation
+    ;; (when (get-process "windoof") (kill-process "windoof"))
+    (shell-command "killall soffice.bin")
+    ;; 
+    ;; export to docx with solution loesningsforslag without rmd sections without toc
+    ;;
+    (save-buffer)
+    (setq exercise-with-code nil  
+	  exercise-with-solutions nil
+	  org-export-exclude-tags (list "noexport" "rmd" "RMD" "Rmd" "nosolution")) 
+    (superman-export-as-docx 'dont)
+    (copy-file opgave-file loesningsforslag-file 'ok)
+    ;; 
+    ;; export to docx without code without solutions without rmd sections without toc
+    ;;
+    (setq org-export-exclude-tags (list "noexport" "rmd" "RMD" "Rmd" "solution" "solutions"))
+    (superman-export-as-docx 'dont)
+    ;; 
+    ;; export to Rmd with code without toc (first without all codes)
+    ;;
+    (switch-to-buffer org-buf)
+    (setq exercise-with-code t  ;; now evaluate blocks/chunks which state :exports (exercise-with-code)
+	  org-export-exclude-tags (list "opgave" "noexport" "solution" "solutions" "nokode"))
+
+    (superman-Rmd-export t nil)
+    (copy-file rmd-file rmd-opgave-file 'ok)
+    ;; 
+    ;; export to Rmd med alle ektrakoder
+    ;;
+    (switch-to-buffer org-buf)
+    (setq exercise-with-code nil
+	  exercise-with-solutions t
+	  org-export-exclude-tags (list "opgave" "noexport" "nosolution" "nosolutions" "noekstrakode" "nokode"))
+    (superman-Rmd-export t nil)
+    (copy-file rmd-file rmd-alle-koder-file 'ok)
+    ;; clean up 
+    (delete-file rmd-file)
+    ;; 
+    (find-file rmd-alle-koder-file)
+    (revert-buffer t t t)
+    (save-excursion (goto-char (point-min))
+		    (while 
+			(re-search-forward ":[a-zA-Z]+:ignore:" nil t)
+		      (replace-match "")))
+    (save-buffer)
+    (find-file rmd-opgave-file)
+    (revert-buffer t t t)
+    (save-excursion (goto-char (point-min))
+		    (while 
+			(re-search-forward ":[a-zA-Z]+:ignore:" nil t)
+		      (replace-match "")))
+    (save-buffer)
+    (superman-set-config (concat (buffer-name org-buf) " | " rmd-opgave-file " / " rmd-alle-koder-file))
+    (if arg
+	(start-process-shell-command
+	 "windoof" (get-buffer-create "windoof-buf")
+	 (concat "/usr/bin/soffice -norestore " opgave-file " " loesningsforslag-file))
+      (start-process-shell-command
+       "windoof" (get-buffer-create "windoof-buf")
+       (concat "/usr/bin/soffice -norestore " opgave-file)))))
+
 ;;; org-opgave-tags.el ends here
+

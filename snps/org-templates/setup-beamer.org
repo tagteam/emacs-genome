@@ -3,13 +3,15 @@
 #+INFOJS_OPT: view:nil toc:nil ltoc:t mouse:underline buttons:0 path:http://orgmode.org/org-info.js
 #+startup: beamer
 #+LaTeX_CLASS: beamer
-#+LaTeX_HEADER: \RequirePackage[absolute, overlay]{textpos}
-#+LaTeX_HEADER: \setbeamertemplate{footline}[frame number]
-#+LaTeX_HEADER: \setbeamertemplate{navigation symbols}{}
-#+LATEX_HEADER: \RequirePackage{fancyvrb}
-#+LATEX_HEADER: \RequirePackage{array}
-#+LATEX_HEADER: \RequirePackage{multirow}
-#+LATEX_HEADER: \RequirePackage{tcolorbox}
+#+LaTeX_HEADER:\RequirePackage[absolute, overlay]{textpos}
+#+LaTeX_HEADER:\setbeamertemplate{footline}[frame number]
+#+LaTeX_HEADER:\setbeamertemplate{navigation symbols}{}
+#+LATEX_HEADER:\RequirePackage{fancyvrb}
+#+LATEX_HEADER:\DefineVerbatimEnvironment{verbatim}{Verbatim}{fontsize=\small,formatcom = {\color[rgb]{0.5,0,0}}}
+#+LATEX_HEADER:\RequirePackage{array}
+#+LATEX_HEADER:\RequirePackage{multirow}
+#+LATEX_HEADER:\RequirePackage{tcolorbox}
+#+LATEX_HEADER:\usepackage[dvipsnames]{xcolor}
 #+LATEX_HEADER:\definecolor{mygray}{rgb}{.95, 0.95, 0.95}
 #+LATEX_HEADER:\newcommand{\mybox}[1]{\vspace{.5em}\begin{tcolorbox}[boxrule=0pt,colback=mygray] #1 \end{tcolorbox}}
 #+LATEX_HEADER:\newcommand{\sfootnote}[1]{\renewcommand{\thefootnote}{\fnsymbol{footnote}}\footnote{#1}\setcounter{footnote}{0}\renewcommand{\thefootnote}{\arabic{foot note}}}

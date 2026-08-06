@@ -45,6 +45,9 @@
 	     (define-key LaTeX-mode-map "\M-k" 'save-buffer)
 	     (define-key LaTeX-mode-map "\M-q" 'eg/indent-paragraph)
 	     (define-key LaTeX-mode-map "\M-j" 'eg/latex-save-and-run)))
+
+
+
 ;;}}} 
 ;;{{{ TeX shell and master and custom 
 (setq TeX-shell "/bin/bash")

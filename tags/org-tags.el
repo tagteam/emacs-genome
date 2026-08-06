@@ -162,7 +162,9 @@
 (eval-after-load "org"
   '(progn
      ;; Change .pdf association directly within the alist
-     (setcdr (assoc "\\.pdf\\'" org-file-apps) "zathura %s")))
+     ;; (setcdr (assoc "\\.pdf\\'" org-file-apps) "zathura %s")
+     (setcdr (assoc "\\.pdf\\'" org-file-apps) "evince %s")
+))
 ;; NOTE: when the exporter is opening the exported file,
 ;;       the following maybe overwritten by a mailcap entry
 (add-to-list 'org-file-apps '("\\.xls[x]?" . "soffice %s"))
@@ -171,8 +173,10 @@
 (add-to-list 'org-file-apps '("\\.odt" . "soffice %s"))
 (add-to-list 'org-file-apps '("\\.ppt[x]?" . "soffice %s"))
 (add-to-list 'org-file-apps '("\\.png" . "geeqie %s"))
-(add-to-list 'org-file-apps '("\\.ps" . "zathura %s"))
+;; (add-to-list 'org-file-apps '("\\.ps" . "zathura %s"))
+(add-to-list 'org-file-apps '("\\.ps" . "evince %s"))
 (add-to-list 'org-file-apps '("\\.eps" . "gv %s"))
+(add-to-list 'org-file-apps '("\\.svg\\'" . "inkscape %s"))
 
 (setq org-odt-preferred-output-format "docx")
 ;;}}}
@@ -364,6 +368,25 @@
       (revert-buffer t t t))
     (superman-set-config (concat (buffer-name) " | " rmd-file))))
 
+
+(defun superman-export-as-exercise-with-code (&optional arg)
+  "Export orgmode R-exercise to 
+   Rmd with code
+"
+  (interactive)
+  (let ((rmd-file (org-export-output-file-name ".Rmd"))
+	(org-export-exclude-tags (list "noexport")))
+    ;; 
+    ;; export to Rmd with code without toc
+    ;;
+    (save-window-excursion
+      (find-file rmd-file)
+      ;; to avoid pop-up 
+      (kill-buffer))
+    (setq exercise-with-code t
+	  org-export-exclude-tags (list "noexport")
+	  org-export-with-toc nil)
+    (Rmd-export)))
   
 (defun superman-export-as-exercise (&optional arg)
   "Export orgmode R-exercise to 4 different targets:
@@ -417,16 +440,6 @@ space
     ;; 
     (save-excursion
       (goto-char (point-min))
-      ;; when link does not exist org breaks the flow
-      (insert "You can read and work out the exercises directly in R-studio. Below are links to R-markdown files, 
-the first R-markdown file contains the exercise text and empty R-chunks where you should put the R-code to solve the exercise. 
-The second R-markdown file contains also the R-code that produces the results. It is recommended that you work with the second file when your Rabilities are insufficient, or you want to cheat (there is nothing to be ashamed of in being in this situation).
-In any case, the focus of your work should be on the understanding of the results. A good way for you to check your understanding, is to write down your interpretation of the results in full English sentences
-in a style suitable for a manuscript that is read by your own kind (i.e., try the person sitting next to you).\n\n")
-      (ignore-errors (insert "- [[./" rmd-file "][Open R-markdown version without R-code]]\n"))
-      (ignore-errors (insert "- [[./" (concat (file-name-sans-extension rmd-file) "-with-code.Rmd") "][Open R-markdown version with R-code]]\n"))
-      (insert "# REMOVEUNTILHERE\n"))
-    ;; (save-buffer)
     (setq exercise-with-code nil);; no need to see the code here
     (setq org-export-exclude-tags (list "noexport" "rmd" "solution"))
     (setq org-export-with-toc t)
@@ -434,8 +447,6 @@ in a style suitable for a manuscript that is read by your own kind (i.e., try th
     ;; get rid of the links to the rmd files
     (revert-buffer t t t)
     (save-buffer)
-    ;; (save-excursion
-    ;; (kill-region (point-min) (goto-char (point-min) (re-search-forward "# REMOVEUNTILHERE"))))
     (setq exercise-with-code nil)
     ;; 
     ;; third, export to Rmd with code without toc
@@ -460,7 +471,7 @@ in a style suitable for a manuscript that is read by your own kind (i.e., try th
     ;; revert rmd buffer
     (save-window-excursion
       (find-file (org-export-output-file-name ".Rmd"))
-      (revert-buffer t t t))))
+      (revert-buffer t t t)))))
 
 ;;;###autoload
 (defun org-rmd-export-to-rmd

@@ -168,10 +168,12 @@ has
 
 (defun dollar-island ()
   (interactive)
-  (insert "\\(")
-  (re-search-forward "[^ ,\.\t\n]*" nil t)
-  (insert "\\)")
-  (backward-char 2))
+  (let ((real-dollars (equal last-command 'dollar-island)))
+    (when real-dollars (undo))
+    (if real-dollars (insert "$") (insert "\\("))
+    (re-search-forward "[^ ,\.\t\n]*" nil t)
+    (if real-dollars (insert "$")  (insert "\\)"))
+    (backward-char (if real-dollars 1 2))))
 
 (defun lige-island ()
   (interactive)

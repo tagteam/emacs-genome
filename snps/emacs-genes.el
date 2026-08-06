@@ -20,9 +20,9 @@
 ;;----------------------------------------------------------------------
 ;; created: Apr 12 2015 (09:51) 
 ;; Version: 
-;; last-updated: Jul 25 2025 (10:44) 
+;; last-updated: aug  5 2026 (09:54) 
 ;;           By: Thomas Alexander Gerds
-;;     Update #: 83
+;;     Update #: 86
 ;;----------------------------------------------------------------------
 ;; 
 ;;; Commentary: Show important features {genes}. 
@@ -522,7 +522,7 @@ the current line."
 	(narrow-to-region beg end)
 	(bibtex-reformat)
 	(widen))))
-   ((eq major-mode 'latex-mode)
+   ((eq major-mode 'LaTeX-mode)
     (unless (save-excursion
 	      (re-search-forward "begin{document}" nil t))
       (LaTeX-fill-paragraph))) ;; in the preamble do nothing
