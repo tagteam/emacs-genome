@@ -248,52 +248,184 @@ replace absolute path to home directory by '~'.
 		 (point))
 	     nil t))
 
-(defun ess-edit-indent-call-sophisticatedly (&optional arg force)
+(defvar ess-edit-not-expand-functions
+  '("c")
+  "Function names that should not be expanded when nested.")
+
+(defun ess-edit-indent-call-sophisticatedly (&optional arg mode-box)
+  "Toggle between compact and expanded representation of a function call.
+
+Formatting mode is determined once from the first sufficiently
+informative call and then propagated consistently to all nested
+calls.
+
+When ARG is given or when the previous command was
+`ess-edit-indent-call-sophisticatedly', apply recursively to
+nested calls.
+
+ODE-BOX is an internal shared mutable container used to propagate
+the formatting mode (`expand' or `compact') through recursive
+calls.  Users should not set it explicitly."
   (interactive "p")
-  (let* ((arg (or arg 1))
-	 (fun (ess-edit-read-call arg 'go))
-	 (beg (+ (point) 1))
-	 (end (progn (forward-sexp) (point)))
-	 breaks
-	 delete-p)
-    ;;	  (eq last-command 'ess-edit-indent-call-sophisticatedly)
-    (goto-char beg)
-    (while (setq match (re-search-forward "[\"\'{([,]" end t))
-      (if (string= (match-string 0) ",")
-	  (setq breaks (cons (cons (point)
-				   (if (looking-at "[ \t]*\n") t nil)) breaks))
-	(if (or (string= (match-string 0) "\"")  (string= (match-string 0) "\'"))
-	    (re-search-forward (match-string 0) nil t)
-	  (backward-char 1)
-	  (forward-sexp))))
-    ;; if there are more breaks than half the number of
-    ;; arguments then delete breaks else add linebreaks
-    (setq delete-p
-	  (if force nil
-	    (> (length (delete nil (mapcar 'cdr breaks))) (* 0.5 (length breaks)))))
-    (while breaks (goto-char (caar breaks))
-	   (if delete-p
-	       (if (cdar breaks)
-		   (delete-region (caar breaks) (+ (point) (skip-chars-forward " \t\n"))))
-	     (if (not (cdar breaks))
-		 (insert "\n")))
-	   (setq breaks (cdr breaks)))
-    (goto-char (- beg 1))
-    (if (and
-	 (eq major-mode 'org-mode)
-	 (string= (car (org-babel-get-src-block-info)) "R"))
-	(let ((org-src-preserve-indentation t))
-	  (org-edit-special)
-	  (indent-region (point-min) (point-max))
-	  (org-edit-src-exit))
+
+  ;; shared mutable container for the formatting mode
+  (unless mode-box
+    (setq mode-box (list nil)))
+
+  (let* ((recursive
+          (or (eq last-command
+                  'ess-edit-indent-call-sophisticatedly)
+              (and arg (> arg 1))))
+
+         (fun
+          (prog1
+              (ess-edit-read-call 1 'go)
+            (ess-edit-unhighlight 0)))
+
+         (beg (+ (point) 1))
+         (end (progn (forward-sexp) (point)))
+
+         (beg-marker (copy-marker beg))
+         (end-marker (copy-marker end t))
+
+         argument-position
+         nested-calls
+         match)
+
+    (when fun
+
+      (goto-char beg)
+
+      ;; before first arg
+      (push (cons (copy-marker (point))
+                  (looking-at "[ \t]*\n"))
+            argument-position)
+
+      ;; collect argument boundaries and nested calls
+      (while (setq match
+                   (re-search-forward "[\"'{([,]" end t))
+
+        (cond
+
+         ;; comma
+         ((string= (match-string 0) ",")
+          (push (cons (copy-marker (point))
+                      (looking-at "[ \t]*\n"))
+                argument-position))
+
+         ;; nested call
+         ((string= (match-string 0) "(")
+
+          (let* ((open-paren (1- (point)))
+                 (fun-name
+                  (save-excursion
+                    (goto-char open-paren)
+                    (ignore-errors
+                      (forward-sexp -1)
+                      (thing-at-point 'symbol t)))))
+
+            ;; functions that should never expand
+            (unless (member fun-name
+                            ess-edit-not-expand-functions)
+              (push (copy-marker open-paren)
+                    nested-calls)))
+
+          (backward-char 1)
+          (forward-sexp))
+
+         ;; strings/brackets/etc
+         (t
+          (backward-char 1)
+          (forward-sexp))))
+
+      ;; after last arg
+      (goto-char (1- end))
+
+      (if (looking-at-backward "\n[ \t]*")
+          (push (cons
+                 (copy-marker
+                  (+ (point)
+                     (skip-chars-backward " \n\t")))
+                 t)
+                argument-position)
+        (push (cons (copy-marker (point))
+                    nil)
+              argument-position))
+
+      ;; determine global mode lazily
+      ;; only the FIRST sufficiently informative call decides
+      (when (null (car mode-box))
+
+        (let* ((inner-breaks
+                (butlast (cdr argument-position)))
+
+               (n-breaks
+                (length
+                 (delq nil
+                       (mapcar #'cdr inner-breaks))))
+
+               (n-total
+                (length inner-breaks)))
+
+          ;; only decide if enough evidence exists
+          (when (> n-total 0)
+
+            (setcar mode-box
+                     (if (> n-breaks (* 0.5 n-total))
+                         'compact
+                       'expand)))))
+
+      ;; recurse AFTER mode is known
+      (when recursive
+        (dolist (pos (reverse nested-calls))
+
+          (goto-char pos)
+
+          (ess-edit-indent-call-sophisticatedly
+           arg
+           mode-box)
+
+          ;; outer positions may shift
+          (save-excursion
+            (goto-char (1- (marker-position beg-marker)))
+            (forward-sexp)
+            (set-marker end-marker (point)))))
+
+      ;; effective mode
+      (let ((mode (or (car mode-box) 'expand)))
+
+        ;; apply formatting
+        ;; right-to-left editing is intentional
+        (dolist (br argument-position)
+
+          (goto-char (car br))
+
+          (pcase mode
+
+            ('expand
+             (unless (cdr br)
+               (insert "\n")))
+
+            ('compact
+             (when (cdr br)
+               (delete-region
+                (car br)
+                (+ (point)
+                   (skip-chars-forward " \t\n"))))))))
+
+      ;; reindent
+      (goto-char (1- (marker-position beg-marker)))
+
+      (if (and (eq major-mode 'org-mode)
+               (string= (car (org-babel-get-src-block-info))
+                        "R"))
+          (let ((org-src-preserve-indentation t))
+            (org-edit-special)
+            (indent-region (point-min) (point-max))
+            (org-edit-src-exit)))
+
       (ess-indent-exp))))
-  ;; (ess-edit-read-call arg 'go)))
 
-
-(defun ess-edit-summary-at-point ()
-  (interactive)
-  (let ((x (ess-edit-word-at-point)))
-    (ess-eval-linewise (concat "summary(" x ")"))))
 
 
 (defun ess-edit-insert-call (ask &optional object)
@@ -430,11 +562,12 @@ replace absolute path to home directory by '~'.
       (ess-edit-highlight-arg window beg end))))
 
 
-(defun ess-edit-read-call (&optional arg move all)
+(defun ess-edit-read-call (&optional arg move all dont-highlight)
   "Return the name of the R-function call at point as a string.
 if ARG return name of function call which is ARG function calls
 above point. if MOVE is non-nil leave point after
- opening parentheses of call. If all is non-nil return the full string."
+ opening parentheses of call. If ALL is non-nil return the call otherwise only the name of the function.
+if DONT-HIGHLIGHT is non-nil do not highlight the function name."
   (interactive "p")
   (or arg (setq arg 1))
   (if (< arg 0) (error "Only backward reading of function calls possible."))
@@ -456,39 +589,42 @@ above point. if MOVE is non-nil leave point after
 	      arg (- arg 1)))
     (while
 	(and (> arg 0)
-	 (re-search-backward "[\"\'()]" lim t)
-	 (let ((matchcar (char-before (match-end 0)))
-	       matchcall)
-	   (if (eq ?\( matchcar)
-	       ;; test if sitting on proper function call
-	       (if (not (progn
-			  (skip-chars-backward "a-zA-Z0-9.")
-			  (looking-at "\\([a-zA-Z0-9.]+\\)\\((\\)")))
-		   nil
-		 (if (string= "\\(if\\|else\\|for\\)"
-				   (setq matchcall (match-string 1)))
-		     t
-		   (setq beg (match-beginning 1) end (match-end 1)
-			 fun (append (list matchcall) fun))
-		   (if (= arg 1) nil (setq arg (- arg 1)))))
-	     ;; skip balanced parentheses or quotes
-	     (if (not (= ?\) matchcar))
-		 (re-search-backward
-		  (char-to-string matchcar) lim t)
-	       (condition-case nil 
-		   (progn
-		     (forward-char 1)
-		     (backward-sexp) t)
-		 (t (goto-char oldpoint)
-		    (message "Point is not in a proper function call or unbalanced parentheses paragraph."))))))))
-	 (if (not fun)
-	     (progn (goto-char oldpoint)
-	     (message "Point is not in a proper function call or unbalanced parentheses in this paragraph."))
-	   (ess-edit-highlight 0 beg end)
-	   (message (car fun))
-	   (goto-char (if move (+ (point) (skip-chars-forward "a-zA-Z0-9."))
-			oldpoint))
-	   (if all fun (car fun)))))
+	     (re-search-backward "[\"\'()]" lim t)
+	     (let ((matchcar (char-before (match-end 0)))
+		   matchcall)
+	       (if (eq ?\( matchcar)
+		   ;; test if sitting on proper function call
+		   (if (not (progn
+			      (skip-chars-backward "a-zA-Z0-9.")
+			      (looking-at "\\([a-zA-Z0-9.]+\\)\\((\\)")))
+		       nil
+		     (if (string= "\\(if\\|else\\|for\\)"
+				  (setq matchcall (match-string 1)))
+			 t
+		       (setq beg (match-beginning 1) end (match-end 1)
+			     fun (append (list matchcall) fun))
+		       (if (= arg 1) nil (setq arg (- arg 1)))))
+		 ;; skip balanced parentheses or quotes
+		 (if (not (= ?\) matchcar))
+		     (re-search-backward
+		      (char-to-string matchcar) lim t)
+		   (condition-case nil 
+		       (progn
+			 (forward-char 1)
+			 (backward-sexp) t)
+		     (t (goto-char oldpoint)
+			(message "Point is not in a proper function call or unbalanced parentheses paragraph.")
+			nil)))))))
+    (if (not fun)
+	(progn (goto-char oldpoint)
+	       (message "Point is not in a proper function call or unbalanced parentheses in this paragraph.")
+	       nil)
+      (unless dont-highlight
+	(ess-edit-highlight 0 beg end))
+      (message (car fun))
+      (goto-char (if move (+ (point) (skip-chars-forward "a-zA-Z0-9."))
+		   oldpoint))
+      (if all fun (car fun)))))
 
 
 (defun ess-edit-hot-key (&optional arg)
@@ -630,7 +766,7 @@ Quotes are single and double."
 
 (defun ess-edit-read-args ()
   (save-excursion
-    (ess-edit-indent-call-sophisticatedly 1 'force)
+    (ess-edit-indent-call-sophisticatedly nil 'force-expand nil)
     (let ((lim (save-excursion (forward-sexp 1) (+ (point) 1)))
 	  args)
       (forward-char 1)

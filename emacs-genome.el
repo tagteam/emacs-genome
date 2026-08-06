@@ -170,13 +170,12 @@
 (require 'latex-snps)
 
 
-;; (add-to-list 'load-path (expand-file-name "genes/SuperMan/lisp" emacs-genome))
-(straight-use-package
- '(superman :type git :host github :repo "tagteam/superman"))
-(require 'superman-manager)
-
-
-  ;; project profile
+;; (straight-use-package
+ ;; '(superman :type git :host github :repo "tagteam/superman"))
+;; (require 'superman-manager)
+(add-to-list 'load-path (expand-file-name "~/research/SoftWare/superman/lisp/"))
+(require 'superman-core)
+;; project profile
   (unless (file-exists-p superman-profile)
     (setq superman-profile "~/.SuperMan.org"))
   (superman-parse-projects)

@@ -24,8 +24,14 @@
 ;; 
 
 ;;; Code:
+;; Keep the menu bar visible
+(menu-bar-mode -1)
 
-(global-set-key [f10] 'undo)
+;; Disable F10 from opening the menu bar
+(define-key global-map [f10] nil)
+
+;; Bind F10 to your custom command
+(global-set-key (kbd "<f10>") 'undo)
 (global-set-key [f2] 'superman-switch-to-project)
 (global-set-key [f3] 'superman-switch-config)
 (global-set-key "\M-1" 'iedit-mode)

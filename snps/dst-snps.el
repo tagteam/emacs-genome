@@ -174,12 +174,12 @@
 	  )))
 
 
-(defun dst ()
+(defun dst (&optional arg)
   "3-in-1 function. 
    Step 1: open DST in Chromium.
    Step 2: login-dst
    Step 3: choose project, download launcher and start xfreerdp session."
-  (interactive)
+  (interactive "P")
     (let* ((p (ido-completing-read
 				   "Choose DST-project: "
 				   dst-login-list
@@ -196,8 +196,8 @@
 	     dst-ident " "
 	     dst-firewall-code " "
 	     (nth 1 project) " "
-	     "--password " (nth 2 project) " "
-	     "--visual "
+	     "--password '" (nth 2 project) "' "
+	     (if arg "--visual " "")
 	     "--download-button-id /Common/dst-RDP_FSE_" (nth 3 project))))
       ;; (message python-command)
       (shell "*dst-remote*")
