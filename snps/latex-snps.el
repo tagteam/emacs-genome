@@ -66,7 +66,8 @@
 (setq reftex-file-extensions '(("Snw" "Rnw" "nw" "tex" ".tex" ".ltx") ("bib" ".bib")))
 ;;}}}
 ;;{{{ bibtex mode
-(setq bibtex-autokey-edit-before-use nil)
+(setq bibtex-autokey-edit-before-use nil
+      bibtex-maintain-sorted-entries nil)
 (setq bibtex-autokey-prefix-string ""
       bibtex-autokey-names 3
       bibtex-autokey-names-stretch 3

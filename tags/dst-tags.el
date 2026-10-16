@@ -1,15 +1,12 @@
 ;; -*- lexical-binding: t; -*-
-;; dst user x56 password uuu888UUU (rrr888RRR) (vCH9byRp)
-;; fjernskrivebord 7389, computer:DS7217 
-
+;; codex resume 01a056a4-39ac-7090-8c80-039d4dc88f67
 (setq dst-click-delay "0.5")
 (setq dst-directory "~/dst")
-;; (setq dst-window-size "/size:1600x1000")
 (setq dst-window-size '("1900" "1050"))
 (setq dst-ident "WJA")
 ;; (setq dst-ident "FBVQ")
-(setq dst-firewall-code "6632")
-;; sasmita
+(setq dst-firewall-code "759927")
+;; 6632
 
 ;;xdotool getmouselocation
 (setq dst-click-position "45 141")
@@ -70,22 +67,21 @@
 ;; Server: SDCA
 ;; Password: FKaA3ChrxKrz
 
-
 ;; WJA: 6632
 ;; WJAxxxx@dstfse.local
-;; Kohl17MAISE!
-(setq dst-pw "4b578MiC#17!MacS")
-(setq dst-pw2 "MacS4b578MiC#17!")
+(setq dst-pw "mAcs4bb77miC99!")
+
 ;; ("3573 Overall meta project" "3573"  ,dst-pw "srvfsegh4")
 (setq dst-login-list
       `(
 	("707655 Steno Main" "707655" ,dst-pw "Windows")
 	("709873 DMreg-projekt" "709873" ,dst-pw "Windows")
-	("3740 Diabetes" "3740" ,dst-pw "srvfsegh5")
-	("3740 Diabetes server 4" "3740" ,dst-pw "srvfsegh4")
+	;; ("3740 Diabetes" "3740" ,dst-pw "srvfsegh5")
+	("3740 Diabetes server 4" "3740" ,dst-pw "srvfsegh5")
 	("6582 Corona, Covid, Mavish, Grimur" "706582" ,dst-pw "srvfsegh5")
 	("6220 RWAS" "6220" ,dst-pw "Windows")
 	("3775 Hannah, Marcella, Regitze" "3775"  ,dst-pw "srvfsegh4")
+	("707376 Filip" "707376"  "779BLUBbla!!" "srvfsegh4")
 	("706818 Alexander Falkentoft, deepthi, novo, Jarl, Jannik, Caroline, Christina Lee" "706818" ,dst-pw "srvfsegh4")
 	;; ("3826 Liv" "3826"  ,dst-pw "srvfsegh4")
 	;; ("3661 Sidsel, Daniel, Carolina, Steen, Kristian, Shahzleen, Carlo" "3661" ,dst-pw "srvfsegh4")
@@ -94,7 +90,7 @@
 	;; ("6130 Maria D'Souza" "6130" ,dst-pw "srvfsegh4")
 	("6322 Marianna Hjertetal" "6322" ,dst-pw "srvfsegh4")
 	;; ("6734 Genetics Maria" "6734" ,dst-pw "srvfsegh4")
-	("9200 Statins" "709200" ,dst-pw2 "srvfsegh4")
+	("9200 Statins Caecilie Denholt Stilling Michaela/Helene" "709200" ,dst-pw "srvfsegh4")
  	;; ("3607 Jonas L. Isaksen, Jonas Bille Nielsen, Morten Wagner" "3607" ,dst-pw "Windows")
 	("4265 Kessing" "4265" ,dst-pw "Windows")
 	("7535 Mie Balling" "707535" ,dst-pw "Windows")

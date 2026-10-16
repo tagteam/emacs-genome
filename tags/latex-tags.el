@@ -126,6 +126,16 @@
 (setq org-latex-pdf-process
       (list "latexmk -f -pdflatex='pdflatex -interaction=nonstopmode -synctex=1' %s"))
 
+(defun my-org-svg-to-pdf-for-latex (text backend _info)
+  (if (and (org-export-derived-backend-p backend 'latex)
+           (string-match-p "\\.svg\\>" text))
+      (replace-regexp-in-string "\\.svg\\>" ".pdf" text)
+    text))
+
+(with-eval-after-load 'ox
+    (add-to-list 'org-export-filter-link-functions
+                 #'my-org-svg-to-pdf-for-latex))
+
 (add-hook 'LaTeX-mode-hook
 	  #'(lambda ()
 	     (add-to-list 'TeX-command-list '("make" "latexmk -f %t" TeX-run-command nil "nil") t)
