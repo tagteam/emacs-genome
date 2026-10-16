@@ -109,8 +109,22 @@
 ;;     if this fails you may have to download a new launcher ...
 ;;  
 ;;; Code:
-(require 'superman-file-list)
-(defvar dst-directory "~/dst")
+(require 'cl-lib)
+(require 'comint)
+
+(defvar dst-change-password-python-script "~/bin/dst-change-password.py"
+  "Python script used by `dst-change-password'.")
+(defvar dst-ident nil
+  "DST ident from dst-snps.el.")
+(defvar dst-firewall-code nil
+  "DST PIN/firewall code from dst-snps.el.")
+(defvar dst-login-list nil
+  "DST project list from dst-snps.el.")
+(defvar dst-login-history nil
+  "Completion history from dst-snps.el.")
+(defvar dst-last-project nil
+  "Last selected DST project from dst-snps.el.")
+
 (defvar dst-login-list nil)
 (defvar dst-emacs-window-identifier "")
 (defvar dst-login-history nil)
@@ -121,58 +135,15 @@
 (defvar dst-use-wmctrl t)
 
 
-(defun dst-current-window ()
-  "Return currently active window as xdotool number"
-  (replace-regexp-in-string
-   "\n" ""  
-   (shell-command-to-string "xdotool getactivewindow")))
-
-(defvar dst-click-delay "1"
-  "number of seconds between clicks and keystrokes")
-
-
-;; xprop -id $(xprop -root _NET_ACTIVE_WINDOW | cut -d ' ' -f 5) WM_NAME | awk -F '"' '{print $2}'
-;; xprop -id $(xprop -root _NET_ACTIVE_WINDOW | cut -d ' ' -f 5) WM_NAME | sed -e 's/.*"\(.*\)".*/\1/'
-(defun dst-current-window-name ()
-  "Return title of currently active window"
-  (replace-regexp-in-string "\n" ""
-   (shell-command-to-string
-    (concat "xdotool getwindowname "
-	    ;; "xdotool getwindowfocus getwindowname"
-	    (dst-current-window)))))
-
-(defun dst-chromium-window ()
-  (let ((cwin (shell-command-to-string
-	       "xdotool search --onlyvisible --class 'chromium'")))
+;; need these xdotool wrappers to type passwords 
+(defun dst-xfree-window ()
+  (let ((cwin (shell-command-to-string "xdotool search --class 'xfreerdp'")))
     (if (string= cwin "") nil
       (replace-regexp-in-string "\n" "" cwin))))
-
-
-(defun dst-chromium-status ()
-  (let* ((chromium-window (dst-chromium-window))
-	 (chromium-status
-	  (when chromium-window
-	    (replace-regexp-in-string
-	     "\n" "" 
-	     (shell-command-to-string
-	      (concat
-	       "xdotool getwindowname " chromium-window))))))
-    ;; three different states: 0 = logged in, 1 = waiting for ident + password, 2 = logged out
-    (cond ((not chromium-status)
-	   (message  "Cannot see  Chromium. Start it via dst-start-browser."))
-	  ((string-match "logout page - Chromium" chromium-status) 
-	   (message "DST browser: logout")
-	   "logout")
-	  ((string-match "remote.dst.dk - Chromium" chromium-status)
-	   (message "DST browser: waiting for login")
-	   "waiting")
-	  ((string-match "F5 Dynamic Webtop - Chromium" chromium-status)
-	   (message "DST browser: running")
-	   "running")
-	  (t
-	   (error  "Cannot see Chromium. Start it via dst-start-browser."))
-	  )))
-
+(defun dst-raise-dst ()
+  (interactive)
+  (shell-command-to-string (concat "xdotool windowraise " (dst-xfree-window) " mousemove --sync --window " (dst-xfree-window) " " dst-click-position
+				     ";xdotool click 1;")))
 
 (defun dst (&optional arg)
   "3-in-1 function. 
@@ -205,166 +176,6 @@
       (insert python-command)
       (comint-send-input)))
 
-(defun dst-old ()
-  "3-in-1 function. 
-   Step 1: open DST in Chromium.
-   Step 2: login-dst
-   Step 3: choose project, download launcher and start session."
-  (interactive)
-  (save-window-excursion
-    (let* ((browser (ignore-errors (dst-start-browser)))
-	   (open (if (and (stringp browser) (string= browser "running"))
-		     (ignore-errors (dst-open-firewall))
-		   (sit-for 5) (ignore-errors (dst-open-firewall)))))
-      (when (and (stringp browser) (stringp open))
-	(let* ((project (let* ((p (ido-completing-read
-				   "Choose DST-project: "
-				   dst-login-list
-				   nil nil nil dst-login-history dst-last-project)))
-			  (setq dst-last-project p)
-			  (assoc p dst-login-list)))
-	       (server (or (nth 3 project)
-			   (completing-read "Server: " dst-servers)))
-	       (user (concat dst-ident (nth 1 project) "@dstfse.local"))
-	       (pss (nth 2 project))
-	       (pos (cdr (assoc server dst-servers)))
-	       pro-cmd cmd project rdp-buffer
-	       (launcher (dst-download-launcher pos))
-	       (cmd  (concat "xfreerdp " launcher " /size:"
-			     (nth 0 dst-window-size)
-			     "x" (nth 1 dst-window-size) 
-			     " /u:" user " /p:" pss))
-	       (async-shell-command-buffer 'new-buffer))
-	  (setq rdp-buffer (generate-new-buffer "*rdp-response*"))
-	  (message cmd)
-	  (async-shell-command cmd rdp-buffer)
-	  (sleep-for 1)
-	  (if (process-live-p (get-buffer-process rdp-buffer))
-	      (message "First attempt succeeded")
-	    (message "Second attempt  ...")
-	    (setq launcher (dst-download-launcher pos))
-	    (setq rdp-buffer (generate-new-buffer "*rdp-response*"))
-	    (setq proc-cmd  (dst-select launcher project)
-		  cmd (plist-get pro-cmd :cmd))
-	    (message cmd)
-	    (async-shell-command cmd rdp-buffer)))))))
-  
-  
-
-(defun dst-start-browser ()
-  "Start chromium browser unless already running."
-  (interactive)
-  (let* ((cwin (dst-chromium-window))
-	 ;; (ewin (dst-current-window))
-	 ;; (emacs-window-name (dst-active-window-name))
-	 (async-shell-command-buffer 'new-buffer)
-	 (obuf (get-buffer-create "*chromium-output-buffer*"))
-	 (ebuf (get-buffer-create "*chromium-error-buffer*")))
-    ;; start chromium when necessary
-    (if cwin
-	"running" ;;(message "Chromium already running")
-      (message "Launching chromium-browser. You have to manually go back to emacs to open the firewall via M-x dst-open-firewall.")
-      (sit-for 1)
-      (async-shell-command
-        "chromium --disable-infobars -new-instance -new-window http://remote.dst.dk/vdesk/hangup.php3"
-	       ;; (if dst-use-wmctrl
-	 ;; "wmctrl -a " emacs-window-name)
-		   ;; "xdotool windowraise " ewin))
-       obuf ebuf))))
-
-(defun dst-show-domain-user-pos ()
-  (interactive)
-  (let ((cwin (dst-chromium-window)))
-    (if (not cwin)
-	(message "Cannot see chromium. Use M-x dst-start-browser RET to start it.")
-      (shell-command (concat "xdotool windowraise " cwin
-			     " mousemove --window " (dst-chromium-window) " " dst-domain-user-pos)))))
-(defun dst-show-server-4-pos ()
-  (interactive)
-  (let ((cwin (dst-chromium-window)))
-    (if (not cwin)
-	(message "Cannot see chromium. Use M-x dst-start-browser RET to start it.")
-      (shell-command (concat "xdotool windowraise " cwin
-			     " mousemove --window " (dst-chromium-window) " " (cdr (assoc "srvfsegh4" dst-servers)))))))
-
-(defun dst-show-server-srvfseatru1-pos ()
-  (interactive)
-  (let ((cwin (dst-chromium-window)))
-    (if (not cwin)
-	(message "Cannot see chromium. Use M-x dst-start-browser RET to start it.")
-      (shell-command (concat "xdotool windowraise " cwin
-			     " mousemove --window " (dst-chromium-window) " " (cdr (assoc "srvfseatru1" dst-servers)))))))
-
-(defun dst-show-fse-server-pos ()
-  (interactive)
-  (let ((cwin (dst-chromium-window)))
-    (if (not cwin)
-	(message "Cannot see chromium. Use M-x dst-start-browser RET to start it.")
-      (shell-command (concat "xdotool windowraise " cwin
-			     " mousemove --window " (dst-chromium-window) " " (cdr (assoc "FSE Windows" dst-servers)))))))
-
-(defun dst-show-current-password-pos ()
-  (interactive)
-  (let ((cwin (dst-chromium-window)))
-    (if (not cwin)
-	(message "Cannot see chromium. Use M-x dst-start-browser RET to start it.")
-      (shell-command (concat "xdotool windowraise " cwin
-			     " mousemove --window " (dst-chromium-window) " " dst-current-password-pos)))))
-(defun dst-show-new-password-pos ()
-  (interactive)
-  (let ((cwin (dst-chromium-window)))
-    (if (not cwin)
-	(message "Cannot see chromium. Use M-x dst-start-browser RET to start it.")
-      (shell-command (concat "xdotool windowraise " cwin
-			     " mousemove --window " (dst-chromium-window) " " dst-new-password-pos)))))
-(defun dst-show-confirm-password-pos ()
-  (interactive)
-  (let ((cwin (dst-chromium-window)))
-    (if (not cwin)
-	(message "Cannot see chromium. Use M-x dst-start-browser RET to start it.")
-      (shell-command (concat "xdotool windowraise " cwin
-			     " mousemove --window " (dst-chromium-window) " " dst-confirm-password-pos)))))
-
-(defun dst-show-submit-button-pos ()
-  (interactive)
-  (let ((cwin (dst-chromium-window)))
-    (if (not cwin)
-	(message "Cannot see chromium. Use M-x dst-start-browser RET to start it.")
-      (shell-command (concat "xdotool windowraise " cwin
-			     " mousemove --window " (dst-chromium-window) " " dst-submit-button-pos)))))
-
-(defun dst-show-click-position ()
-  (interactive)
-  (let ((cwin (dst-chromium-window)))
-    (if (not cwin)
-	(message "Cannot see chromium. Use M-x dst-start-browser RET to start it.")
-      (shell-command (concat "xdotool windowraise " cwin
-			     " mousemove --window " (dst-chromium-window) " " dst-click-position)))))
-
-(defun dst-show-change-password-position ()
-  (interactive)
-  (let ((cwin (dst-chromium-window))
-	(ewin (dst-current-window)))
-    (if (not cwin)
-	(message "Cannot see chromium. Use M-x dst-start-browser RET to start it.")
-      (shell-command (concat "xdotool windowraise " cwin
-			     " mousemove --window "
-			     (dst-chromium-window) " "
-			     dst-change-password-pos)))))
-
-
-(defun dst-goto-click ()
-  (interactive)
-  (let* ((serv (if (= (length dst-servers) 1) (caar dst-servers)
-		 (completing-read "Server: " dst-servers)))
-	 (pos (cdr (assoc serv dst-servers))))
-    (shell-command (concat "xdotool mousemove --window " (dst-chromium-window) " " pos ";"))))
-
-(defun dst-current-mouse-position ()
-  (interactive)
-  (message (shell-command-to-string
-	    "xdotool getmouselocation")))
-
 (defun dst-open-firewall ()
   "Start chromium browser and open firewall at remote.dst.dk."
   (interactive)
@@ -385,291 +196,178 @@
     (switch-to-buffer "*dst-remote*")
     (insert python-command)
     (comint-send-input)))
+(defun dst--change-password-check-config ()
+  (unless (bound-and-true-p dst-ident)
+    (error "You need to set `dst-ident'"))
+  (unless (bound-and-true-p dst-firewall-code)
+    (error "You need to set `dst-firewall-code'")))
 
-(defun dst-change-password ()
-  "Start chromium browser and open firewall at remote.dst.dk."
-  (interactive)
-  (unless dst-firewall-code
-    (error "You need to set the variable `dst-firewall-code', i.e., when your code is 1234 add a line (setq dst-firewall-code \"1234\") to your .emacs file"))
-  (unless dst-ident 
-    (error "You need to set the variable `dst-ident', i.e., when your indent is ABCD add a line (setq dst-indent \"ABCD\") to your .emacs file"))
-  (let ((buffer-read-only t)
-	(python-command
-	 (concat 
-          "python3 ~/bin/dst-open-firewall.py "
-	  dst-ident " "
-	  dst-firewall-code " "
-	  " '707655' " 
-          " 'Kohl17MAISE!' "
-          " '99!dulMEblivGLAD!17' "
-	  "--visual ")))
-    (message python-command)
-    ;; (shell-command python-command)))
-    (shell "*dst-remote*")
-    (switch-to-buffer "*dst-remote*")
-    (insert python-command)
-    (comint-send-input)))
+(defun dst--change-password-resolve-project (project)
+  (cond
+   ((and (listp project) (nth 1 project)) project)
+   ((and (stringp project) dst-login-list)
+    (or (assoc project dst-login-list)
+        (cl-find-if (lambda (entry) (string= project (nth 1 entry)))
+                    dst-login-list)
+        (list project project nil)))
+   ((stringp project)
+    (list project project nil))
+   (dst-login-list
+    (let* ((choice (ido-completing-read
+                    "Choose DST-project: "
+                    dst-login-list nil nil nil dst-login-history dst-last-project))
+           (entry (assoc choice dst-login-list)))
+      (setq dst-last-project choice)
+      entry))
+   (t
+    (let ((number (read-string "DST project number: ")))
+      (list number number nil)))))
+
+(defun dst--change-password-start-process (buffer-name args secret-lines)
+  (let* ((buffer (get-buffer-create buffer-name))
+         (process-connection-type nil))
+    (with-current-buffer buffer
+      (let ((inhibit-read-only t))
+        (erase-buffer)))
+    (apply #'make-comint-in-buffer
+           "dst-change-password" buffer "python3" nil args)
+    (let ((proc (get-buffer-process buffer)))
+      (unless proc
+        (error "Could not start dst-change-password process"))
+      (dolist (line secret-lines)
+        (process-send-string proc (concat line "\n")))
+      (pop-to-buffer buffer)
+      (message "Enter the SMS code in %s when prompted" buffer-name)
+      proc)))
+
+(defun dst--change-password-python-base-args ()
+  (list "-u"
+        (expand-file-name dst-change-password-python-script)
+        dst-ident
+        dst-firewall-code))
+
+(defun dst--change-password-start-batch (buffer-name projects new-password &optional visual)
+  (dst--change-password-start-process
+   buffer-name
+   (append (dst--change-password-python-base-args)
+           (list "--batch-stdin"
+                 (number-to-string (length projects))
+                 "--new-password-stdin"
+                 "--submit")
+           (when visual
+             (list "--visual")))
+   (cons new-password
+         (mapcar (lambda (project)
+                   (concat (nth 0 project) "\t" (nth 1 project)))
+                 projects))))
+
+(defun dst-change-password (&optional project new-password click-submit visual)
+  "Change one DST project password via `dst-change-password.py'.
+With VISUAL non-nil, show the Selenium browser.  Programmatic
+CLICK-SUBMIT keeps compatibility with the old xdotool function."
+  (interactive (list nil nil nil current-prefix-arg))
+  (dst--change-password-check-config)
+  (let* ((entry (dst--change-password-resolve-project project))
+         (project-number (nth 1 entry))
+         (current-password (or (nth 2 entry)
+                               (read-passwd
+                                (format "Current password for %s: " project-number))))
+         (new-password (or new-password
+                           (read-passwd
+                            (format "New password for %s: " project-number) t)))
+         (submit (or click-submit
+                     (y-or-n-p
+                      (format "Submit password change for %s now? " project-number))))
+         (args (append (dst--change-password-python-base-args)
+                       (list project-number
+                             "--password-stdin"
+                             "--new-password-stdin"
+                             (if submit "--submit" "--no-submit"))
+                       (when (or visual (not submit))
+                         (list "--visual")))))
+    (when (string= current-password new-password)
+      (user-error "New password is identical to the current password"))
+    (dst--change-password-start-process
+     (format "*dst-change-password-%s*" project-number)
+     args
+     (list current-password new-password))))
+
+(defun dst-change-password-loop (&optional new-password visual)
+  "Select several DST projects and change them in one Python session."
+  (interactive (list nil current-prefix-arg))
+  (dst--change-password-check-config)
+  (let ((new-password (or new-password
+                          (read-passwd "New password for selected DST projects: " t)))
+        seen
+        projects
+        done)
+    (while (not done)
+      (let* ((entry
+              (if dst-login-list
+                  (let* ((choices (cons (list "DONE" nil nil) dst-login-list))
+                         (choice (ido-completing-read
+                                  "Choose DST-project, or DONE: "
+                                  choices nil nil nil dst-login-history dst-last-project)))
+                    (if (string= choice "DONE")
+                        nil
+                      (setq dst-last-project choice)
+                      (assoc choice dst-login-list)))
+                (let ((number (read-string "DST project number, empty to start: ")))
+                  (unless (string-empty-p number)
+                    (list number number nil))))))
+        (if (not entry)
+            (setq done t)
+          (let* ((number (nth 1 entry))
+                 (current-password
+                  (or (nth 2 entry)
+                      (read-passwd (format "Current password for %s: " number)))))
+            (cond
+             ((member number seen)
+              (message "Already selected %s" number))
+             ((string= current-password new-password)
+              (message "Skipping %s: current password already matches new password" number))
+             (t
+              (push number seen)
+              (push (list number current-password) projects)))))))
+    (setq projects (nreverse projects))
+    (unless projects
+      (user-error "No projects selected"))
+    (unless (y-or-n-p (format "Submit password change for %d projects in one DST session? "
+                              (length projects)))
+      (user-error "Canceled"))
+    (dst--change-password-start-batch
+     "*dst-change-password-loop*" projects new-password visual)))
+
+(defun dst-change-all-passwords (&optional new-password visual)
+  "Change passwords for each unique project in `dst-login-list' in one session."
+  (interactive (list nil current-prefix-arg))
+  (dst--change-password-check-config)
+  (unless dst-login-list
+    (user-error "`dst-login-list' is empty"))
+  (let ((new-password (or new-password
+                          (read-passwd "New password for all DST projects: " t)))
+        seen
+        projects)
+    (dolist (entry dst-login-list)
+      (let ((number (nth 1 entry)))
+        (unless (member number seen)
+          (push number seen)
+          (let ((current-password
+                 (or (nth 2 entry)
+                     (read-passwd (format "Current password for %s: " number)))))
+            (if (string= current-password new-password)
+                (message "Skipping %s: current password already matches new password" number)
+              (push (list number current-password) projects))))))
+    (setq projects (nreverse projects))
+    (unless projects
+      (user-error "No projects need a password change"))
+    (unless (y-or-n-p (format "Submit password change for %d projects in one DST session? "
+                              (length projects)))
+      (user-error "Canceled"))
+    (dst--change-password-start-batch
+     "*dst-change-all-passwords*" projects new-password visual)))
   
-(defun dst-select (launcher &optional project)
-  (interactive)
-  (let* ((launcher (or launcher (car (directory-files dst-directory t "launch" t))))
-	 (project (or project (if dst-login-list
-				  (let* ((p (ido-completing-read
-					     "Choose DST-project: "
-					     dst-login-list
-					     nil nil nil dst-login-history dst-last-project)))
-				    (setq dst-last-project p)
-				    (assoc p dst-login-list))
-				(let* ((u (read-string "DST project number (only last 4 digits, e.g., 3274): "))
-				       (p (read-passwd (concat "password for " u ": "))))
-				  `("none" ,u ,p)))))
-	 (user (concat dst-ident (nth 1 project) "@dstfse.local"))
-	 (cmd  (concat "xfreerdp " launcher " /size:"
-		       (nth 0 dst-window-size)
-		       "x" (nth 1 dst-window-size) 
-		       " /u:" user " /p:"
-		       (or (nth 2 project)
-			   (read-passwd (concat "Password for " user ": "))))))
-    `(:project ,project :cmd ,cmd)))
-
-(defun dst-download-launcher (pos)
-  ;; remove old launchers
-  (shell-command-to-string (concat "rm " dst-directory "/launch*.rdp"))
-  ;; download new launcher
-  (let ((ewin (dst-current-window))
-	(cwin (dst-chromium-window))
-	cmd result)
-    (unless cwin
-      (error "Cannot see chromium. Use M-x dst-start-browser RET to start it."))
-    (unless (string= "running" (dst-chromium-status))
-      (message "Need to open firewall via M-x dst-open-firewall"))
-    (setq cmd
-     (concat
-      "xdotool windowraise " cwin "; xdotool mousemove --sync --window " (dst-chromium-window) " " pos ";"
-      "xdotool click 1; sleep " dst-click-delay ";"
-      "xdotool windowraise " ewin ";"))
-    (message cmd)
-    (message "HA:")
-    (message (shell-command-to-string cmd))
-    (setq result (shell-command-to-string (concat "mv ~/Downloads/launch*.rdp " dst-directory)))
-    (if (string-match "cannot" result)
-	nil
-       (car (directory-files dst-directory t "launch" t)))))
-
-(defun dst-connect (&optional server)
-  (interactive)
-  (let* ((server (or server (completing-read "Server: " dst-servers)))
-	 (pos (cdr (assoc server dst-servers)))
-	 pro-cmd cmd project rdp-buffer
-	 (launcher (dst-download-launcher pos))
-	 (async-shell-command-buffer 'new-buffer))
-    (setq pro-cmd (dst-select launcher)
-	  cmd (plist-get pro-cmd :cmd)
-	  project (plist-get pro-cmd :project))
-    (setq rdp-buffer (generate-new-buffer "*rdp-response*"))
-    (message cmd)
-    (async-shell-command cmd rdp-buffer)
-    (sleep-for 1)
-    (if (process-live-p (get-buffer-process rdp-buffer))
-	(message "First attempt succeeded")
-      (message "Second attempt  ...")
-      (setq launcher (dst-download-launcher pos))
-      (setq rdp-buffer (generate-new-buffer "*rdp-response*"))
-      (setq proc-cmd  (dst-select launcher project)
-	    cmd (plist-get pro-cmd :cmd))
-      (message cmd)
-      (async-shell-command cmd rdp-buffer))))
-
-
-(defun dst1 () (interactive) (dst-connect "FSE Windows"))
-(defun dst4 () (interactive) (dst-connect "srvfsegh4"))
-(defun dst5 () (interactive) (dst-connect "srvfsegh5"))
-
-
-(defun dst-xfree-window ()
-  (let ((cwin (shell-command-to-string "xdotool search --class 'xfreerdp'")))
-    (if (string= cwin "") nil
-      (replace-regexp-in-string "\n" "" cwin))))
-(defun dst-raise-dst ()
-  (interactive)
-  (shell-command-to-string (concat "xdotool windowraise " (dst-xfree-window) " mousemove --sync --window " (dst-xfree-window) " " dst-click-position
-				     ";xdotool click 1;")))
-
-
-
-
-(defun dst-type-buffer ()
-  (interactive)
-  (let ((sbuf
-	 (replace-regexp-in-string
-	  "_" "UNDERSCORE"
-	  (replace-regexp-in-string
-	   "~" "TILDE"
-	   (replace-regexp-in-string
-	  "==" "DOBBELEQUAL"
-	  (replace-regexp-in-string
-	  "\\^" "POTENZ"
-	  (replace-regexp-in-string
-	  ">" "GREATER"
-	  (replace-regexp-in-string
-	   "<" "SMALLER"
-	   (replace-regexp-in-string
-	   "'" "SINGLEQUOTE" 
-	   (replace-regexp-in-string "\n" "\r" (buffer-substring (point-min) (point-max))))))))))))
-    (shell-command-to-string (concat "xdotool windowraise " (dst-xfree-window) " mousemove --sync --window " (dst-xfree-window) " " dst-click-position
-				     ";xdotool click 1;sleep 2;"
-				     "xdotool type '" sbuf "';"
-				     "xdotool key Return;"))))
-
-(defun dst-clean-incoming ()
-  (interactive)
-  (goto-char (point-min))
-  (while (re-search-forward "UNDERSCORE" nil t)
-    (replace-match "_"))
-  (goto-char (point-min))
-  (while (re-search-forward "TILDE" nil t)
-    (replace-match "~"))
-  (goto-char (point-min))
-  (while (re-search-forward "POTENZ" nil t)
-    (replace-match "^"))
-  (goto-char (point-min))
-  (while (re-search-forward "GREATER" nil t)
-    (replace-match ">"))
-  (goto-char (point-min))
-  (while (re-search-forward "SMALLER" nil t)
-    (replace-match "<"))
-  (goto-char (point-min))
-  (while (re-search-forward "SINGLEQUOTE" nil t)
-    (replace-match "'")))
-
-(defun dst-type-file ()
-  (interactive)
-  (let* ((sbuf (read-file-name "file: "))
-	(cmd (concat "xdotool windowraise " (dst-xfree-window) " mousemove --sync --window " (dst-xfree-window) " " dst-click-position
-				     ";xdotool click 1;"
-				     "xdotool type $(cat " sbuf ");"
-				     "xdotool key Return;")))
-    (message cmd)
-    (shell-command-to-string cmd)))
-
-  
-
-(defun dst-change-all-passwords ()
-  "Go through the list of projects and change the passwords."
-  (interactive)
-  (let ((ddlist dst-login-list)
-	projects
-	(new (read-string (concat "New password: "))))
-    (while ddlist
-      (setq this-project (car ddlist))
-      (if (member (cadr this-project) projects)
-	  (message "Already changed this project")
-	(setq projects (append (list (cadr this-project)) projects))
-	(dst-change-password this-project new 'submit))
-      (setq ddlist (cdr ddlist)))))
-
-;; (dst-change-password (car dst-login-list) "bla" nil)
-
-(defun dst-change-password (&optional project new-password click-submit)
-  "Change passwords."
-  (interactive)
-  (let* ((emacs-window  (dst-current-window))
-	 (log-buf (get-buffer-create "*dst-change-password-log*"))
-	 (this-project (or project
-			   (let ((p (ido-completing-read
-				     "Choose DST-project: "
-				     dst-login-list
-				     nil nil nil dst-login-history dst-last-project)))
-			     (assoc p dst-login-list))))
-	 (new (or new-password (read-string (concat "New password for " (nth 1 this-project) " (old is " (nth 2 this-project) "): "))))
-	 (buffer-read-only t)
-	 (chromium-window (dst-chromium-window))
-	 (chromium-status (dst-chromium-status))
-	 cmd)
-    (unless (string= chromium-status "running")
-      (error "Chromium not logged into DST"))
-    (if (string-match new (nth 2 this-project))
-	(message (concat "Already new password: "(nth 0 this-project)))
-      (setq cmd (concat
-		 "xdotool windowraise " chromium-window ";"
-		 "xdotool mousemove --sync --window " (dst-chromium-window) " " dst-change-password-pos " click 1;" ;; change-password-button
-		 "sleep 1;"
-		 "xdotool mousemove --window " (dst-chromium-window) " " dst-domain-user-pos " click 1;"  ;; domain user field
-		 "sleep 1;"
-		 ;;"xdotool type " dst-ident "70" (nth 1 this-project) "@dstfse.local;"
-		 "xdotool type " dst-ident (nth 1 this-project) "@dstfse.local;"
-		 "sleep 1;"
-		 "xdotool mousemove --window " (dst-chromium-window) " " dst-current-password-pos " click 1;"  ;; current password
-		 "sleep 1;"
-		 "xdotool type " (nth 2 this-project) ";"
-		 "sleep 1;"
-		 "xdotool mousemove --window " (dst-chromium-window) " " dst-new-password-pos" click 1;" ;; new password
-		 "sleep 1;"
-		 "xdotool type " new ";"
-		 "sleep 1;"
-		 "xdotool mousemove --window " (dst-chromium-window) " " dst-confirm-password-pos " click 1;" ;; confirm password
-		 "xdotool type " new ";"
-		 "sleep 3;"
-		 (when click-submit
-		   (concat "xdotool mousemove --window " (dst-chromium-window) " " dst-submit-button-pos " click 1;"
-			   "sleep 5;"
-			   "xdotool key ctrl+w;"
-			   "sleep 1;"
-			   "xdotool windowraise " emacs-window))))
-      (when (or click-submit
-		(y-or-n-p (concat "Run this: " cmd)))
-	(message cmd)
-	(shell-command cmd)
-	(save-excursion (set-buffer log-buf)
-			(goto-char (point-max))
-			(insert "Project: " (nth 1 this-project) "\told: " (nth 2 this-project) "\tnew: " new "\n")
-			)))))
-
-
-;; ------------------------------
-
-(defun dst-downloader-ui (&optional ident pin project password)
-  "Emacs UI wrapper for the Python DST downloader script."
-  (interactive)
-  (let* ((ident (or ident (read-string "DST ident (four letters): ")))
-         (pin (or pin (read-string "DST PIN (four numbers): ")))
-         (project (or project (read-string "DST project (six numbers): ")))
-         (password (or password (read-passwd "DST password: ")))
-         ;; Path to your python script
-         (python-script (expand-file-name "~/bin/dst-downloader.py")))
-
-    (catch 'quit
-      (while t
-        (let ((choice (read-string
-                       (concat "\nAvailable commands:\n"
-                               "  [l] login\n"
-                               "  [d] download\n"
-                               "  [x] run xfreerdp\n"
-                               "  [p] print xfreerdp command\n"
-                               "  [a] automatic\n"
-                               "  [q] quit\n"
-                               "Select option: ")))))
-          (pcase choice
-            ((or "l" "login")
-             (start-process "dst-login" "*DST*" "python3" python-script
-                            ident pin project "--password" password "--raw-init" "1")
-             (message "Started login subprocess…"))
-            ((or "d" "download")
-             (start-process "dst-download" "*DST*" "python3" python-script
-                            ident pin project "--password" password "--raw-init" "1" "d"))
-            ((or "x" "xfreerdp")
-             (start-process "dst-xfreerdp" "*DST*" "python3" python-script
-                            ident pin project "--password" password "--raw-init" "1" "x"))
-            ((or "p" "print")
-             (start-process "dst-print" "*DST*" "python3" python-script
-                            ident pin project "--password" password "--raw-init" "1" "p"))
-            ((or "a" "automatic")
-             (start-process "dst-automatic" "*DST*" "python3" python-script
-                            ident pin project "--password" password))
-            ((or "q" "quit" "exit")
-             (message "Quitting DST UI.") (throw 'quit t))
-            (_ (message "❓ Unknown option: %s" choice)))))))
-
 
 (provide 'dst-snps)
+
 ;;; dst-snps.el ends here
