@@ -46,6 +46,8 @@
 ;; The Org editor pushes the page on save (C-x C-s), using the usual write
 ;; guard and confirmation settings.  `absalon-switch-course' changes course;
 ;; `absalon-refresh-course-list' refreshes the cached course choices.
+;; RET on an Absalon page link visits its Org editor, or creates an unpublished
+;; page after confirmation if the linked page does not exist.
 ;;
 ;; Create a module with `absalon-create-module'.  Start a page draft with
 ;; `absalon-org-new-page', then preview and push it from the Org buffer.
@@ -1428,7 +1430,8 @@ If no course is selected, offer course-name completion."
   (and value (member (downcase value) '("t" "true" "yes" "1" "published"))))
 
 (defun absalon-org-export-body ()
-  "Export current Org buffer body to Canvas-friendly HTML."
+  "Export current Org buffer body to Canvas-friendly HTML.
+Headings are unnumbered, with top-level Org headings exported as h2."
   (unless (derived-mode-p 'org-mode)
     (user-error "Current buffer is not an Org buffer"))
   (let* ((org-export-with-title nil)
@@ -1437,7 +1440,8 @@ If no course is selected, offer course-name completion."
          (org-export-with-date nil)
          (body (org-export-as 'html nil nil t
                               '(:with-title nil :with-toc nil
-                                :with-author nil :with-date nil))))
+                                :with-author nil :with-date nil
+                                :section-numbers nil :html-toplevel-hlevel 2))))
     (concat (or absalon-org-html-preamble "")
             body
             (or absalon-org-html-postamble ""))))
@@ -1750,8 +1754,9 @@ Reuse an existing editor for this page without overwriting local edits."
         (with-current-buffer buffer
           (org-mode)
           (absalon--insert-page-as-org course-id page-url page)
-          (absalon--setup-page-editor)
           (set-buffer-modified-p nil))))
+    (with-current-buffer buffer
+      (absalon--setup-page-editor))
     (pop-to-buffer buffer)
     buffer))
 
@@ -1801,14 +1806,90 @@ return nil here so Emacs also saves the local Org file normally."
     (set-buffer-modified-p nil)
     t))
 
+(defvar absalon-page-editor-mode-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map (kbd "RET") #'absalon-org-return)
+    (define-key map (kbd "<return>") #'absalon-org-return)
+    map)
+  "Keymap for `absalon-page-editor-mode'.")
+
+(define-minor-mode absalon-page-editor-mode
+  "Edit an Absalon page in Org, with page-link navigation and push on save.
+RET follows links to pages on `absalon-base-url'.  Other RET behavior is
+provided by `org-return'.  Save hooks are local to this buffer."
+  :lighter " Absalon"
+  :keymap absalon-page-editor-mode-map
+  (if absalon-page-editor-mode
+      (progn
+        (unless (derived-mode-p 'org-mode)
+          (setq absalon-page-editor-mode nil)
+          (user-error "Absalon page editing requires Org mode"))
+        (setq-local buffer-offer-save t)
+        (add-hook 'write-contents-functions #'absalon--save-page-without-file nil t)
+        (add-hook 'after-save-hook #'absalon-push-page nil t))
+    (remove-hook 'write-contents-functions #'absalon--save-page-without-file t)
+    (remove-hook 'after-save-hook #'absalon-push-page t)))
+
+(defun absalon--page-link-target (link)
+  "Return (COURSE-ID PAGE-URL) for an Absalon Org LINK, or nil."
+  (when (and link (eq (org-element-type link) 'link)
+             (member (org-element-property :type link) '("http" "https")))
+    (let* ((url (url-generic-parse-url
+                 (org-link-unescape (org-element-property :raw-link link))))
+           (base (url-generic-parse-url absalon-base-url))
+           (path (url-filename url)))
+      (when (and (equal (downcase (or (url-host url) ""))
+                        (downcase (or (url-host base) "")))
+                 (stringp path)
+                 (string-match
+                  "\\`/courses/\\([0-9]+\\)/pages/\\([^/?#]+\\)/?\\(?:[?].*\\)?\\'"
+                  path))
+        (list (match-string 1 path)
+              (decode-coding-string (url-unhex-string (match-string 2 path))
+                                    'utf-8))))))
+
+(defun absalon-org-return ()
+  "Visit or create the Absalon page linked at point in the Org editor.
+Only HTTP 404 offers creation.  Create an unpublished page using the link
+description as its title, respecting the usual write guard and confirmation.
+Outside Absalon page links, delegate to `org-return'."
+  (interactive)
+  (let* ((link (org-element-lineage (org-element-context) '(link) t))
+         (target (absalon--page-link-target link)))
+    (if (not target)
+        (call-interactively #'org-return)
+      (let ((course-id (car target))
+            (page-url (cadr target)))
+        (condition-case err
+            (absalon--open-page-org-buffer course-id page-url)
+          (absalon-http-error
+           (unless (eq (cadr err) 404)
+             (signal (car err) (cdr err)))
+           (let* ((begin (org-element-property :contents-begin link))
+                  (end (org-element-property :contents-end link))
+                  (title (absalon--creation-text
+                          (if (and begin end)
+                              (replace-regexp-in-string
+                               "[\n\r\t ]+" " "
+                               (buffer-substring-no-properties begin end))
+                            (replace-regexp-in-string "-" " " page-url))
+                          "Page title")))
+             (absalon--confirm-write
+              (format "Create unpublished Absalon page %S in course %s at %s"
+                      title course-id page-url))
+             ;; Canvas's update/create endpoint preserves the linked address.
+             (let* ((page (absalon-update-page course-id page-url title "" nil))
+                    (remote-url (absalon--get 'url page)))
+               (unless remote-url
+                 (signal 'absalon-error (list "Created page has no URL" page)))
+               (absalon--open-page-org-buffer course-id remote-url page)))))))))
+
 (defun absalon--setup-page-editor ()
   "Install buffer-local save support for the current Org page."
-  (setq-local buffer-offer-save t)
   (setq absalon--page-identity
         (when-let* ((page-url (absalon-org-keyword "ABSALON_PAGE_URL")))
           (cons (absalon-org-keyword "ABSALON_COURSE_ID") page-url)))
-  (add-hook 'write-contents-functions #'absalon--save-page-without-file nil t)
-  (add-hook 'after-save-hook #'absalon-push-page nil t))
+  (absalon-page-editor-mode 1))
 
 (defun absalon-push-page ()
   "Push the current Org page using the existing write and confirmation settings.
@@ -2052,9 +2133,22 @@ token."
                       (list "Multipart upload failed" status
                             (with-current-buffer buffer (buffer-string)))))
             (with-current-buffer buffer
+              (goto-char (point-min))
               (json-parse-buffer :object-type 'alist :array-type 'list
                                  :null-object nil :false-object :false))))
       (kill-buffer buffer))))
+
+(defun absalon-link-region (beg end)
+  "Convert the selected text into an Absalon Org link."
+  (interactive "r")
+  (let* ((label (buffer-substring-no-properties beg end))
+         (slug (replace-regexp-in-string
+                "[[:space:]]+" "-" (downcase label)))
+         (url (concat "https://absalon.ku.dk/courses/95138/pages/"
+                      slug)))
+    (delete-region beg end)
+    (goto-char beg)
+    (insert (format "[[%s][%s]]" url label))))
 
 (defun absalon-create-folder (course-id name &optional parent-folder-id)
   "Create and return a folder named NAME in COURSE-ID.
@@ -2136,6 +2230,8 @@ Interactively, select a destination folder by its full path."
       (insert (absalon--json-string snapshot))
       (json-pretty-print-buffer))
     (message "Wrote %s" (expand-file-name file))))
+
+
 
 (provide 'absalon)
 
