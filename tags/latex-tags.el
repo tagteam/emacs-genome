@@ -71,7 +71,7 @@
       bibtex-autokey-titlewords 3
       bibtex-autokey-titlewords-stretch 3
       bibtex-autokey-titleword-length 10
-      bibtex-maintain-sorted-entries t)
+      bibtex-maintain-sorted-entries nil)
 (add-hook
  'bibtex-mode-hook
  (lambda nil

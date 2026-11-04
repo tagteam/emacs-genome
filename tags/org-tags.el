@@ -246,7 +246,7 @@
       ;; '(("en" "<div id=\"bottomBox\">last updated by %a: %d using %c</div>")))
 ;; org-export-date-timestamp-format
 
-(setq org-html-head "<link rel=\"stylesheet\" type=\"text/css\" href=\"https://publicifsv.sund.ku.dk/~tag/styles/practicals.css\" />")
+(setq org-html-head "<link rel=\"stylesheet\"  type=\"text/css\"  href="https://gongzhitaao.org/orgcss/org.css" />")
 
 ;;}}}
 

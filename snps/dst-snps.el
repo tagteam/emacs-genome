@@ -112,6 +112,12 @@
 (require 'cl-lib)
 (require 'comint)
 
+(defvar dst-login-python-script
+  (expand-file-name
+   "dst-login.py"
+   (file-name-directory
+    (or load-file-name buffer-file-name (locate-library "dst-snps"))))
+  "Python script used by `dst'.")
 (defvar dst-change-password-python-script "~/bin/dst-change-password.py"
   "Python script used by `dst-change-password'.")
 (defvar dst-ident nil
@@ -133,6 +139,14 @@
 (defvar dst-window-size nil)
 (defvar dst-screen-setting 'laptop)
 (defvar dst-use-wmctrl t)
+
+(defun dst--login-project-label-arguments ()
+  "Return command-line arguments describing `dst-login-list' projects."
+  (cl-mapcan
+   (lambda (entry)
+     (list "--project-label"
+           (format "%s=%s" (nth 1 entry) (nth 0 entry))))
+   dst-login-list))
 
 
 ;; need these xdotool wrappers to type passwords 
@@ -160,16 +174,24 @@
 		      (assoc p dst-login-list)))
 	   	       (server (or (nth 3 project)
 			   (completing-read "Server: " dst-servers)))
+	   (password (or (nth 2 project)
+			 (read-passwd (format "DST password for %s: "
+					      (nth 1 project)))))
 	   (python-command
-	    (concat 
-             "python3 ~/bin/dst-login.py "
-	     ;; "dst-login "
-	     dst-ident " "
-	     dst-firewall-code " "
-	     (nth 1 project) " "
-	     "--password '" (nth 2 project) "' "
-	     (if arg "--visual " "")
-	     "--download-button-id /Common/dst-RDP_FSE_" (nth 3 project))))
+	    (mapconcat
+	     #'shell-quote-argument
+	     (append
+	      (list "python3"
+		    (expand-file-name dst-login-python-script)
+		    dst-ident
+		    dst-firewall-code
+		    (nth 1 project)
+		    "--password" password)
+	      (when arg (list "--visible"))
+	      (list "--download-button-id"
+		    (concat "/Common/dst-RDP_FSE_" server))
+	      (dst--login-project-label-arguments))
+	     " ")))
       ;; (message python-command)
       (shell "*dst-remote*")
       (switch-to-buffer "*dst-remote*")
