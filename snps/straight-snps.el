@@ -50,6 +50,13 @@
 (setq package-enable-at-startup nil
       straight-use-package-by-default t
       straight-vc-git-default-protocol 'ssh)
+
+;; Register Transient before dependencies such as org-ref request it.
+(straight-use-package
+ '(transient :type git :host github
+             :repo "magit/transient"
+             :branch "main"))
+
 (straight-use-package 'use-package)
 (require 'use-package)
 (setq use-package-enable-imenu-support t)

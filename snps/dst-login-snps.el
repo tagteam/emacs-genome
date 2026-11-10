@@ -20,11 +20,37 @@
 ;;         '(("Cardiology collaborators" "709924" "Windows")
 ;;           ("Registry study" "9200" "srvfsegh4")))
 ;;
-;; Load this file after dst-snps.el if both are used, so this file's `dst'
-;; command takes precedence.
+;; Project passwords are read from ~/.authinfo using `auth-source'.  For
+;; example, if `dst-ident' is "abc", add one line per project:
+;;
+;;   machine dstfse.local port 3389 login abc709924@dstfse.local password "PROJECT-709924-PASSWORD"
+;;   machine dstfse.local port 3389 login abc9200@dstfse.local password "PROJECT-9200-PASSWORD"
+;;
+;; Replace "abc" with your DST identifier and the passwords with your own.
+;; Restrict access with chmod 600 ~/.authinfo.  Missing passwords are prompted
+;; for, but are not written to the file.  Passwords are cached for this Emacs
+;; session; press k in the dashboard after editing the file to reload them.
+;; The firewall PIN is still configured separately in `dst-firewall-code'.
+;;
+;; In the dashboard, p changes/resets the project password (prompting for
+;; current and new passwords), a changes all project passwords using authinfo,
+;; and s changes a selected set.  The new password is confirmed twice.
+;; Password changes use the existing firewall session, with 2FA if needed.
+;; Confirmed changes update the session cache and matching authinfo entries.
+;; Set `dst-login-save-changed-passwords' to nil to edit authinfo yourself.
+;; Results and failures are recorded in *dst-password-changes*.
+;; A password is blocked for its project after two rejected or unconfirmed
+;; authentication attempts in this Emacs session.  Clearing the password
+;; cache or reopening the dashboard does not reset this guard.  Correcting
+;; the password allows a new attempt.  Network-only RDP failures do not count.
+;;
+;; Load this file after dst-snps.el if both are used, so its `dst' and
+;; `dst-change-password', `dst-change-password-loop', and
+;; `dst-change-all-passwords' commands take precedence.
 
 ;;; Code:
 
+(require 'auth-source)
 (require 'cl-lib)
 (require 'json)
 (require 'subr-x)
@@ -58,6 +84,17 @@
   "DST remote login URL."
   :type 'string)
 
+(defcustom dst-login-authinfo-file "~/.authinfo"
+  "File containing DST project passwords in authinfo format.
+Entries use machine dstfse.local, port 3389, and the full project login
+as their login (for example, abc709924@dstfse.local).
+An encrypted authinfo file such as ~/.authinfo.gpg can also be used."
+  :type 'file)
+
+(defcustom dst-login-save-changed-passwords t
+  "Whether to update authinfo after DST confirms a password change."
+  :type 'boolean)
+
 (defcustom dst-login-download-timeout 60
   "Seconds to wait for a new RDP launcher after clicking a project."
   :type 'integer)
@@ -84,7 +121,12 @@
   "DST projects as (DESCRIPTION PROJECT-NUMBER SERVER) entries.")
 
 (defvar dst-login-password-cache (make-hash-table :test #'equal)
-  "Project passwords retained for the rest of this Emacs session.")
+  "Project passwords keyed by full login for this Emacs session.")
+
+(defvar dst-login--password-attempts (make-hash-table :test #'equal)
+  "Credential attempt counts for this Emacs session.
+Keys are (FULL-LOGIN SHA256-OF-PASSWORD); values are (FAILURES . PENDING).
+Pending attempts reserve slots so concurrent requests cannot bypass the limit.")
 
 (defconst dst-login-buffer-name "*dst-login*")
 (defconst dst-login--webdriver-buffer-name " *dst-login-chromedriver*")
@@ -122,6 +164,10 @@
   "v" #'dst-login-visible
   "c" #'dst-login-enter-two-factor
   "g" #'dst-login-refresh
+  "l" #'dst-login-show-project-log
+  "p" #'dst-change-password
+  "a" #'dst-change-all-passwords
+  "s" #'dst-change-password-loop
   "k" #'dst-login-forget-passwords
   "q" #'dst-login-quit)
 
@@ -196,7 +242,9 @@
         (insert (propertize "DST Login\n" 'face '(:height 1.4 :weight bold)))
         (insert (format "DST remote status: %s\n\n" dst-login--remote-status))
         (insert "RET selects the project at point; its displayed Key selects it directly\n")
-        (insert "      v visible login, c login/enter 2FA, g refresh, k forget passwords, q quit\n\n")
+        (insert "      v visible login, c login/enter 2FA, g refresh, l project log\n")
+        (insert "      k forget passwords, q quit\n\n")
+        (insert "      p change/reset password, a change all, s change selected\n\n")
         (insert (propertize " Key Project    Server        Status                  Description\n"
                             'face 'bold))
         (cl-loop for entry in dst-login-list
@@ -525,17 +573,401 @@
                   (dst-login--index-key index)))
     (dst-login-connect project)))
 
+(defun dst-login--project-user (project)
+  "Return the full DST login for PROJECT."
+  (concat dst-ident (nth 1 project) "@dstfse.local"))
+
+(defun dst-login--password-attempt-key (project password)
+  "Identify PROJECT's PASSWORD without storing another plaintext copy."
+  (list (dst-login--project-user project) (secure-hash 'sha256 password)))
+
+(defun dst-login--check-password-attempt (project password)
+  "Reject a third use of PROJECT's failed PASSWORD, including pending attempts."
+  (let* ((key (dst-login--password-attempt-key project password))
+         (counts (gethash key dst-login--password-attempts '(0 . 0))))
+    (when (>= (car counts) 2)
+      (dst-login--set-project-status project "Password blocked")
+      (user-error
+       "Password blocked for project %s after two failed/unconfirmed attempts (or account lockout); correct authinfo and press k, or use p with a reset password"
+       (nth 1 project)))
+    (when (>= (+ (car counts) (cdr counts)) 2)
+      (user-error "Wait for the pending password attempt(s) for project %s to finish"
+                  (nth 1 project)))
+    key))
+
+(defun dst-login--begin-password-attempt (project password)
+  "Reserve a password attempt for PROJECT and return its credential key."
+  (let* ((key (dst-login--check-password-attempt project password))
+         (counts (gethash key dst-login--password-attempts '(0 . 0))))
+    (puthash key (cons (car counts) (1+ (cdr counts))) dst-login--password-attempts)
+    key))
+
+(defun dst-login--finish-password-attempt (key &optional outcome)
+  "Release KEY's pending attempt and record OUTCOME.
+OUTCOME is `rejected', `unconfirmed', `locked', or nil for other outcomes.
+A lockout blocks further uses immediately.  Successful attempts do not erase
+earlier failures for the same password."
+  (when key
+    (let* ((counts (gethash key dst-login--password-attempts '(0 . 0)))
+           (failures (pcase outcome
+                       ('locked 2)
+                       ((or 'rejected 'unconfirmed) (min 2 (1+ (car counts))))
+                       (_ (car counts)))))
+      (puthash key (cons failures (max 0 (1- (cdr counts)))) dst-login--password-attempts))))
+
+(defun dst-login--authinfo-password (project)
+  "Read PROJECT's password from authinfo without prompting or session caching."
+  (let* ((auth-sources (list dst-login-authinfo-file))
+         (auth-source-do-cache nil)
+         (entry (car (auth-source-search
+                      :host "dstfse.local" :port "3389"
+                      :user (dst-login--project-user project)
+                      :require '(:secret) :max 1)))
+         (secret (plist-get entry :secret))
+         (password (if (functionp secret) (funcall secret) secret)))
+    (and (stringp password) (not (string-empty-p password)) password)))
+
 (defun dst-login--project-password (project)
+  "Return PROJECT's cached password, authinfo secret, or prompted password."
   (let* ((number (nth 1 project))
-         (cached (gethash number dst-login-password-cache)))
+         (user (dst-login--project-user project))
+         (cached (gethash user dst-login-password-cache)))
     (or cached
-        (let ((password (read-passwd
-                         (format "DST password for %s (%s): "
-                                 number (nth 0 project)))))
-          (when (string-empty-p password)
+        (let ((password (dst-login--authinfo-password project)))
+          (unless (and (stringp password) (not (string-empty-p password)))
+            (setq password
+                  (read-passwd (format "DST password for %s (%s): "
+                                       number (nth 0 project)))))
+          (unless (and (stringp password) (not (string-empty-p password)))
             (user-error "No password entered"))
-          (puthash number password dst-login-password-cache)
+          (puthash user password dst-login-password-cache)
           password))))
+
+(defun dst-login--authinfo-token (password)
+  "Encode PASSWORD as a token understood by the authinfo parser."
+  (when (or (string-empty-p password) (string-match-p "[\n\r]" password))
+    (user-error "Passwords must be nonempty and contain no newlines"))
+  (cond
+   ((not (string-match-p "\"" password)) (concat "\"" password "\""))
+   ((not (string-match-p "'" password)) (concat "'" password "'"))
+   ((and (not (string-match-p "[ \t]" password))
+         (not (memq (aref password 0) '(?\" ?\' ?#)))) password)
+   (t (user-error "This password cannot be represented in authinfo; avoid mixing both quote types with whitespace"))))
+
+(defun dst-login--check-authinfo-writable ()
+  "Check that authinfo can be updated without discarding unsaved edits."
+  (let* ((file (expand-file-name dst-login-authinfo-file))
+         (buffer (get-file-buffer file)))
+    (when (and buffer (buffer-modified-p buffer))
+      (user-error "Save your edits to %s before changing passwords" file))
+    (unless (file-writable-p file)
+      (user-error "Cannot write %s" file))))
+
+(defun dst-login--save-project-password (project password)
+  "Update PROJECT's authinfo entry to PASSWORD after confirmed success.
+Preserve other entries, formatting and comments.  Update all exact duplicate
+entries; add an entry if none matches.  Never replace wildcard credentials."
+  (dst-login--check-authinfo-writable)
+  (let* ((file (expand-file-name dst-login-authinfo-file))
+         (user (dst-login--project-user project))
+         (token (dst-login--authinfo-token password))
+         (visiting (get-file-buffer file))
+         replacements fields password-start password-end entry-end matched)
+    (with-temp-buffer
+      (when (file-exists-p file) (insert-file-contents file))
+      (cl-labels
+          ((finish-entry
+            ()
+            (when (and (equal (or (cdr (assoc "machine" fields))
+                                 (cdr (assoc "host" fields))) "dstfse.local")
+                       (equal (or (cdr (assoc "login" fields))
+                                  (cdr (assoc "user" fields))
+                                  (cdr (assoc "account" fields))) user)
+                       (equal (cdr (assoc "port" fields)) "3389"))
+              (setq matched t)
+              (push (if password-start
+                        (list password-start password-end token)
+                      (list entry-end entry-end (concat " password " token)))
+                    replacements))))
+        (goto-char (point-min))
+        (while (progn (auth-source-netrc-parse-next-interesting) (not (eobp)))
+          (let ((key (auth-source-netrc-parse-one)))
+            (unless key (error "Cannot parse authinfo"))
+            (when (member key '("machine" "default"))
+              (finish-entry)
+              (setq fields nil password-start nil password-end nil))
+            (if (equal key "default")
+                (push (cons key t) fields)
+              (unless (auth-source-netrc-looking-at-token)
+                (error "Missing value in authinfo"))
+              (let ((start (match-beginning 0))
+                    (end (match-end 0))
+                    (value (auth-source-netrc-parse-one)))
+                (setq entry-end end)
+                (push (cons key value) fields)
+                (when (equal key "password")
+                  (setq password-start start password-end end))))))
+        (finish-entry))
+      ;; Apply edits from the end so positions remain valid.
+      (dolist (replacement replacements)
+        (goto-char (nth 0 replacement))
+        (delete-region (nth 0 replacement) (nth 1 replacement))
+        (insert (nth 2 replacement)))
+      (unless matched
+        (goto-char (point-max))
+        (unless (bolp) (insert "\n"))
+        (insert (format "machine dstfse.local port 3389 login %s password %s\n"
+                        user token)))
+      ;; Avoid backups of old credentials; file handlers support .authinfo.gpg.
+      (let ((epa-file-encrypt-to (and visiting
+                                      (buffer-local-value 'epa-file-encrypt-to visiting))))
+        (write-region (point-min) (point-max) file nil 'silent))
+      (set-file-modes file #o600))
+    (setq auth-source-netrc-cache
+          (assoc-delete-all dst-login-authinfo-file
+                            (assoc-delete-all file auth-source-netrc-cache)))
+    (when (buffer-live-p visiting)
+      (with-current-buffer visiting (revert-buffer t t t)))))
+
+(defun dst-login--switch-window (handle)
+  "Select the ChromeDriver window HANDLE."
+  (dst-login--webdriver-request
+   "POST" (dst-login--session-endpoint "/window") `((handle . ,handle))))
+
+(defun dst-login--password-webtop ()
+  "Find and select the browser tab containing DST's password-change button."
+  (or (cl-loop for handle in (dst-login--webdriver-request
+                             "GET" (dst-login--session-endpoint "/window/handles"))
+               thereis (progn
+                         (dst-login--switch-window handle)
+                         (and (dst-login--element-present-p
+                               "id" "/Common/dst-FSE-password") handle)))
+      (user-error "DST project page is unavailable; press c to log in again")))
+
+(defun dst-login--open-password-form ()
+  "Open the password form and return (WEBTOP-HANDLE FORM-HANDLE NEW-TAB-P)."
+  (let* ((main (dst-login--password-webtop))
+         (before (dst-login--webdriver-request
+                  "GET" (dst-login--session-endpoint "/window/handles")))
+         (button (dst-login--find-element "id" "/Common/dst-FSE-password"))
+         (deadline (time-add (current-time) dst-login-webdriver-timeout))
+         form)
+    (dst-login--webdriver-request
+     "POST" (dst-login--element-endpoint button "/click") (make-hash-table))
+    (while (and (not form) (time-less-p (current-time) deadline))
+      (let* ((handles (dst-login--webdriver-request
+                       "GET" (dst-login--session-endpoint "/window/handles")))
+             (new-handles (cl-set-difference handles before :test #'equal))
+             (candidates (append new-handles
+                                 (cl-remove-if (lambda (handle)
+                                                 (or (equal handle main)
+                                                     (member handle new-handles)))
+                                               handles)
+                                 (list main))))
+        (dolist (handle candidates)
+          (unless form
+            (dst-login--switch-window handle)
+            (when (dst-login--element-present-p "id" "DomainUserName")
+              (setq form handle)))))
+      (unless form (accept-process-output nil 0.2)))
+    (unless form (error "Timed out opening the DST password form"))
+    (list main form (not (member form before)))))
+
+(defun dst-login--password-page-text ()
+  "Return visible text from the current password form, excluding input values."
+  (let ((body (dst-login--find-element "css selector" "body")))
+    (dst-login--webdriver-request
+     "GET" (dst-login--element-endpoint body "/text"))))
+
+(defun dst-login--password-result ()
+  "Wait for explicit DST success; signal an error if success is unconfirmed."
+  (let ((deadline (time-add (current-time) dst-login-webdriver-timeout))
+        text success)
+    (while (and (not success) (time-less-p (current-time) deadline))
+      (setq text (dst-login--password-page-text)
+            success (string-match-p
+                     "your password has been successfully changed"
+                     (downcase text)))
+      (unless success (accept-process-output nil 0.2)))
+    (unless success
+      (error "DST did not confirm the password change. Check the result before retrying. Server page: %s"
+             (or text "No response")))))
+
+(defun dst-login--password-log (text)
+  "Append non-secret TEXT to the password-change results buffer."
+  (let ((buffer (get-buffer-create "*dst-password-changes*")))
+    (with-current-buffer buffer
+      (special-mode)
+      (let ((inhibit-read-only t))
+        (goto-char (point-max))
+        (insert text "\n")))
+    buffer))
+
+(defun dst-login--change-one-password (project current-password new-password)
+  "Submit one password change and update credentials only on confirmed success."
+  (let ((user (dst-login--project-user project))
+        (number (nth 1 project))
+        context submitted confirmed attempt)
+    (dst-login--check-password-attempt project current-password)
+    (unwind-protect
+        (condition-case err
+            (progn
+              (dst-login--set-project-status project "Changing password")
+              (setq context (dst-login--open-password-form))
+              (dolist (field `(("DomainUserName" . ,user)
+                               ("UserPass" . ,current-password)
+                               ("NewUserPass" . ,new-password)
+                               ("ConfirmNewUserPass" . ,new-password)))
+                (let ((element (dst-login--find-element "id" (car field))))
+                  (dst-login--webdriver-request
+                   "POST" (dst-login--element-endpoint element "/clear") (make-hash-table))
+                  (dst-login--send-keys element (cdr field))))
+              (let ((button (dst-login--find-element "id" "btnSignIn")))
+                ;; A lost response can follow a successful submission: never retry.
+                (setq attempt (dst-login--begin-password-attempt project current-password)
+                      submitted t)
+                (dst-login--webdriver-request
+                 "POST" (dst-login--element-endpoint button "/click") (make-hash-table)))
+              (dst-login--password-result)
+              (setq confirmed t)
+              ;; DST has just made this password valid, even if an earlier
+              ;; attempt to use the same text was rejected before the reset.
+              (let* ((key (dst-login--password-attempt-key project new-password))
+                     (counts (gethash key dst-login--password-attempts '(0 . 0))))
+                (puthash key (cons 0 (cdr counts)) dst-login--password-attempts))
+              (puthash user new-password dst-login-password-cache)
+              (when dst-login-save-changed-passwords
+                (dst-login--save-project-password project new-password))
+              (dst-login--set-project-status project "Password changed")
+              (dst-login--password-log
+               (format "%s: password changed; %s" number
+                       (if dst-login-save-changed-passwords "authinfo updated"
+                         "update authinfo manually"))))
+          ((error quit)
+           (when (and submitted (not confirmed))
+             (remhash user dst-login-password-cache))
+           (dst-login--set-project-status
+            project (if confirmed "Changed; save failed" "Change unconfirmed"))
+           (let ((detail (error-message-string err)))
+             (dolist (secret (list current-password new-password))
+               (setq detail (string-replace secret "[REDACTED]" detail)))
+             (display-buffer
+              (dst-login--password-log
+               (format "%s: %s. %s\nBatch stopped; later projects were not changed."
+                       number (if confirmed "Changed at DST; save authinfo manually"
+                                "Password change NOT confirmed") detail))))
+           (user-error "Password change stopped for %s; see *dst-password-changes*" number)))
+      ;; Keep an unconfirmed result available for inspection.  On success,
+      ;; close our new tab or navigate the original tab back to the webtop.
+      ;; An unconfirmed submission may already have checked the password at
+      ;; DST, so retain it against the limit even if the response was lost.
+      (dst-login--finish-password-attempt
+       attempt (and submitted (not confirmed) 'unconfirmed))
+      (when context
+        (ignore-errors
+          (when confirmed
+            (dst-login--switch-window (nth 1 context))
+            (cond
+             ((nth 2 context)
+              (dst-login--webdriver-request
+               "DELETE" (dst-login--session-endpoint "/window")))
+             ((equal (car context) (nth 1 context))
+              (dst-login--webdriver-request
+               "POST" (dst-login--session-endpoint "/url") `((url . ,dst-login-url))))))
+          (dst-login--switch-window (car context)))))))
+
+(defun dst-login--password-project (&optional project)
+  "Resolve PROJECT, the dashboard row, or a completion choice."
+  (or (and (listp project) project)
+      (and (stringp project)
+           (or (assoc project dst-login-list)
+               (cl-find project dst-login-list :key #'cadr :test #'equal)
+               (user-error "Unknown DST project: %s" project)))
+      (and (null project) (dst-login--project-at-point))
+      (let* ((choices (mapcar (lambda (entry)
+                               (cons (format "%s — %s" (nth 1 entry) (car entry)) entry))
+                             dst-login-list))
+             (choice (completing-read "DST project: " choices nil t)))
+        (cdr (assoc choice choices)))))
+
+(defun dst-login--run-password-changes (changes new-password &optional visual)
+  "Apply CHANGES, a list of (PROJECT CURRENT-PASSWORD), in one DST session."
+  (when (timerp dst-login--download-timer)
+    (user-error "Wait for the launcher download before changing passwords"))
+  (unless (and (stringp new-password) (not (string-empty-p new-password)))
+    (user-error "No new password entered"))
+  (when dst-login-save-changed-passwords
+    (dst-login--authinfo-token new-password)
+    (dst-login--check-authinfo-writable))
+  (unless changes (user-error "No projects need a password change"))
+  ;; Preflight every credential so a blocked later project cannot cause a
+  ;; partially submitted batch.
+  (dolist (change changes)
+    (dst-login--check-password-attempt (car change) (cadr change)))
+  (unless (and dst-login--authenticated
+               (or (not visual) dst-login--webdriver-visible))
+    (dst-login--begin-login visual))
+  (unless dst-login--authenticated (user-error "Complete firewall authentication first"))
+  (dst-login--password-log (format "\n%s — changing %d project password(s)"
+                                   (format-time-string "%F %T") (length changes)))
+  (dolist (change changes)
+    (dst-login--change-one-password (car change) (cadr change) new-password))
+  (message "Changed %d DST project password(s)%s" (length changes)
+           (if dst-login-save-changed-passwords "; authinfo updated"
+             "; remember to update authinfo")))
+
+(defun dst-change-password (&optional project new-password _click-submit visual)
+  "Change/reset PROJECT's password using the dashboard browser session.
+Always prompt for the current password, including a temporary reset password.
+Prompt for NEW-PASSWORD with confirmation unless supplied programmatically.
+VISUAL (the interactive prefix argument) requests a visible browser.
+The legacy CLICK-SUBMIT argument is retained for call compatibility; this
+command submits the change and checks DST's response."
+  (interactive (list nil nil nil current-prefix-arg))
+  (dst-login--validate-config)
+  (let* ((entry (dst-login--password-project project))
+         (current (read-passwd (format "Current/reset password for %s: " (nth 1 entry))))
+         (new (or new-password (read-passwd "New DST project password: " t))))
+    (when (string-empty-p current) (user-error "No current password entered"))
+    (when (equal current new) (user-error "New password is identical to the current password"))
+    (dst-login--run-password-changes (list (list entry current)) new visual)))
+
+(defun dst-login--change-project-passwords (projects new-password visual)
+  "Read all current passwords for PROJECTS from authinfo and change them."
+  (let (seen changes missing)
+    (dolist (entry projects)
+      (unless (member (nth 1 entry) seen)
+        (push (nth 1 entry) seen)
+        (let ((current (dst-login--authinfo-password entry)))
+          (if current
+              (push (list entry current) changes)
+            (push (nth 1 entry) missing)))))
+    (when missing
+      (user-error "Missing authinfo password for project(s) %s; no changes submitted"
+                  (string-join (nreverse missing) ", ")))
+    (let ((new (or new-password (read-passwd "New password for DST projects: " t))))
+      (setq changes (cl-remove-if (lambda (change) (equal (cadr change) new))
+                                  (nreverse changes)))
+      (dst-login--run-password-changes changes new visual))))
+
+(defun dst-change-all-passwords (&optional new-password visual)
+  "Change each unique project's password using current passwords from authinfo.
+Prompt only for the new password (with confirmation), plus firewall 2FA if
+needed.  Missing authinfo entries abort the entire batch before submission."
+  (interactive (list nil current-prefix-arg))
+  (dst-login--validate-config)
+  (dst-login--change-project-passwords dst-login-list new-password visual))
+
+(defun dst-change-password-loop (&optional new-password visual)
+  "Change selected project passwords using their current authinfo passwords."
+  (interactive (list nil current-prefix-arg))
+  (dst-login--validate-config)
+  (let* ((choices (mapcar (lambda (entry) (cons (nth 1 entry) entry)) dst-login-list))
+         (selected (completing-read-multiple "DST project numbers (comma-separated): "
+                                             choices nil t)))
+    (unless selected (user-error "No projects selected"))
+    (dst-login--change-project-passwords
+     (mapcar (lambda (number) (cdr (assoc number choices))) selected) new-password visual)))
 
 (defun dst-login--server-button-id (server)
   (if (string-prefix-p "/Common/" server)
@@ -608,34 +1040,126 @@
     (dst-login--set-project-status project "Starting FreeRDP")
     (dst-login--start-xfreerdp project target)))
 
+(defun dst-login-show-project-log ()
+  "Show the complete FreeRDP output for the project at point."
+  (interactive)
+  (let* ((project (or (dst-login--project-at-point)
+                      (user-error "Move point to a project line first")))
+         (buffer (get-buffer (format "*dst-rdp-%s*" (nth 1 project)))))
+    (unless buffer
+      (user-error "No connection log for project %s yet" (nth 1 project)))
+    (pop-to-buffer buffer)
+    (goto-char (point-max))))
+
+(defun dst-login--rdp-exit-description (code)
+  "Describe a FreeRDP exit CODE, retaining unknown codes verbatim."
+  (or (cdr (assq code '((0 . "Closed")
+                        (132 . "Authentication failed")
+                        (134 . "Logon failed")
+                        (135 . "Account locked out")
+                        (148 . "Password expired")
+                        (149 . "Password must change")
+                        (151 . "Account disabled")
+                        (154 . "Wrong password")
+                        (155 . "Access denied"))))
+      (format "Failed (exit %d)" code)))
+
+(defun dst-login--rdp-append-log (buffer text)
+  "Append TEXT to the connection log BUFFER, if it still exists."
+  (when (buffer-live-p buffer)
+    (with-current-buffer buffer
+      (let ((inhibit-read-only t))
+        (goto-char (point-max))
+        (insert text)))))
+
+(defun dst-login--rdp-sentinel (number proc event)
+  "Report termination of project NUMBER's PROC and show failures in full.
+EVENT is the process sentinel event.  FreeRDP is an external program;
+its stdout and stderr contain its diagnostics, including any native
+backtrace it emits, rather than an Emacs Lisp backtrace."
+  (when (and (memq (process-status proc) '(exit signal failed))
+             (not (process-get proc 'dst-login-result-handled)))
+    (process-put proc 'dst-login-result-handled t)
+    (let* ((code (process-exit-status proc))
+           (normal-exit (eq (process-status proc) 'exit))
+           (failed (not (and normal-exit (zerop code))))
+           (description (if normal-exit
+                            (dst-login--rdp-exit-description code)
+                          (format "Stopped: %s" (string-trim event))))
+           (buffer (process-buffer proc))
+           (attempt (process-get proc 'dst-login-password-attempt))
+           (outcome (and normal-exit
+                         (cond ((= code 135) 'locked)
+                               ((memq code '(132 134 154)) 'rejected)))))
+      (dst-login--finish-password-attempt attempt outcome)
+      (process-put proc 'dst-login-password-attempt nil)
+      (dst-login--set-project-status number "%s" description)
+      (dst-login--rdp-append-log
+       buffer (format "\n[%s] %s (%s %d): %s\n"
+                      (format-time-string "%F %T") description
+                      (process-status proc) code (string-trim event)))
+      (when (and attempt outcome)
+        (let ((failures (car (gethash attempt dst-login--password-attempts))))
+          (dst-login--rdp-append-log
+           buffer (if (>= failures 2)
+                      "This password is now blocked for this project. Correct authinfo and press k, or use p with a reset password.\n"
+                    "Password rejected (1 of 2 attempts). Verify the password before retrying.\n"))))
+      (when (and normal-exit (= code 135))
+        (dst-login--rdp-append-log
+         buffer "DST reports that this project account is locked.\nHave DST unlock it, or wait for DST's lockout period before retrying.\nCheck the project password in authinfo, then press k in the dashboard.\n"))
+      (when failed
+        (when (buffer-live-p buffer)
+          (display-buffer buffer))
+        (message "DST project %s: %s; see %s"
+                 number description (if (buffer-live-p buffer)
+                                        (buffer-name buffer)
+                                      "connection log (buffer was killed)"))))))
+
 (defun dst-login--start-xfreerdp (project launcher)
   (let* ((number (nth 1 project))
          (password (dst-login--project-password project))
-         (user (concat dst-ident number "@dstfse.local"))
+         (user (dst-login--project-user project))
          (buffer (get-buffer-create (format "*dst-rdp-%s*" number)))
          (command (append (list dst-login-xfreerdp-program
                                 launcher
                                 (concat "/u:" user)
                                 (concat "/p:" password))
-                          dst-login-xfreerdp-arguments)))
-    (make-process
-     :name (format "dst-rdp-%s" number)
-     :buffer buffer
-     :command command
-     :noquery t
-     :sentinel
-     (lambda (proc event)
-       (unless (process-live-p proc)
-         (dst-login--set-project-status
-          number
-          (cond
-           ((and (eq (process-status proc) 'exit)
-                 (zerop (process-exit-status proc)))
-            "Closed")
-           ((eq (process-status proc) 'exit)
-            (format "Failed (exit %d)" (process-exit-status proc)))
-           (t (format "Stopped: %s" (string-trim event))))))))
-    (dst-login--set-project-status project "Running")))
+                          dst-login-xfreerdp-arguments))
+         attempt)
+    (dst-login--check-password-attempt project password)
+    (with-current-buffer buffer
+      (special-mode)
+      (setq-local truncate-lines nil))
+    ;; Keep previous attempts, but never print the password-bearing command.
+    (dst-login--rdp-append-log
+     buffer (format "\n=== %s: project %s, server %s ===\nProgram: %s\nLauncher: %s\nFreeRDP stdout/stderr:\n"
+                    (format-time-string "%F %T") number (nth 2 project)
+                    dst-login-xfreerdp-program launcher))
+    (dst-login--set-project-status project "Starting FreeRDP")
+    (condition-case err
+        (progn
+          (setq attempt (dst-login--begin-password-attempt project password))
+          (let ((proc (make-process
+                       :name (format "dst-rdp-%s" number)
+                       :buffer buffer
+                       :command command
+                       :connection-type 'pipe
+                       :noquery t
+                       :sentinel (apply-partially #'dst-login--rdp-sentinel number))))
+            (process-put proc 'dst-login-password-attempt attempt)
+            ;; The sentinel owns this reservation once the process exists.
+            (setq attempt nil))
+          (dst-login--set-project-status project "Running"))
+      ((error quit)
+       (dst-login--finish-password-attempt attempt)
+       (dst-login--set-project-status project "Failed to start")
+       (dst-login--rdp-append-log
+        buffer (concat "\nCould not start FreeRDP: "
+                       (string-replace password "[REDACTED]"
+                                       (error-message-string err))
+                       "\n"))
+       (display-buffer buffer)
+       (signal (car err) (cdr err))))))
 
 (defun dst-login-connect (project)
   "Download PROJECT's launcher and open it with FreeRDP."
@@ -643,8 +1167,8 @@
     (user-error "Open the firewall and enter the 2FA code first"))
   (when (timerp dst-login--download-timer)
     (user-error "Another DST launcher download is still in progress"))
-  ;; Prompt before clicking, so a missing password cannot strand a download.
-  (dst-login--project-password project)
+  ;; Resolve the password before clicking so it cannot strand a download.
+  (dst-login--check-password-attempt project (dst-login--project-password project))
   (make-directory (expand-file-name dst-login-download-directory) t)
   (setq dst-login--pending-project project
         dst-login--download-snapshot (dst-login--rdp-snapshot)
@@ -677,7 +1201,8 @@
      (signal (car error-data) (cdr error-data)))))
 
 (defun dst-login-forget-passwords ()
-  "Forget all DST project passwords cached during this Emacs session."
+  "Forget cached DST passwords so the next connection rereads authinfo.
+This does not reset failed-password counts or unblock rejected passwords."
   (interactive)
   (clrhash dst-login-password-cache)
   (message "Forgot all cached DST project passwords"))
