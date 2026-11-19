@@ -43,6 +43,9 @@
 ;; authentication attempts in this Emacs session.  Clearing the password
 ;; cache or reopening the dashboard does not reset this guard.  Correcting
 ;; the password allows a new attempt.  Network-only RDP failures do not count.
+;; FreeRDP questions open an interactive *dst-rdp-PROJECT* buffer.  Review the
+;; certificate details, type your answer (for example Y), and press RET.
+;; The dashboard's l key also opens this buffer.  No answer is sent automatically.
 ;;
 ;; Load this file after dst-snps.el if both are used, so its `dst' and
 ;; `dst-change-password', `dst-change-password-loop', and
@@ -52,6 +55,7 @@
 
 (require 'auth-source)
 (require 'cl-lib)
+(require 'comint)
 (require 'json)
 (require 'subr-x)
 (require 'url)
@@ -779,6 +783,17 @@ entries; add an entry if none matches.  Never replace wildcard credentials."
     (dst-login--webdriver-request
      "GET" (dst-login--element-endpoint body "/text"))))
 
+(defun dst-login--password-submit-button ()
+  "Find the enabled submit button on the current or legacy DST password form.
+DST now uses submitBtn; older forms used btnSignIn.  Disabled buttons mean
+client-side validation failed, so do not reserve a password attempt yet."
+  (let ((button (dst-login--find-element "css selector" "#submitBtn, #btnSignIn")))
+    (unless (eq t (dst-login--webdriver-request
+                   "GET" (dst-login--element-endpoint button "/enabled")))
+      (user-error "DST has disabled Change Password; check the filled fields and password requirements. No change submitted. Form: %s"
+                  (dst-login--password-page-text)))
+    button))
+
 (defun dst-login--password-result ()
   "Wait for explicit DST success; signal an error if success is unconfirmed."
   (let ((deadline (time-add (current-time) dst-login-webdriver-timeout))
@@ -822,7 +837,7 @@ entries; add an entry if none matches.  Never replace wildcard credentials."
                   (dst-login--webdriver-request
                    "POST" (dst-login--element-endpoint element "/clear") (make-hash-table))
                   (dst-login--send-keys element (cdr field))))
-              (let ((button (dst-login--find-element "id" "btnSignIn")))
+              (let ((button (dst-login--password-submit-button)))
                 ;; A lost response can follow a successful submission: never retry.
                 (setq attempt (dst-login--begin-password-attempt project current-password)
                       submitted t)
@@ -1041,7 +1056,7 @@ needed.  Missing authinfo entries abort the entire batch before submission."
     (dst-login--start-xfreerdp project target)))
 
 (defun dst-login-show-project-log ()
-  "Show the complete FreeRDP output for the project at point."
+  "Show FreeRDP output for the project at point, with input while it is running."
   (interactive)
   (let* ((project (or (dst-login--project-at-point)
                       (user-error "Move point to a project line first")))
@@ -1050,6 +1065,48 @@ needed.  Missing authinfo entries abort the entire batch before submission."
       (user-error "No connection log for project %s yet" (nth 1 project)))
     (pop-to-buffer buffer)
     (goto-char (point-max))))
+
+(define-derived-mode dst-login-rdp-mode comint-mode "DST-RDP"
+  "Interactive FreeRDP output.  Type a prompt's answer and press RET to send it."
+  (setq-local buffer-read-only nil
+              truncate-lines nil
+              comint-ptyp t
+              comint-process-echoes nil
+              comint-prompt-read-only t
+              comint-input-filter #'ignore
+              comint-input-sender #'dst-login--rdp-send-input))
+
+(defun dst-login--rdp-send-input (process input)
+  "Send the user's INPUT to FreeRDP PROCESS without choosing an answer for them."
+  (comint-simple-send process input)
+  (when (process-get process 'dst-login-awaiting-input)
+    (process-put process 'dst-login-awaiting-input nil)
+    (process-put process 'dst-login-prompt-tail nil)
+    (dst-login--set-project-status (process-get process 'dst-login-project) "Running")))
+
+(defun dst-login--rdp-output-filter (process output)
+  "Insert OUTPUT from PROCESS and expose interactive FreeRDP questions.
+Keep a short tail to recognize prompts split across process-output chunks."
+  (comint-output-filter process output)
+  (when (buffer-live-p (process-buffer process))
+    (let* ((text (concat (process-get process 'dst-login-prompt-tail) output))
+           (case-fold-search t)
+           (start 0)
+           prompt-end)
+      ;; FreeRDP uses (Y/T/N) for certificate trust and (Y/N) for consent.
+      ;; Match the question, not merely a certificate warning in the log.
+      (while (string-match "(y/\\(?:t/\\)?n)" text start)
+        (setq prompt-end (match-end 0)
+              start prompt-end))
+      (process-put process 'dst-login-prompt-tail
+                   (substring text (max (or prompt-end 0) (- (length text) 512))))
+      (when prompt-end
+        (process-put process 'dst-login-awaiting-input t)
+        (dst-login--set-project-status (process-get process 'dst-login-project) "Awaiting reply")
+        (pop-to-buffer (process-buffer process))
+        (goto-char (point-max))
+        (message "DST project %s needs input: review the prompt, type your answer, and press RET"
+                 (process-get process 'dst-login-project))))))
 
 (defun dst-login--rdp-exit-description (code)
   "Describe a FreeRDP exit CODE, retaining unknown codes verbatim."
@@ -1127,12 +1184,17 @@ backtrace it emits, rather than an Emacs Lisp backtrace."
                           dst-login-xfreerdp-arguments))
          attempt)
     (dst-login--check-password-attempt project password)
+    ;; A Comint buffer must have one input target.  Never replace a running
+    ;; connection or mix two certificate questions in the same project buffer.
+    (when-let* ((existing (get-buffer-process buffer))
+                (_ (process-live-p existing)))
+      (pop-to-buffer buffer)
+      (user-error "FreeRDP is already running for project %s; use its existing buffer" number))
     (with-current-buffer buffer
-      (special-mode)
-      (setq-local truncate-lines nil))
+      (dst-login-rdp-mode))
     ;; Keep previous attempts, but never print the password-bearing command.
     (dst-login--rdp-append-log
-     buffer (format "\n=== %s: project %s, server %s ===\nProgram: %s\nLauncher: %s\nFreeRDP stdout/stderr:\n"
+     buffer (format "\n=== %s: project %s, server %s ===\nProgram: %s\nLauncher: %s\nAnswer FreeRDP questions here and press RET.\nFreeRDP stdout/stderr:\n"
                     (format-time-string "%F %T") number (nth 2 project)
                     dst-login-xfreerdp-program launcher))
     (dst-login--set-project-status project "Starting FreeRDP")
@@ -1143,10 +1205,13 @@ backtrace it emits, rather than an Emacs Lisp backtrace."
                        :name (format "dst-rdp-%s" number)
                        :buffer buffer
                        :command command
-                       :connection-type 'pipe
+                       :connection-type 'pty
+                       :filter #'dst-login--rdp-output-filter
                        :noquery t
                        :sentinel (apply-partially #'dst-login--rdp-sentinel number))))
             (process-put proc 'dst-login-password-attempt attempt)
+            (process-put proc 'dst-login-project number)
+            (set-marker (process-mark proc) (with-current-buffer buffer (point-max)) buffer)
             ;; The sentinel owns this reservation once the process exists.
             (setq attempt nil))
           (dst-login--set-project-status project "Running"))

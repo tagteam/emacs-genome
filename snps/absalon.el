@@ -35,6 +35,7 @@
 ;;
 ;; Useful read commands:
 ;;
+;;   M-x absalon                 ; course picker; RET or 1-9 opens pages
 ;;   M-x absalon-select-course
 ;;   M-x absalon-show-profile
 ;;   M-x absalon-list-courses
@@ -73,6 +74,11 @@
 ;;   M-x absalon-org-pull-page
 ;;   M-x absalon-org-preview-page
 ;;   M-x absalon-org-push-page
+;;   M-x absalon-org-insert-link
+;;
+;; Insert a link by choosing an existing page or file in the page's course.
+;; The link label defaults to the selected text, page title, or filename.
+;; With C-u, select another course to link to.
 ;;
 ;; Upload a local attachment with `absalon-upload-file'.  The returned Canvas
 ;; file can then be linked from a page.  Uploads require the external `curl'
@@ -80,6 +86,11 @@
 ;; Emacs's built-in URL library.
 ;; The file view shows folders as a tree: RET/TAB toggles a folder, + creates
 ;; a folder, and u uploads to a folder selected by its full path.
+;; RET opens HTML/PDF in a browser and other files as local copies in Emacs.
+;; e always opens a local copy in Emacs; b always uses the browser.
+;; d downloads the file at point.  m toggles marks on a file or all files
+;; below a folder, U clears marks, and D downloads marked files with their
+;; course-relative folder paths.  C-u D downloads all course files.
 ;;
 ;; Caveats: Kaltura and other LTI tools have separate APIs.  This package does
 ;; not manage quizzes, submissions, enrolments, or student data.  Test writes
@@ -181,6 +192,12 @@ The function named `absalon-courses' remains the uncached API reader.")
   "File objects backing the current file tree.")
 (defvar-local absalon--collapsed-folders nil
   "Folder ID strings collapsed in the current file tree.")
+
+(defvar-local absalon--marked-files nil
+  "File ID strings marked for download, including hidden rows.")
+
+(defvar absalon--file-cache-directory nil
+  "Temporary directory for local file copies opened during this session.")
 
 (defvar-local absalon-detail-object nil
   "Absalon object backing the current detail buffer.")
@@ -598,9 +615,21 @@ to vectors while retaining genuine alists as objects."
     map)
   "Keymap for `absalon-files-mode'.")
 
+;; Also update existing file buffers when this library is reloaded.
+(dolist (binding '(("e" . absalon-files-open-in-emacs)
+                   ("d" . absalon-files-download)
+                   ("D" . absalon-files-download-marked)
+                   ("m" . absalon-files-mark)
+                   ("U" . absalon-files-unmark-all)))
+  (define-key absalon-files-mode-map (kbd (car binding)) (cdr binding)))
+
 (define-derived-mode absalon-files-mode absalon-list-mode "Absalon-Files"
   "Browse course folders and files as an expandable tree.
-Use RET or TAB to toggle a folder, + to create a folder, and u to upload.")
+RET toggles folders, browses HTML/PDF, or opens other files in Emacs.
+e opens any file in Emacs; b browses it.  d saves the file at point.
+m toggles marks (recursively on folders); U clears all marks.
+D downloads marked files preserving folders; C-u D downloads all files.
+Use + to create a folder and u to upload.")
 
 (defvar absalon-detail-mode-map
   (let ((map (make-sparse-keymap)))
@@ -900,7 +929,14 @@ Keep original API objects in the object table for row actions and JSON."
                                       absalon--collapsed-folders)))
     (setq tabulated-list-entries (car data)
           absalon-view-object-table (cdr data))
-    (tabulated-list-print t)))
+    (tabulated-list-print t)
+    (save-excursion
+      (goto-char (point-min))
+      (while (not (eobp))
+        (when (member (string-remove-prefix "file:" (or (tabulated-list-get-id) ""))
+                      absalon--marked-files)
+          (tabulated-list-put-tag "*"))
+        (forward-line 1)))))
 
 (defun absalon-files-toggle-folder ()
   "Expand or collapse the folder at point without another API request."
@@ -916,17 +952,218 @@ Keep original API objects in the object table for row actions and JSON."
       (absalon--render-file-tree))))
 
 (defun absalon-files-open ()
-  "Toggle the folder at point, or open the selected file in a browser."
+  "Toggle a folder, browse HTML/PDF, or open another file in Emacs."
   (interactive)
   (if (string-prefix-p "folder:" (or (tabulated-list-get-id) ""))
       (absalon-files-toggle-folder)
-    (absalon-view-browse)))
+    (let* ((file (absalon--file-at-point))
+           (extension (downcase (or (file-name-extension
+                                     (absalon--file-name file)) "")))
+           (type (absalon--object-id-string file 'content-type 'content_type)))
+      (if (or (member extension '("html" "htm" "pdf"))
+              (member (car (split-string (downcase type) ";"))
+                      '("text/html" "application/pdf" "application/xhtml+xml")))
+          (absalon-view-browse)
+        (absalon-files-open-in-emacs)))))
+
+(defun absalon--file-at-point ()
+  "Return the file on the current row, rejecting folders."
+  (unless (and (derived-mode-p 'absalon-files-mode)
+               (string-prefix-p "file:" (or (tabulated-list-get-id) "")))
+    (user-error "No file on this line"))
+  (absalon-view-current-object))
+
+(defun absalon--safe-file-component (name)
+  "Return NAME if it is a safe single local path component."
+  (when (or (string-empty-p name) (member name '("." ".."))
+            (string-match-p "[/\\\\\0]" name))
+    (user-error "Unsafe file or folder name: %S" name))
+  name)
+
+(defun absalon--file-name (file)
+  "Return a local filename for FILE, preserving its displayed name."
+  (absalon--safe-file-component
+   (absalon--object-id-string file 'display_name 'filename)))
+
+(defun absalon--file-folder-chain (file &optional partial)
+  "Return FILE's folders, innermost first.
+Reject incomplete hierarchies unless PARTIAL is non-nil."
+  (let ((id (absalon--string-or-nil (absalon--get 'folder_id file)))
+        seen chain)
+    (catch 'incomplete
+      (while id
+        (when (member id seen)
+          (if partial (throw 'incomplete nil)
+            (user-error "Cycle in course folders at %s" id)))
+        (push id seen)
+        (let ((folder (seq-find
+                       (lambda (item) (equal id (absalon--object-id-string item 'id)))
+                       absalon--file-folders)))
+          (unless folder
+            (if partial (throw 'incomplete nil)
+              (user-error "Missing folder %s; refresh the file list" id)))
+          (push folder chain)
+          (setq id (absalon--string-or-nil (absalon--get 'parent_folder_id folder))))))
+    (nreverse chain)))
+
+(defun absalon--file-relative-path (file)
+  "Return FILE's course-relative path, omitting the course root folder."
+  (mapconcat #'identity
+             (append
+              (mapcar (lambda (folder)
+                        (absalon--safe-file-component (absalon--get 'name folder)))
+                      (cdr (reverse (absalon--file-folder-chain file))))
+              (list (absalon--file-name file)))
+             "/"))
+
+(defun absalon--download-file (file destination)
+  "Download FILE to DESTINATION as raw bytes, returning the saved path.
+Refresh the download URL through the authenticated API.  Do not send the
+API token to download servers or their redirects.  Replace the destination
+only after a successful transfer.  Callers handle overwrite confirmation."
+  (let* ((metadata (absalon-request
+                    (format "files/%s" (absalon--get 'id file))))
+         (url (absalon--absolute-url (absalon--get 'url metadata)))
+         (destination (expand-file-name destination))
+         (url-request-method "GET")
+         (url-request-data nil)
+         (url-request-extra-headers nil)
+         buffer temporary)
+    (unless (and url (string-match-p "\\`https?://" url))
+      (user-error "No download URL for %s" (absalon--file-name file)))
+    (unwind-protect
+        (progn
+          (setq buffer (url-retrieve-synchronously url t t 120))
+          (unless buffer (signal 'absalon-http-error '("No download response")))
+          (with-current-buffer buffer
+            (let ((status (and (boundp 'url-http-response-status)
+                               url-http-response-status)))
+              (unless (and (integerp status) (<= 200 status 299))
+                (signal 'absalon-http-error (list "Download failed" status))))
+            ;; Parse the separator exactly: a file may itself start with CR/LF.
+            (goto-char (point-min))
+            (unless (re-search-forward "\r?\n\r?\n" nil t)
+              (signal 'absalon-http-error '("Malformed download response")))
+            (make-directory (file-name-directory destination) t)
+            (setq temporary (make-temp-file
+                             (expand-file-name ".absalon-" (file-name-directory destination))))
+            (let ((coding-system-for-write 'no-conversion))
+              (write-region (point) (point-max) temporary nil 'silent)))
+          (rename-file temporary destination t)
+          destination)
+      (when (buffer-live-p buffer) (kill-buffer buffer))
+      (when (and temporary (file-exists-p temporary)) (delete-file temporary)))))
+
+(defun absalon-files-open-in-emacs ()
+  "Open the file at point as a local copy with its normal Emacs major mode.
+Saving this copy does not upload changes to Absalon.  Reuse an already
+visited copy, including unsaved edits; otherwise fetch a fresh copy."
+  (interactive)
+  (let* ((file (absalon--file-at-point))
+         (name (absalon--file-name file)))
+    (unless (and absalon--file-cache-directory
+                 (file-directory-p absalon--file-cache-directory))
+      (setq absalon--file-cache-directory (make-temp-file "absalon-files-" t)))
+    (let* ((directory (expand-file-name
+                       (secure-hash 'sha256
+                                    (format "%s/%s" absalon-base-url (absalon--get 'id file)))
+                       absalon--file-cache-directory))
+           (path (concat (file-name-as-directory directory) name)))
+      (unless (find-buffer-visiting path)
+        (absalon--download-file file path))
+      (find-file path)
+      (message "Local Absalon copy; saving does not upload changes"))))
+
+(defun absalon-files-download (destination)
+  "Save the file at point to DESTINATION, regardless of format."
+  (interactive
+   (list (read-file-name "Download file to: " nil nil nil
+                         (absalon--file-name (absalon--file-at-point)))))
+  (when (file-directory-p destination)
+    (setq destination (concat (file-name-as-directory destination)
+                              (absalon--file-name (absalon--file-at-point)))))
+  (when (or (not (file-exists-p destination))
+            (yes-or-no-p (format "Overwrite %s? " destination)))
+    (absalon--download-file (absalon--file-at-point) destination)
+    (message "Downloaded %s" destination)))
+
+(defun absalon-files-mark ()
+  "Toggle the mark on this file, or all files recursively below this folder.
+Folder selection includes files hidden by collapsed folders."
+  (interactive)
+  (unless (derived-mode-p 'absalon-files-mode) (user-error "Not a file list"))
+  (let* ((object (absalon-view-current-object))
+         (id (absalon--object-id-string object 'id))
+         (folder-p (string-prefix-p "folder:" (tabulated-list-get-id)))
+         (ids (if folder-p
+                  (mapcar
+                   (lambda (file) (absalon--object-id-string file 'id))
+                   (seq-filter
+                    (lambda (file)
+                      (seq-some (lambda (folder)
+                                  (equal id (absalon--object-id-string folder 'id)))
+                                (absalon--file-folder-chain file t)))
+                    absalon--file-objects))
+                (list id)))
+         (unmark (seq-every-p (lambda (id) (member id absalon--marked-files)) ids)))
+    (dolist (id ids)
+      (if unmark
+          (setq absalon--marked-files (delete id absalon--marked-files))
+        (cl-pushnew id absalon--marked-files :test #'equal)))
+    (absalon--render-file-tree)
+    (unless folder-p (forward-line 1))
+    (message "%d file(s) marked" (length absalon--marked-files))))
+
+(defun absalon-files-unmark-all ()
+  "Clear every file mark, including marks on hidden rows."
+  (interactive)
+  (setq absalon--marked-files nil)
+  (absalon--render-file-tree))
+
+(defun absalon-files-download-marked (directory &optional all)
+  "Download marked files under DIRECTORY, preserving course folder paths.
+With prefix ALL, download all files, including those in collapsed folders.
+The destination corresponds to the course root, so Week 1/a.R is saved as
+DIRECTORY/Week 1/a.R.  Ask before overwriting existing files."
+  (interactive (list (read-directory-name "Download course files into: ")
+                     current-prefix-arg))
+  (unless (derived-mode-p 'absalon-files-mode) (user-error "Not a file list"))
+  (let* ((files (if all absalon--file-objects
+                  (seq-filter (lambda (file)
+                                (member (absalon--object-id-string file 'id)
+                                        absalon--marked-files))
+                              absalon--file-objects)))
+         (directory (file-name-as-directory (expand-file-name directory)))
+         (seen (make-hash-table :test #'equal))
+         jobs (saved 0) (skipped 0))
+    (unless files (user-error "No files selected; use m to mark or C-u D for all"))
+    ;; Validate the complete selection before starting any transfers.
+    (dolist (file files)
+      (let* ((path (concat directory (absalon--file-relative-path file)))
+             (resolved (file-truename path)))
+        (unless (file-in-directory-p resolved directory)
+          (user-error "Download path escapes destination: %s" path))
+        (when (gethash resolved seen)
+          (user-error "Multiple selected files have the same local path: %s" path))
+        (when (file-directory-p path) (user-error "Destination is a directory: %s" path))
+        (puthash resolved t seen)
+        (push (cons file path) jobs)))
+    (dolist (job (nreverse jobs))
+      (if (and (file-exists-p (cdr job))
+               (not (yes-or-no-p (format "Overwrite %s? " (cdr job)))))
+          (cl-incf skipped)
+        (message "Downloading %s (%d/%d)..." (cdr job) (+ 1 saved skipped) (length files))
+        (absalon--download-file (car job) (cdr job))
+        (cl-incf saved)))
+    (message "Downloaded %d file(s) to %s; skipped %d" saved directory skipped)))
 
 (defun absalon--display-list (kind title items format row-function
                                    refresh-function refresh-args
-                                   &optional context sort-key)
-  "Display ITEMS in a human-readable Absalon list buffer."
-  (let ((buffer (get-buffer-create (format "*Absalon %s*" title)))
+                                   &optional context sort-key buffer-name)
+  "Display ITEMS in a human-readable Absalon list buffer.
+Use BUFFER-NAME when non-nil; otherwise derive the buffer name from TITLE."
+  (let ((buffer (get-buffer-create
+                 (or buffer-name (format "*Absalon %s*" title))))
         entries table
         (index 0))
     (dolist (object items)
@@ -1381,6 +1618,69 @@ This command only prepares a local draft and does not require write mode."
   (interactive)
   (absalon--display-json (absalon-profile) "*Absalon profile*"))
 
+(defun absalon--open-course-pages (&optional course)
+  "Select COURSE, or the course at point, and list its pages."
+  (interactive)
+  (let* ((course (or course (absalon-view-current-object)))
+         (id (absalon--string-or-nil (absalon--get 'id course))))
+    (unless id (user-error "No course ID for this item"))
+    (setq absalon-current-course course)
+    (absalon-list-pages id)))
+
+;;;###autoload
+(defun absalon (&optional include-completed)
+  "List active courses in `*absalon*'.
+With prefix INCLUDE-COMPLETED, also show past courses.
+Use n/p or the arrow keys to move and RET to select a course and call
+`absalon-list-pages'.  Keys 1 through 9 select the corresponding courses
+directly.  Use a to toggle past courses, g to refresh, and q to quit."
+  (interactive "P")
+  (let* ((courses (sort (copy-sequence
+                         (absalon-refresh-course-list include-completed))
+                        (lambda (a b)
+                          (string-lessp
+                           (absalon--object-id-string a 'name 'course_code 'id)
+                           (absalon--object-id-string b 'name 'course_code 'id)))))
+         (map (make-sparse-keymap)))
+    (set-keymap-parent map absalon-list-mode-map)
+    (define-key map (kbd "RET") #'absalon--open-course-pages)
+    (define-key map (kbd "p") #'previous-line)
+    (define-key map (kbd "n") #'next-line)
+    (define-key map (kbd "a")
+      (lambda ()
+        (interactive)
+        (absalon (not include-completed))))
+    (cl-loop for course in courses
+             for index from 1 to 9
+             do (let ((selected-course course))
+                  (define-key map (number-to-string index)
+                    (lambda ()
+                      (interactive)
+                      (absalon--open-course-pages selected-course)))))
+    (absalon--display-list
+     'courses (if include-completed "courses (all)" "courses (active)") courses
+     (vconcat [("Key" 3 nil)] absalon--courses-format)
+     (lambda (course index)
+       (let ((row (absalon--course-row course index)))
+         (list (car row)
+               (vconcat (vector (if (< index 9) (number-to-string (1+ index)) ""))
+                        (cadr row)))))
+     #'absalon (list include-completed) nil nil "*absalon*")
+    (with-current-buffer "*absalon*"
+      (use-local-map map)
+      (setq-local header-line-format
+                  (format " %s courses | RET: pages   1-9: select   n/p: move   a: %s past   g: refresh   q: quit"
+                          (if include-completed "All" "Active")
+                          (if include-completed "hide" "show")))
+      ;; Keep column names visible beneath the shortcut help.
+      (setq-local tabulated-list-use-header-line nil)
+      (tabulated-list-init-header)
+      (tabulated-list-print t)
+      (goto-char (point-min))
+      (forward-line 1)
+      (unless courses (message "No Absalon courses available")))
+    (get-buffer "*absalon*")))
+
 (defun absalon-list-courses (&optional include-completed)
   "Show courses; with prefix INCLUDE-COMPLETED include completed courses."
   (interactive "P")
@@ -1797,6 +2097,80 @@ COURSE-ID and PAGE-URL take precedence over buffer context."
                 (or (cdr (assoc choice choices))
                     (user-error "No page selected")))))
     (absalon--open-page-org-buffer course-id page-url)))
+
+(defun absalon-org-insert-link (&optional course-id)
+  "Insert an Org link to an existing Absalon page or file at point.
+Offer completion for the target and prompt for its link text.  An active
+region supplies the default text and is replaced by the link; otherwise
+default to the page title or filename.  File choices include folder paths
+and IDs so identically named files can be distinguished.
+
+Use COURSE-ID, the buffer's ABSALON_COURSE_ID, or the selected course.
+Interactively, a prefix argument prompts for another course.  Only the
+local buffer is changed; save or push the page to publish the link."
+  (interactive
+   (progn
+     (unless (derived-mode-p 'org-mode)
+       (user-error "Current buffer is not an Org buffer"))
+     (list (when current-prefix-arg (absalon--select-course-id)))))
+  (unless (derived-mode-p 'org-mode)
+    (user-error "Current buffer is not an Org buffer"))
+  (barf-if-buffer-read-only)
+  (let* ((beg (and (use-region-p) (region-beginning)))
+         (end (and beg (region-end)))
+         (selected-text (and beg (buffer-substring-no-properties beg end)))
+         (course-id (absalon--require-course-id
+                     (or course-id
+                         (absalon-org-keyword "ABSALON_COURSE_ID"))))
+         (kind (completing-read "Link to: " '("page" "file") nil t))
+         (choices
+          (pcase kind
+            ("page"
+             (mapcar
+              (lambda (page)
+                (let ((title (absalon--object-id-string page 'title 'url))
+                      (slug (absalon--get 'url page)))
+                  (list (format "%s [%s]" title slug)
+                        (absalon--page-browser-url course-id slug) title)))
+              (absalon-pages course-id)))
+            ("file"
+             (let* ((files (absalon-files course-id))
+                    (folders (and files (absalon-folders course-id))))
+               (mapcar
+                (lambda (file)
+                  (let* ((id (absalon--object-id-string file 'id))
+                         (name (absalon--object-id-string
+                                file 'display_name 'filename 'id))
+                         (folder-id (absalon--object-id-string file 'folder_id))
+                         (folder (seq-find
+                                  (lambda (item)
+                                    (equal folder-id
+                                           (absalon--object-id-string item 'id)))
+                                  folders))
+                         (path (if folder
+                                   (concat (absalon--folder-path folder) "/" name)
+                                 name)))
+                    ;; Use the course file page, not an expiring download URL.
+                    (list (format "%s [%s]" path id)
+                          (concat (absalon--course-browser-url course-id)
+                                  "/files/" (url-hexify-string id))
+                          name)))
+                files))))))
+    (unless choices
+      (user-error "No %ss in course %s" kind course-id))
+    (let* ((choice (completing-read (if (equal kind "page") "Page: " "File: ")
+                                    choices nil t))
+           (target (or (assoc choice choices)
+                       (user-error "No target selected")))
+           (label (read-string "Link text: " nil nil
+                               (or selected-text (nth 2 target))))
+           (link (org-link-make-string (nth 1 target) label)))
+      (atomic-change-group
+        (when beg
+          (delete-region beg end)
+          (goto-char beg))
+        (insert link))
+      (setq deactivate-mark t))))
 
 (defun absalon--save-page-without-file ()
   "Handle saving a fileless page editor before its `after-save-hook' runs.

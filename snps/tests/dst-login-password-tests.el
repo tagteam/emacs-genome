@@ -131,6 +131,7 @@
            (dst-login--authenticated t)
            (dst-login--download-timer nil)
            (dst-login-webdriver-timeout 0.01)
+           (submit-enabled t)
            (page-text "Your password has been successfully changed")
            filled requests)
        (cl-letf (((symbol-function 'dst-login--open-password-form) (lambda () '("main" "form" t)))
@@ -138,7 +139,9 @@
                  ((symbol-function 'dst-login--send-keys)
                   (lambda (id value) (push (cons id value) filled)))
                  ((symbol-function 'dst-login--webdriver-request)
-                  (lambda (method endpoint &optional data) (push (list method endpoint data) requests)))
+                  (lambda (method endpoint &optional data)
+                    (push (list method endpoint data) requests)
+                    (if (string-suffix-p "/enabled" endpoint) submit-enabled nil)))
                  ((symbol-function 'dst-login--password-page-text) (lambda () page-text))
                  ((symbol-function 'display-buffer) #'ignore))
          ,@body))))
@@ -182,6 +185,19 @@
     (should (equal (gethash "abc123@dstfse.local" dst-login-password-cache) "new"))
     (should (equal (gethash "123" dst-login-project-status) "Changed; save failed"))))
 
+(ert-deftest dst-password-disabled-submit-does-not-use-an-attempt ()
+  (dst-test-with-form
+    (setq submit-enabled :json-false
+          page-text "Password requirements: at least 12 characters, uppercase, lowercase, number")
+    (should-error (dst-login--change-one-password (car dst-login-list) "old" "new")
+                  :type 'user-error)
+    (should (= (hash-table-count dst-login--password-attempts) 0))
+    (should (equal (dst-login--authinfo-password (car dst-login-list)) "old"))
+    (should-not (cl-find-if (lambda (request)
+                             (string-suffix-p "/click" (cadr request))) requests))
+    (with-current-buffer "*dst-password-changes*"
+      (should (string-match-p "DST has disabled Change Password" (buffer-string))))))
+
 (ert-deftest dst-password-form-new-same-or-reused-tab ()
   (dolist (mode '(new same reuse))
     (let ((dst-login--webdriver-session "fake")
@@ -205,24 +221,36 @@
         (should (equal (dst-login--open-password-form)
                        (list "main" (if (eq mode 'same) "main" "form") (eq mode 'new))))))))
 
-(defmacro dst-test-with-rdp-exit (code &rest body)
-  "Run real child processes with fake RDP exit CODE and dummy credentials."
+(defmacro dst-test-with-rdp-script (script &rest body)
+  "Run a real child process executing SCRIPT with dummy RDP credentials."
   (declare (indent 1))
   `(dst-test-with-authinfo
        "machine dstfse.local port 3389 login abc123@dstfse.local password old\n"
      (let ((original-make-process (symbol-function 'make-process))
-           (launches 0))
+           (launches 0)
+           popped)
        (unwind-protect
            (cl-letf (((symbol-function 'make-process)
                       (lambda (&rest args)
                         (cl-incf launches)
                         (apply original-make-process
                                (plist-put args :command
-                                          (list "sh" "-c" (format "exit %d" ,code))))))
-                     ((symbol-function 'display-buffer) #'ignore))
+                                          (list "sh" "-c" ,script)))))
+                     ((symbol-function 'display-buffer) #'ignore)
+                     ((symbol-function 'pop-to-buffer)
+                      (lambda (buffer &rest _)
+                        (push (buffer-name (get-buffer buffer)) popped)
+                        (set-buffer buffer))))
              ,@body)
          (when (get-buffer "*dst-rdp-123*")
+           (let ((proc (get-buffer-process "*dst-rdp-123*")))
+             (when (and proc (process-live-p proc)) (delete-process proc)))
            (kill-buffer "*dst-rdp-123*"))))))
+
+(defmacro dst-test-with-rdp-exit (code &rest body)
+  "Run real child processes with fake RDP exit CODE and dummy credentials."
+  (declare (indent 1))
+  `(dst-test-with-rdp-script (format "exit %d" ,code) ,@body))
 
 (defun dst-test-run-rdp ()
   "Start a dummy connection and wait for its sentinel, bounded to 3 seconds."
@@ -315,5 +343,51 @@
         (should-error (dst-login--change-one-password (car dst-login-list) "old" "new")
                       :type 'user-error)))
     (should (= (hash-table-count dst-login--password-attempts) 0))))
+
+(ert-deftest dst-rdp-certificate-prompt-is-interactive ()
+  (dolist (answer '("Y" "N"))
+    (dst-test-with-rdp-script
+        (concat "printf 'New Certificate details: new-fingerprint\nOld Certificate details: old-fingerprint\n'\n"
+                "printf 'Do you trust the above certificate? (Y/'\nsleep 0.05\nprintf 'T/N) '\n"
+                "IFS= read -r answer\nprintf '\nREPLY:%s\n' \"$answer\"\n")
+      (dst-login--start-xfreerdp (car dst-login-list) "/tmp/dummy.rdp")
+      (let ((proc (get-buffer-process "*dst-rdp-123*"))
+            (deadline (+ (float-time) 3)))
+        (while (and (not popped) (< (float-time) deadline))
+          (accept-process-output nil 0.01))
+        (should (equal popped '("*dst-rdp-123*")))
+        (should (equal (gethash "123" dst-login-project-status) "Awaiting reply"))
+        (should (process-live-p proc))
+        (should (process-tty-name proc))
+        (with-current-buffer "*dst-rdp-123*"
+          (should (derived-mode-p 'comint-mode))
+          (should-not buffer-read-only)
+          (should (string-match-p "old-fingerprint" (buffer-string)))
+          (should (string-match-p "new-fingerprint" (buffer-string)))
+          ;; No input has been sent automatically.
+          (should-not (string-match-p "REPLY:" (buffer-string))))
+        ;; A second process must not steal this buffer's input.
+        (should-error (dst-login--start-xfreerdp (car dst-login-list) "/tmp/dummy.rdp")
+                      :type 'user-error)
+        (should (= launches 1))
+        (should (eq proc (get-buffer-process "*dst-rdp-123*")))
+        (with-current-buffer "*dst-rdp-123*"
+          (goto-char (point-max))
+          (insert answer)
+          (call-interactively (key-binding (kbd "RET"))))
+        (while (and (process-live-p proc) (< (float-time) deadline))
+          (accept-process-output nil 0.01))
+        (should-not (process-live-p proc))
+        (with-current-buffer "*dst-rdp-123*"
+          (should (string-match-p (concat "REPLY:" answer) (buffer-string)))
+          (should-not (string-match-p "/p:old" (buffer-string))))
+        (should (equal (gethash (dst-login--password-attempt-key (car dst-login-list) "old")
+                               dst-login--password-attempts) '(0 . 0)))))))
+
+(ert-deftest dst-rdp-warning-alone-does-not-prompt ()
+  (dst-test-with-rdp-script
+      "printf 'Certificate verification failure: self-signed certificate\n'\nexit 0"
+    (dst-test-run-rdp)
+    (should-not popped)))
 
 ;;; dst-login-password-tests.el ends here

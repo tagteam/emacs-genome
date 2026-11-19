@@ -19,11 +19,11 @@
   "Type text into a remote desktop."
   :group 'external)
 
-(defcustom dst-type-character-delay 50
+(defcustom dst-type-character-delay 10
   "Delay between keystrokes, in milliseconds."
   :type 'natnum)
 
-(defcustom dst-type-line-delay 0.3
+(defcustom dst-type-line-delay 0.13
   "Pause after each line, in seconds."
   :type 'number)
 
